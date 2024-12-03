@@ -8,19 +8,18 @@ export default class App {
   }
 
   setup() {
-    this.$target = $target;
     this.bindEvents();
   }
 
   template() {
     return `
-            <header>
-                <a href="/">Home</a>
-                <a  href="/register">SignUp</a>
-                <a href="/login">Login</a>
-            </header>
-            <main></main>
-        `;
+      <header>
+        <a href="/">Home</a>
+        <a href="/register">SignUp</a>
+        <a href="/login">Login</a>
+      </header>
+      <main></main>
+    `;
   }
 
   bindEvents() {

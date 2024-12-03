@@ -1,4 +1,8 @@
 export default class Component {
+  static html(strings, ...values) {
+    return String.raw({ raw: strings }, ...values);
+  }
+
   $target; //컴포넌트를 넣을 부모
   $props;
   $state;
