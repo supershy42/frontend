@@ -1,5 +1,6 @@
 import path from 'path';
 import Dotenv from 'dotenv-webpack';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 export default {
   mode: 'development',
@@ -24,5 +25,17 @@ export default {
   },
   plugins: [
     new Dotenv(),
+    new HtmlWebpackPlugin({
+      template: './src/index.html',
+    }),
   ],
+  devServer: {
+    static: {
+      directory: path.resolve('dist'),
+    },
+    historyApiFallback: true,
+    compress: true,
+    port: 3000,
+    hot: true,
+  },
 };
