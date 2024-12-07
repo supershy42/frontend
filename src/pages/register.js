@@ -1,5 +1,6 @@
 import Component from '../component/component.js';
 import { registerUser } from '../api/userApi.js';
+import Router from '../router.js';
 
 class Register extends Component {
   setup() {
@@ -51,7 +52,7 @@ class Register extends Component {
       const userData = { nickname, email, password };
       await registerUser(userData); // API 호출
       alert('Registration successful!'); // 성공 메시지
-      // 추가적인 동작 (예: 로그인 페이지로 리다이렉트)
+      Router.instance.navigate('/login'); // 로그인 페이지로 이동
     } catch (error) {
       this.setState({ error: error.message });
       document.getElementById('error-message').innerText = this.$state.error; // 오류 메시지 표시
