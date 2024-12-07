@@ -14,6 +14,10 @@ const routes = {
 
 export default class Router {
   constructor($app) {
+    if (Router.instance) {
+      return Router.instance;
+    }
+    Router.instance = this;
     this.$app = $app;
     this.init();
   }
