@@ -11,14 +11,15 @@ export default class Component {
     this.$target = $target;
     this.$props = $props;
     this.setup();
-    this.setEvent();
-    console.log(`${this.constructor.name} will mount.`);
     this.render();
   }
 
   setup() {} //컴포넌트 state 설정
 
-  mounted() {} //컴포넌트가 마운트 되었을 때
+  mounted() {
+    console.log(`${this.constructor.name} mounted.`);
+    this.setEvent();
+  } //컴포넌트가 마운트 되었을 때
 
   template() {
     //UI 구성
@@ -40,10 +41,19 @@ export default class Component {
 
   addEvent(eventType, selector, callback) {
     //이벤트 등록 추상화
-    this.$target.addEventListener(eventType, (event) => {
-      if (!event.target.closest(selector)) return false;
-      callback(event);
-    });
+    const nonBubblingEvents = ['focus', 'blur', 'mouseenter', 'mouseleave'];
+
+    if (nonBubblingEvents.includes(eventType)) {
+      const element = this.$target.querySelector(selector);
+      if (element) {
+        element.addEventListener(eventType, callback);
+      }
+    } else {
+      this.$target.addEventListener(eventType, (event) => {
+        if (!event.target.closest(selector)) return false;
+        callback(event);
+      });
+    }
   }
 
   destroy() {
