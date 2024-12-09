@@ -19,6 +19,7 @@ export default class Router {
     }
     Router.instance = this;
     this.$app = $app;
+    this.$currentComponent = null;
     this.init();
   }
 
@@ -32,10 +33,16 @@ export default class Router {
   render() {
     const path = window.location.pathname;
     const Component = routes[path] || Home;
-    new Component(this.$app);
+
+    if (this.$currentComponent) {
+      this.$currentComponent.destroy();
+    }
+    this.$currentComponent = new Component(this.$app);
   }
 
   navigate(path) {
+    if (window.location.pathname === path) return;
+    
     window.history.pushState({}, '', path);
     this.render();
   }

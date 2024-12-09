@@ -12,6 +12,7 @@ export default class Component {
     this.$props = $props;
     this.setup();
     this.setEvent();
+    console.log(`${this.constructor.name} will mount.`);
     this.render();
   }
 
@@ -43,5 +44,15 @@ export default class Component {
       if (!event.target.closest(selector)) return false;
       callback(event);
     });
+  }
+
+  destroy() {
+    console.log(`${this.constructor.name} will unmount.`);
+    this.cleanup();
+    this.$target.innerHTML = '';
+  }
+
+  cleanup() {
+    // 정리작업
   }
 }
