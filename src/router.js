@@ -39,7 +39,7 @@ export default class Router {
   }
 
   navigate(path) {
-    if (window.location.pathname === path) return;
+    // if (window.location.pathname === path) return;
 
     window.history.pushState({}, '', path);
     this.render();

@@ -1,4 +1,5 @@
 import Component from '../component/component.js';
+import Router from '../router.js';
 import { loginUser } from '../api/userApi.js';
 
 export default class Login extends Component {
@@ -32,7 +33,7 @@ export default class Login extends Component {
     event.preventDefault();
     const email = event.target.email.value;
     const password = event.target.password.value;
-    
+
     if (!email || !password) {
       return;
     }
@@ -49,7 +50,9 @@ export default class Login extends Component {
         Router.instance.navigate('/');
       }, 2000);
     } catch (error) {
-      this.setState({ loginMessage: 'Login failed. Please check your email and password.' });
+      this.setState({
+        loginMessage: 'Login failed. Please check your email and password.',
+      });
     }
   }
 }
