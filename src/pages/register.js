@@ -55,7 +55,7 @@ class Register extends Component {
 
   async checkNickname(event) {
     const nickname = event.target.value;
-    
+
     if (this.$state.lastCheckedNickname === nickname) return;
 
     try {
@@ -107,7 +107,7 @@ class Register extends Component {
       this.setState({ verificationMessage: 'Registration successful. Redirecting to login page...' });
       this.setTimeout(() => {
         Router.instance.navigate('/login');
-      }, 3000);
+      }, 2000);
     } catch (error) {
       this.setState({ verificationMessage: error.message });
     }
