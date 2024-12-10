@@ -1,7 +1,7 @@
 const USER_API_URL = process.env.USER_API_URL;
 
 export const checkNickname = async (nickname) => {
-  const response = await fetch(`${USER_API_URL}/check-nickname/`, {
+  const response = await fetch(`${USER_API_URL}/register/nickname-check/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -18,7 +18,7 @@ export const checkNickname = async (nickname) => {
 };
 
 export const registerUser = async (userData) => {
-  const response = await fetch(`${USER_API_URL}/register/`, {
+  const response = await fetch(`${USER_API_URL}/register/complete/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -35,7 +35,7 @@ export const registerUser = async (userData) => {
 };
 
 export const verifyEmail = async (userData) => {
-  const response = await fetch(`${USER_API_URL}/verify-email/`, {
+  const response = await fetch(`${USER_API_URL}/register/email-check/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

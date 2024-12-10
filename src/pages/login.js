@@ -39,7 +39,7 @@ export default class Login extends Component {
     }
 
     try {
-      await loginUser({ email, password });
+      const data = await loginUser({ email, password });
       document.cookie = `refresh=${data.refresh}; path=/; secure: HttpOnly`;
       localStorage.setItem('access', data.access);
 

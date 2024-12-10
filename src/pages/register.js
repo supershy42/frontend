@@ -49,7 +49,11 @@ class Register extends Component {
 
   setEvent() {
     this.addEvent('blur', '#nickname', this.checkNickname.bind(this));
-    this.addEvent('click', '#send-verification-code', this.sendVerificationCode.bind(this));
+    this.addEvent(
+      'click',
+      '#send-verification-code',
+      this.sendVerificationCode.bind(this)
+    );
     this.addEvent('submit', '#register-form', this.registerUser.bind(this));
   }
 
@@ -59,9 +63,9 @@ class Register extends Component {
     if (this.$state.lastCheckedNickname === nickname) return;
 
     try {
-      const data = await checkNickname({ nickname });
+      const data = await checkNickname(nickname);
       this.setState({ nicknameMessage: 'Nickname is available' });
-      this.setState({ lastCheckedEmail: nickname })
+      this.setState({ lastCheckedEmail: nickname });
     } catch (error) {
       this.setState({ nicknameMessage: error.message });
     }
@@ -73,7 +77,10 @@ class Register extends Component {
 
     try {
       await verifyEmail({ email });
-      this.setState({ emailMessage: 'Verification code sent', showVerificationSection: true });
+      this.setState({
+        emailMessage: 'Verification code sent',
+        showVerificationSection: true,
+      });
     } catch (error) {
       this.setState({ emailMessage: error.message });
     }
@@ -85,7 +92,7 @@ class Register extends Component {
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirm-password').value;
     const email = document.getElementById('email').value;
-    const verificationCode = document.getElementById('verification-code').value;
+    const code = document.getElementById('verification-code').value;
 
     if (password !== confirmPassword) {
       this.setState({ verificationMessage: 'Passwords do not match' });
@@ -103,9 +110,12 @@ class Register extends Component {
     }
 
     try {
-      await registerUser({ nickname, password, email, verificationCode });
-      this.setState({ verificationMessage: 'Registration successful. Redirecting to login page...' });
-      this.setTimeout(() => {
+      await registerUser({ nickname, password, email, code });
+      this.setState({
+        verificationMessage:
+          'Registration successful. Redirecting to login page...',
+      });
+      setTimeout(() => {
         Router.instance.navigate('/login');
       }, 2000);
     } catch (error) {
