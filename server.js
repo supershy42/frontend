@@ -1,12 +1,20 @@
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
+import http from 'http';
+import fs from 'fs';
+import path from 'path';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const PORT = 3000;
 
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
+
 const server = http.createServer((req, res) => {
-  let filePath = req.url === '/' ? '/src/index.html' : '/src' + req.url;
-  filePath = path.join(__dirname, filePath);
+  let filePath = path.join(__dirname, '/src/index.html');
+
+  if (req.url.startsWith('/dist/')) {
+    filePath = path.join(__dirname, req.url);
+  }
 
   const ext = path.extname(filePath);
 
@@ -25,15 +33,8 @@ const server = http.createServer((req, res) => {
   fs.readFile(filePath, (err, content) => {
     if (err) {
       if (err.code === 'ENOENT') {
-        fs.readFile(path.join(__dirname, '/src/index.html'), (err, content) => {
-          if (err) {
-            res.writeHead(500);
-            res.end('Error loading index.html');
-            return;
-          }
-          res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-          res.end(content, 'utf-8');
-        });
+        res.writeHead(404);
+        res.end('404 Not Found');
       } else {
         res.writeHead(500);
         res.end(`Server Error: ${err.code}`);

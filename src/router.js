@@ -1,5 +1,5 @@
 import Home from './pages/home.js';
-// import Register from './pages/register.js';
+import Register from './pages/register.js';
 // import VerifyEmail from './pages/verify-email.js';
 // import Login from './pages/login.js';
 // import Profile from '@pages/profile';
@@ -7,14 +7,18 @@ import Home from './pages/home.js';
 
 const routes = {
   '/': Home,
-//   '/register': Register,
-//   '/verify-email': VerifyEmail,
-//   '/login': Login,
+  '/register': Register,
+  //   '/verify-email': VerifyEmail,
+  //   '/login': Login,
 };
 
 export default class Router {
-  constructor() {
-    this.$app = document.getElementById('app');
+  constructor($app) {
+    if (Router.instance) {
+      return Router.instance;
+    }
+    Router.instance = this;
+    this.$app = $app;
     this.init();
   }
 
