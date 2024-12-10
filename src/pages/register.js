@@ -1,14 +1,16 @@
 import Component from '../component/component.js';
-import { registerUser } from '../api/userApi.js';
+import { checkNickname, registerUser, verifyEmail } from '../api/userApi.js';
 import Router from '../router.js';
 
 class Register extends Component {
   setup() {
     this.$state = {
-      nickname: '',
-      email: '',
-      password: '',
-      error: null,
+      nicknameMessage: '',
+      emailMessage: '',
+      verificationMessage: '',
+      showVerificationSection: false,
+      lastCheckedNickname: '',
+      lastCheckedEmail: '',
     };
   }
 
@@ -20,42 +22,104 @@ class Register extends Component {
           <div>
             <label for="nickname">Nickname:</label>
             <input type="text" id="nickname" name="nickname" required />
-          </div>
-          <div>
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required />
+            <span id="nickname-message" class="message">${this.$state.nicknameMessage}</span>
           </div>
           <div>
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required />
+            <label for="confirm-password">Confirm Password:</label>
+            <input type="password" id="confirm-password" name="confirm-password" required />
+          </div>
+          <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required />
+            <span id="email-message" class="message">${this.$state.emailMessage}</span>
+            <button type="button" id="send-verification-code">Send Verification Code</button>
+          </div>
+          <div>
+            <label for="verification-code" style="display: ${this.$state.showVerificationSection} ? 'block' : 'none';">Verification Code:</label>
+            <input type="text" id="verification-code" name="verification-code" required />
+            <span id="verification-message" class="message">${this.$state.verificationMessage}</span>
           </div>
           <button type="submit">Register</button>
         </form>
-        <div id="error-message" style="color: red;"></div>
       </div>
     `;
   }
 
-  mounted() {
-    const form = document.getElementById('register-form');
-    form.addEventListener('submit', this.handleSubmit.bind(this));
+  setEvent() {
+    this.addEvent('blur', '#nickname', this.checkNickname.bind(this));
+    this.addEvent(
+      'click',
+      '#send-verification-code',
+      this.sendVerificationCode.bind(this)
+    );
+    this.addEvent('submit', '#register-form', this.registerUser.bind(this));
   }
 
-  async handleSubmit(event) {
-    event.preventDefault(); // 기본 폼 제출 방지
+  async checkNickname(event) {
+    const nickname = event.target.value;
 
-    const nickname = event.target.nickname.value;
-    const email = event.target.email.value;
-    const password = event.target.password.value;
+    if (this.$state.lastCheckedNickname === nickname) return;
 
     try {
-      const userData = { nickname, email, password };
-      await registerUser(userData); // API 호출
-      alert('Registration successful!'); // 성공 메시지
-      Router.instance.navigate('/login'); // 로그인 페이지로 이동
+      const data = await checkNickname(nickname);
+      this.setState({ nicknameMessage: 'Nickname is available' });
+      this.setState({ lastCheckedEmail: nickname });
     } catch (error) {
-      this.setState({ error: error.message });
-      document.getElementById('error-message').innerText = this.$state.error; // 오류 메시지 표시
+      this.setState({ nicknameMessage: error.message });
+    }
+  }
+
+  async sendVerificationCode() {
+    const email = document.getElementById('email').value;
+    if (this.$state.lastCheckedEmail === email) return;
+
+    try {
+      await verifyEmail({ email });
+      this.setState({
+        emailMessage: 'Verification code sent',
+        showVerificationSection: true,
+      });
+    } catch (error) {
+      this.setState({ emailMessage: error.message });
+    }
+  }
+
+  async registerUser(event) {
+    event.preventDefault();
+    const nickname = document.getElementById('nickname').value;
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+    const email = document.getElementById('email').value;
+    const code = document.getElementById('verification-code').value;
+
+    if (password !== confirmPassword) {
+      this.setState({ verificationMessage: 'Passwords do not match' });
+      return;
+    }
+
+    if (nickname === this.$state.lastCheckedNickname) {
+      this.setState({ nicknameMessage: 'Please check nickname availability' });
+      return;
+    }
+
+    if (email === this.$state.lastCheckedEmail) {
+      this.setState({ emailMessage: 'Please check email availability' });
+      return;
+    }
+
+    try {
+      await registerUser({ nickname, password, email, code });
+      this.setState({
+        verificationMessage:
+          'Registration successful. Redirecting to login page...',
+      });
+      setTimeout(() => {
+        Router.instance.navigate('/login');
+      }, 2000);
+    } catch (error) {
+      this.setState({ verificationMessage: error.message });
     }
   }
 }

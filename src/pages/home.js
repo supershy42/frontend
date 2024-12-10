@@ -2,7 +2,20 @@ import Component from '../component/component.js';
 import Router from '../router.js';
 
 class Home extends Component {
+  setup() {
+    this.$state = {
+      isLogin: localStorage.getItem('access') ? true : false,
+    };
+  }
+
   template() {
+    if (this.$state.isLogin) {
+      return Component.html`
+        <div>
+          <button type="button" class="nav-link">Logout</button>
+        </div>
+      `;
+    }
     return Component.html`
       <div>
         <button type="button" class="nav-link">Register</button>
@@ -18,6 +31,10 @@ class Home extends Component {
         Router.instance.navigate('/register');
       } else if (text === 'Login') {
         Router.instance.navigate('/login');
+      } else if (text === 'Logout') {
+        localStorage.removeItem('access');
+        document.cookie = 'refresh=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        Router.instance.navigate('/');
       }
     });
   }
