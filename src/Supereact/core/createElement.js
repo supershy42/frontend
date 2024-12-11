@@ -5,7 +5,8 @@
  * @param {...any} children - 자식 요소들
  * @returns {Object} Virtual DOM 객체
  * @example
- * // ex) <div id="hello">Hi</div> => createElement("div", { id: "hello" }, "Hi")
+ * // JSX: <div id="hello">Hi</div>
+ * createElement("div", { id: "hello" }, "Hi")
  */
 export default function createElement(type, props, ...children) {
   return {
@@ -24,7 +25,7 @@ export default function createElement(type, props, ...children) {
  * @param {string|number} text - 변환할 텍스트
  * @returns {Object} 텍스트 노드 객체
  * @example
- * // ex) "Hello" => { type: "TEXT_ELEMENT", props: { nodeValue: "Hello", children: [] } }
+ * // "Hello" => { type: "TEXT_ELEMENT", props: { nodeValue: "Hello", children: [] } }
  */
 function createTextElement(text) {
   return {
