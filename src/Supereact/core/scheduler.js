@@ -1,3 +1,5 @@
+import { reconcileChildren } from './reconciler';
+
 /**
  * 다음 작업 단위를 추적하는 변수
  * @type {Object|null}
@@ -30,35 +32,18 @@ function performUnitOfWork(nodeChain) {
   }
 
   const elements = nodeChain.props.children;
-  let index = 0;
-  let prevSibling = null;
-
-  while (index < elements.length) {
-    const element = elements[index];
-    const newNode = {
-      type: element.type,
-      props: element.props,
-      parent: nodeChain,
-      dom: null,
-    };
-
-    if (index === 0) nodeChain.child = newNode;
-    else prevSibling.sibling = newNode;
-
-    prevSibling = newNode;
-    index++;
-  }
+  reconcileChildren(nodeChain, elements);
 
   if (nodeChain.child) {
     return nodeChain.child;
   }
 
-  let nextNode = nodeChain;
-  while (nextNode) {
-    if (nextNode.sibling) {
-      return nextNode.sibling;
+  let nextNodeChain = nodeChain;
+  while (nextNodeChain) {
+    if (nextNodeChain.sibling) {
+      return nextNodeChain.sibling;
     }
-    nextNode = nextNode.parent;
+    nextNodeChain = nextNodeChain.parent;
   }
 }
 
