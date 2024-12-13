@@ -5,6 +5,7 @@ import {
   deletions,
   setDeletions,
   reconcileChildren,
+  currentRoot,
 } from './reconciler.js';
 import { updateRoot } from './update.js';
 import createDom from './createDom.js';
@@ -17,14 +18,20 @@ import updateFunctionComponent from './component.js';
 let nextUnitOfWork = null;
 
 function setNextUnitOfWork(value) {
+  console.log('setNextUnitOfWork 호출됨:', value);
   nextUnitOfWork = value;
+  console.log('nextUnitOfWork 설정됨:', nextUnitOfWork);
 }
 
 /**
  * @param {IdleDeadline} deadline - 브라우저의 idle 상태정보를 가진 객체
  */
 function workLoop(deadline) {
-  // console.log('workLoop started!');
+  console.log('=== workLoop 시작 ===');
+  console.log('nextUnitOfWork:', nextUnitOfWork);
+  console.log('wipRoot:', wipRoot);
+  console.log('currentRoot:', currentRoot);
+
   let shouldYield = false;
 
   while (nextUnitOfWork && !shouldYield) {
@@ -34,16 +41,19 @@ function workLoop(deadline) {
   }
 
   if (!nextUnitOfWork && wipRoot) {
-    // console.log('updating DOM');
+    console.log('DOM 업데이트 시작');
+    console.log('업데이트할 wipRoot:', wipRoot);
+    console.log('deletions:', deletions);
+
     updateRoot(deletions, wipRoot);
     setCurrentRoot(wipRoot);
     setWipRoot(null);
     setDeletions([]);
   }
 
-  if (nextUnitOfWork || wipRoot) {
-    requestIdleCallback(workLoop);
-  }
+  console.log('=== workLoop 종료 ===');
+  console.log('작업 후 nextUnitOfWork:', nextUnitOfWork);
+  console.log('작업 후 wipRoot:', wipRoot);
 }
 
 /**
@@ -81,4 +91,4 @@ function performUnitOfWork(nodeChain) {
 
 requestIdleCallback(workLoop);
 
-export { nextUnitOfWork, setNextUnitOfWork };
+export { nextUnitOfWork, setNextUnitOfWork, workLoop };

@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Supereact Function Component Test</title>
+    <title>Supereact Hooks Test</title>
 </head>
 
 <body>
@@ -10,20 +10,36 @@
     <script type="module">
         import Supereact from './index.js';
 
-        // 함수형 컴포넌트 정의
-        function App(props) {
+        // 카운터 컴포넌트
+        function Counter(props) {
+            const [count, setCount] = Supereact.useState(0);
+
+            const handleClick = () => {
+                console.log('버튼 클릭됨, 현재 count:', count);  // 추가
+                setCount(count + 1);
+            };
+
             return Supereact.createElement(
                 'div',
                 null,
-                Supereact.createElement('h1', null, 'Hello ', props.name),
-                Supereact.createElement('p', null, 'This is a functional component')
+                Supereact.createElement(
+                    'h1',
+                    null,
+                    'Count: ',
+                    count
+                ),
+                Supereact.createElement(
+                    'button',
+                    {
+                        onClick: handleClick  // 익명 함수 대신 명명된 함수 사용
+                    },
+                    'Increment'
+                )
             );
         }
 
-        // 컴포넌트 사용
-        const element = Supereact.createElement(App, { name: 'World' });
-
-        // 렌더링
+        // Counter 컴포넌트 렌더링
+        const element = Supereact.createElement(Counter, null);
         const container = document.getElementById('root');
         Supereact.render(element, container);
     </script>

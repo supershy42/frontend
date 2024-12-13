@@ -5,6 +5,7 @@
 function updateWork(nodeChain) {
   if (!nodeChain) return;
 
+  console.log('updateWork', nodeChain);
   // 함수형컴포넌트 아닌 실제 DOM 요소만 처리
   if (!nodeChain.type || typeof nodeChain.type !== 'function') {
     const domParent = nodeChain.parent ? nodeChain.parent.dom : null;
@@ -33,23 +34,57 @@ function updateRoot(deletions, wipRoot) {
   updateWork(wipRoot.child);
 }
 
+// /**
+//  * 이벤트 리스너인지 확인
+//  */
+// const isEvent = (key) => key.startsWith('on');
+// /**
+//  * 일반 속성인지 확인 (children과 이벤트 제외)
+//  */
+// const isProperty = (key) => key !== 'children' && !isEvent(key);
+
 /**
  * DOM 속성들 업데이트
  */
 function updateDom(dom, prevProps, nextProps) {
+  console.log('updateDom 호출:', { dom, prevProps, nextProps }); // 추가
+
+  // 이벤트 리스너인지 확인
+  const isEvent = (key) => key.startsWith('on');
+  // 일반 속성인지 확인
+  const isProperty = (key) => key !== 'children' && !isEvent(key);
+
+  // 이전 이벤트 리스너 제거
+  Object.keys(prevProps || {})
+    .filter(isEvent)
+    .forEach((name) => {
+      const eventType = name.toLowerCase().substring(2);
+      console.log('이벤트 리스너 제거:', eventType); // 추가
+      dom.removeEventListener(eventType, prevProps[name]);
+    });
+
   // 이전 속성 제거
-  Object.keys(prevProps)
-    .filter((key) => key !== 'children')
+  Object.keys(prevProps || {})
+    .filter(isProperty)
     .filter((key) => !(key in nextProps))
     .forEach((name) => {
       dom[name] = '';
     });
 
-  // 새 속성 설정
-  Object.keys(nextProps)
-    .filter((key) => key !== 'children')
+  // 새로운 속성 설정
+  Object.keys(nextProps || {})
+    .filter(isProperty)
     .forEach((name) => {
       dom[name] = nextProps[name];
+    });
+
+  // 새로운 이벤트 리스너 추가
+  Object.keys(nextProps || {})
+    .filter(isEvent)
+    .forEach((name) => {
+      const eventType = name.toLowerCase().substring(2);
+      console.log('이벤트 리스너 추가:', eventType, nextProps[name]); // 추가
+      dom.addEventListener(eventType, nextProps[name]);
     });
 }
 

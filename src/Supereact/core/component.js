@@ -1,3 +1,4 @@
+import { setCurrentComponent, setHookIndex } from '../hooks/useState.js';
 import { reconcileChildren } from './reconciler.js';
 
 /**
@@ -6,11 +7,13 @@ import { reconcileChildren } from './reconciler.js';
  * @returns {Object} 컴포넌트가 반환한 엘리먼트 nodeChain
  */
 function updateFunctionComponent(nodeChain) {
+  setCurrentComponent(nodeChain);
+  setHookIndex(0);
   const children = [nodeChain.type(nodeChain.props)];
-
   nodeChain.dom = nodeChain.parent.dom;
-
   reconcileChildren(nodeChain, children);
+
+  setCurrentComponent(null);
 }
 
 export default updateFunctionComponent;

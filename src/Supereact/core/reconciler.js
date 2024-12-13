@@ -83,6 +83,8 @@ function reconcileChildren(wipNodeChain, elements) {
       oldNodeChain = oldNodeChain.sibling;
     }
 
+    // console.log(newNodeChain);
+
     if (index === 0) wipNodeChain.child = newNodeChain;
     else if (element) prevSibling.sibling = newNodeChain;
 
