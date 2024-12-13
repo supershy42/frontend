@@ -8,6 +8,7 @@ import {
 } from './reconciler.js';
 import { updateRoot } from './update.js';
 import createDom from './createDom.js';
+import updateFunctionComponent from './component.js';
 
 /**
  * 다음 작업 단위를 추적하는 변수
@@ -51,13 +52,17 @@ function workLoop(deadline) {
  * @returns {Object|null} - 다음 작업
  */
 function performUnitOfWork(nodeChain) {
-  // console.log('performUnitOfWork 실행', nodeChain);
-  if (!nodeChain.dom) {
-    nodeChain.dom = createDom(nodeChain);
-  }
+  console.log('performUnitOfWork 실행', nodeChain);
 
-  const elements = nodeChain.props.children;
-  reconcileChildren(nodeChain, elements);
+  const isFunctionComponent = nodeChain.type instanceof Function;
+  if (isFunctionComponent) {
+    updateFunctionComponent(nodeChain);
+  } else {
+    if (!nodeChain.dom) {
+      nodeChain.dom = createDom(nodeChain);
+    }
+    reconcileChildren(nodeChain, nodeChain.props.children);
+  }
 
   if (nodeChain.child) {
     return nodeChain.child;

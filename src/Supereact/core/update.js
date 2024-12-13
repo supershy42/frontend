@@ -3,20 +3,21 @@
  * @param {Object} nodeChain - 적용할 변경사항 있는 nodeChain
  */
 function updateWork(nodeChain) {
-  // console.log('updating node:', nodeChain);
-  if (!nodeChain) {
-    // console.log('nodeChain is undefined');
-    return;
-  }
+  if (!nodeChain) return;
 
-  const domParent = nodeChain.parent.dom;
+  // 함수형컴포넌트 아닌 실제 DOM 요소만 처리
+  if (!nodeChain.type || typeof nodeChain.type !== 'function') {
+    const domParent = nodeChain.parent ? nodeChain.parent.dom : null;
 
-  if (nodeChain.effectTag === 'PLACEMENT' && nodeChain.dom != null) {
-    domParent.appendChild(nodeChain.dom);
-  } else if (nodeChain.effectTag === 'UPDATE' && nodeChain.dom != null) {
-    updateDom(nodeChain.dom, nodeChain.alternate.props, nodeChain.props);
-  } else if (nodeChain.effectTag === 'DELETION') {
-    domParent.removeChild(nodeChain.dom);
+    if (domParent) {
+      if (nodeChain.effectTag === 'PLACEMENT' && nodeChain.dom != null) {
+        domParent.appendChild(nodeChain.dom);
+      } else if (nodeChain.effectTag === 'UPDATE' && nodeChain.dom != null) {
+        updateDom(nodeChain.dom, nodeChain.alternate.props, nodeChain.props);
+      } else if (nodeChain.effectTag === 'DELETION') {
+        domParent.removeChild(nodeChain.dom);
+      }
+    }
   }
 
   updateWork(nodeChain.child);

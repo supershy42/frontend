@@ -2,23 +2,29 @@
 <html>
 
 <head>
-    <title>Supereact Test</title>
+    <title>Supereact Function Component Test</title>
 </head>
 
 <body>
     <div id="root"></div>
     <script type="module">
-        import Supereact from '../core/index.js';
+        import Supereact from './index.js';
 
-        // JSX 대신 직접 createElement 호출
-        const element = Supereact.createElement(
-            "div",
-            { id: "test" },
-            Supereact.createElement("h1", null, "Hello Supereact"),
-            Supereact.createElement("p", null, "This is a test")
-        );
+        // 함수형 컴포넌트 정의
+        function App(props) {
+            return Supereact.createElement(
+                'div',
+                null,
+                Supereact.createElement('h1', null, 'Hello ', props.name),
+                Supereact.createElement('p', null, 'This is a functional component')
+            );
+        }
 
-        const container = document.getElementById("root");
+        // 컴포넌트 사용
+        const element = Supereact.createElement(App, { name: 'World' });
+
+        // 렌더링
+        const container = document.getElementById('root');
         Supereact.render(element, container);
     </script>
 </body>
