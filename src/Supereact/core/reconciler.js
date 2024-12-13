@@ -4,11 +4,19 @@
  */
 let wipRoot = null;
 
+function setWipRoot(value) {
+  wipRoot = value;
+}
+
 /**
  * 마지막으로 수정된 nodeChain의 루트
  * @type {Object|null}
  */
 let currentRoot = null;
+
+function setCurrentRoot(value) {
+  currentRoot = value;
+}
 
 /**
  * 삭제될 노드들을 추적하는 배열
@@ -16,12 +24,17 @@ let currentRoot = null;
  */
 let deletions = null;
 
+function setDeletions(value) {
+  deletions = value;
+}
+
 /**
  * 이전 nodeChain과 새로운 엘리먼트들 비교 후 업데이트
  * @param {Object} wipNodeChain
  * @param {Array} elements
  */
 function reconcileChildren(wipNodeChain, elements) {
+  // console.log('reconciling children:', elements);
   let index = 0;
   let oldNodeChain = wipNodeChain.alternate && wipNodeChain.alternate.child;
   let prevSibling = null;
@@ -29,6 +42,8 @@ function reconcileChildren(wipNodeChain, elements) {
   while (index < elements.length || oldNodeChain != null) {
     const element = elements[index];
     let newNodeChain = null;
+
+    // console.log('new nodechain 생성', element);
 
     // 이전 nodeChain과 새로운 엘리먼트 비교
     const sameType =
@@ -68,7 +83,7 @@ function reconcileChildren(wipNodeChain, elements) {
       oldNodeChain = oldNodeChain.sibling;
     }
 
-    if (index === 0) wipNodeChain = newNodeChain;
+    if (index === 0) wipNodeChain.child = newNodeChain;
     else if (element) prevSibling.sibling = newNodeChain;
 
     prevSibling = newNodeChain;
@@ -76,4 +91,12 @@ function reconcileChildren(wipNodeChain, elements) {
   }
 }
 
-export { reconcileChildren };
+export {
+  setWipRoot,
+  setDeletions,
+  setCurrentRoot,
+  reconcileChildren,
+  wipRoot,
+  currentRoot,
+  deletions,
+};

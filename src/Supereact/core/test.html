@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Supereact Test</title>
+</head>
+
+<body>
+    <div id="root"></div>
+    <script type="module">
+        import Supereact from '../core/index.js';
+
+        // JSX 대신 직접 createElement 호출
+        const element = Supereact.createElement(
+            "div",
+            { id: "test" },
+            Supereact.createElement("h1", null, "Hello Supereact"),
+            Supereact.createElement("p", null, "This is a test")
+        );
+
+        const container = document.getElementById("root");
+        Supereact.render(element, container);
+    </script>
+</body>
+
+</html>

@@ -1,4 +1,13 @@
-import { reconcileChildren } from './reconciler';
+import {
+  wipRoot,
+  setWipRoot,
+  setCurrentRoot,
+  deletions,
+  setDeletions,
+  reconcileChildren,
+} from './reconciler.js';
+import { updateRoot } from './update.js';
+import createDom from './createDom.js';
 
 /**
  * 다음 작업 단위를 추적하는 변수
@@ -6,10 +15,15 @@ import { reconcileChildren } from './reconciler';
  */
 let nextUnitOfWork = null;
 
+function setNextUnitOfWork(value) {
+  nextUnitOfWork = value;
+}
+
 /**
  * @param {IdleDeadline} deadline - 브라우저의 idle 상태정보를 가진 객체
  */
 function workLoop(deadline) {
+  // console.log('workLoop started!');
   let shouldYield = false;
 
   while (nextUnitOfWork && !shouldYield) {
@@ -18,7 +32,17 @@ function workLoop(deadline) {
     shouldYield = deadline.timeRemaining() < 1;
   }
 
-  requestIdleCallback(workLoop);
+  if (!nextUnitOfWork && wipRoot) {
+    // console.log('updating DOM');
+    updateRoot(deletions, wipRoot);
+    setCurrentRoot(wipRoot);
+    setWipRoot(null);
+    setDeletions([]);
+  }
+
+  if (nextUnitOfWork || wipRoot) {
+    requestIdleCallback(workLoop);
+  }
 }
 
 /**
@@ -27,6 +51,7 @@ function workLoop(deadline) {
  * @returns {Object|null} - 다음 작업
  */
 function performUnitOfWork(nodeChain) {
+  // console.log('performUnitOfWork 실행', nodeChain);
   if (!nodeChain.dom) {
     nodeChain.dom = createDom(nodeChain);
   }
@@ -45,8 +70,10 @@ function performUnitOfWork(nodeChain) {
     }
     nextNodeChain = nextNodeChain.parent;
   }
+
+  return null;
 }
 
 requestIdleCallback(workLoop);
 
-export { nextUnitOfWork, performUnitOfWork };
+export { nextUnitOfWork, setNextUnitOfWork };

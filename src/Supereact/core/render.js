@@ -30,13 +30,18 @@
 //   container.appendChild(dom);
 // }
 
-import { nextUnitOfWork } from './scheduler';
+import { setNextUnitOfWork } from './scheduler.js';
+import { setWipRoot, currentRoot, setDeletions } from './reconciler.js';
 
 export default function render(element, container) {
-  nextUnitOfWork = {
+  const root = {
     dom: container,
     props: {
       children: [element],
     },
+    alternate: currentRoot,
   };
+  setWipRoot(root);
+  setDeletions([]);
+  setNextUnitOfWork(root);
 }
