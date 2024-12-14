@@ -1,3 +1,5 @@
+import { Core } from './index.js';
+
 /**
  * 변경사항 적용
  * @param {Object} nodeChain - 적용할 변경사항 있는 nodeChain
@@ -5,20 +7,18 @@
 function updateWork(nodeChain) {
   if (!nodeChain) return;
 
-  console.log('updateWork', nodeChain);
-  // 함수형컴포넌트 아닌 실제 DOM 요소만 처리
-  if (!nodeChain.type || typeof nodeChain.type !== 'function') {
-    const domParent = nodeChain.parent ? nodeChain.parent.dom : null;
+  let domParentNodeChain = nodeChain.parent;
+  while (!domParentNodeChain.dom) {
+    domParentNodeChain = domParentNodeChain.parent;
+  }
+  const domParent = domParentNodeChain.dom;
 
-    if (domParent) {
-      if (nodeChain.effectTag === 'PLACEMENT' && nodeChain.dom != null) {
-        domParent.appendChild(nodeChain.dom);
-      } else if (nodeChain.effectTag === 'UPDATE' && nodeChain.dom != null) {
-        updateDom(nodeChain.dom, nodeChain.alternate.props, nodeChain.props);
-      } else if (nodeChain.effectTag === 'DELETION') {
-        domParent.removeChild(nodeChain.dom);
-      }
-    }
+  if (nodeChain.effectTag === 'PLACEMENT' && nodeChain.dom != null) {
+    domParent.appendChild(nodeChain.dom);
+  } else if (nodeChain.effectTag === 'UPDATE' && nodeChain.dom != null) {
+    updateDom(nodeChain.dom, nodeChain.alternate.props, nodeChain.props);
+  } else if (nodeChain.effectTag === 'DELETION') {
+    doDeletion(nodeChain, domParent);
   }
 
   updateWork(nodeChain.child);
@@ -30,24 +30,27 @@ function updateWork(nodeChain) {
  * @param {Object} wipRoot - 작업 중인 루트 nodeChain
  */
 function updateRoot(deletions, wipRoot) {
-  deletions.forEach(updateWork);
-  updateWork(wipRoot.child);
+  const { getRuntime, setRuntime } = Core;
+  const runtime = getRuntime();
+  runtime.deletions.forEach(updateWork);
+  updateWork(runtime.wipRoot.child);
+  runtime.currentRoot = runtime.wipRoot;
+  runtime.wipRoot = null;
+  setRuntime(runtime);
 }
 
-// /**
-//  * 이벤트 리스너인지 확인
-//  */
-// const isEvent = (key) => key.startsWith('on');
-// /**
-//  * 일반 속성인지 확인 (children과 이벤트 제외)
-//  */
-// const isProperty = (key) => key !== 'children' && !isEvent(key);
+function doDeletion(nodeChain, domParent) {
+  if (nodeChain.dom) {
+    domParent.removeChild(nodeChain.dom);
+  } else {
+    doDeletion(nodeChain.child, domParent);
+  }
+}
 
 /**
  * DOM 속성들 업데이트
  */
 function updateDom(dom, prevProps, nextProps) {
-  console.log('updateDom 호출:', { dom, prevProps, nextProps }); // 추가
 
   // 이벤트 리스너인지 확인
   const isEvent = (key) => key.startsWith('on');
@@ -59,7 +62,6 @@ function updateDom(dom, prevProps, nextProps) {
     .filter(isEvent)
     .forEach((name) => {
       const eventType = name.toLowerCase().substring(2);
-      console.log('이벤트 리스너 제거:', eventType); // 추가
       dom.removeEventListener(eventType, prevProps[name]);
     });
 
@@ -83,7 +85,6 @@ function updateDom(dom, prevProps, nextProps) {
     .filter(isEvent)
     .forEach((name) => {
       const eventType = name.toLowerCase().substring(2);
-      console.log('이벤트 리스너 추가:', eventType, nextProps[name]); // 추가
       dom.addEventListener(eventType, nextProps[name]);
     });
 }

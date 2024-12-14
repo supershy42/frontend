@@ -1,4 +1,5 @@
-import { setCurrentComponent, setHookIndex } from '../hooks/useState.js';
+import { createDom } from './createDom.js';
+import { Core } from './index.js';
 import { reconcileChildren } from './reconciler.js';
 
 /**
@@ -6,14 +7,22 @@ import { reconcileChildren } from './reconciler.js';
  * @param {Object} nodeChain - 함수형 컴포넌트를 포함한 nodeChain
  * @returns {Object} 컴포넌트가 반환한 엘리먼트 nodeChain
  */
-function updateFunctionComponent(nodeChain) {
-  setCurrentComponent(nodeChain);
-  setHookIndex(0);
-  const children = [nodeChain.type(nodeChain.props)];
-  nodeChain.dom = nodeChain.parent.dom;
-  reconcileChildren(nodeChain, children);
+export function updateFunctionComponent(nodeChain) {
+  const { getRuntime, setRuntime } = Core;
 
-  setCurrentComponent(null);
+  let runtime = getRuntime();
+  runtime.wipNodeChain = nodeChain;
+  runtime.hookIndex = 0;
+  runtime.wipNodeChain.hooks = [];
+  setRuntime(runtime);
+
+  const children = [nodeChain.type(nodeChain.props)];
+  reconcileChildren(nodeChain, children);
 }
 
-export default updateFunctionComponent;
+export function updateHostComponent(nodeChain) {
+  if (!nodeChain.dom) {
+    nodeChain.dom = createDom(nodeChain);
+  }
+  reconcileChildren(nodeChain, nodeChain.props.children);
+}

@@ -1,58 +1,47 @@
-import {
-  wipRoot,
-  setWipRoot,
-  currentRoot,
-  setDeletions,
-} from '../core/reconciler.js';
-import { setNextUnitOfWork, workLoop } from '../core/scheduler.js';
+import { Core } from '../core/index.js';
+import { workLoop } from '../core/scheduler.js';
 
-let currentComponent = null;
-let hookIndex = 0;
-const componentHooks = new Map();
+export function useState(initial) {
+  const { getRuntime, setRuntime } = Core;
+  const runtime = getRuntime();
+  const oldHook =
+    runtime.wipNodeChain.alternate &&
+    runtime.wipNodeChain.alternate.hooks &&
+    runtime.wipNodeChain.alternate.hooks[runtime.hookIndex];
 
-function setCurrentComponent(value) {
-  currentComponent = value;
-}
+  const hook = {
+    state: oldHook ? oldHook.state : initial,
+    queue: [],
+  };
 
-function setHookIndex(index) {
-  hookIndex = index;
-}
+  const actions = oldHook ? oldHook.queue : [];
+  actions.forEach((actions) => {
+    hook.state = actions(hook.state);
+  });
 
-function useState(initial) {
-  console.log('useState 호출됨:', { currentComponent, hookIndex, initial });
+  const setState = (action) => {
+    const runtime = getRuntime();
+    hook.queue.push(typeof action === 'function' ? action : () => action);
 
-  const hooks = componentHooks.get(currentComponent) || [];
-  const hook = hooks[hookIndex] || { state: initial };
-
-  const setState = (value) => {
-    console.log('setState 호출됨:', {
-      oldState: hook.state,
-      newState: value,
-      currentRoot,
-    });
-    console.log(hooks);
-    hook.state = value;
-
-    const newRoot = {
-      dom: currentRoot.dom,
-      props: currentRoot.props,
-      alternate: currentRoot,
+    const wipRoot = {
+      dom: runtime.currentRoot.dom,
+      props: runtime.currentRoot.props,
+      alternate: runtime.currentRoot,
     };
 
-    console.log('새 root 생성:', newRoot);
-
-    setWipRoot(newRoot);
-    setNextUnitOfWork(newRoot);
-    setDeletions([]);
+    setRuntime({
+      ...runtime,
+      wipRoot,
+      nextUnitOfWork: wipRoot,
+      deletions: [],
+    });
 
     requestIdleCallback(workLoop);
   };
 
-  hooks[hookIndex] = hook;
-  componentHooks.set(currentComponent, hooks);
-  hookIndex++;
+  runtime.wipNodeChain.hooks.push(hook);
+  runtime.hookIndex++;
+  setRuntime(runtime);
 
   return [hook.state, setState];
 }
-
-export { useState, currentComponent, setCurrentComponent, setHookIndex };
