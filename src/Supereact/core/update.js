@@ -32,6 +32,16 @@ function updateWork(nodeChain) {
 function updateRoot(deletions, wipRoot) {
   const { getRuntime, setRuntime } = Core;
   const runtime = getRuntime();
+
+  // cleanup effect 실행
+  runtime.cleanupEffects.forEach((cleanup) => {
+    if (typeof cleanup === 'function') {
+      cleanup();
+    }
+  });
+  runtime.cleanupEffects = [];
+
+  // 기존 DOM에서 변경
   runtime.deletions.forEach(updateWork);
   updateWork(runtime.wipRoot.child);
   runtime.currentRoot = runtime.wipRoot;
@@ -51,7 +61,6 @@ function doDeletion(nodeChain, domParent) {
  * DOM 속성들 업데이트
  */
 function updateDom(dom, prevProps, nextProps) {
-
   // 이벤트 리스너인지 확인
   const isEvent = (key) => key.startsWith('on');
   // 일반 속성인지 확인

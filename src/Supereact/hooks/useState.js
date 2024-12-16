@@ -4,10 +4,7 @@ import { workLoop } from '../core/scheduler.js';
 export function useState(initial) {
   const { getRuntime, setRuntime } = Core;
   const runtime = getRuntime();
-  const oldHook =
-    runtime.wipNodeChain.alternate &&
-    runtime.wipNodeChain.alternate.hooks &&
-    runtime.wipNodeChain.alternate.hooks[runtime.hookIndex];
+  const oldHook = runtime.wipNodeChain?.alternate?.hooks?.[runtime.hookIndex];
 
   const hook = {
     state: oldHook ? oldHook.state : initial,

@@ -1,27 +1,32 @@
-let currentNodeChain = null;
-let hookIndex = 0;
+import { Core } from '../core/index.js';
 
 export function useEffect(callback, deps) {
-  const hooks = currentNodeChain.hooks || (currentNodeChain.hooks = []);
+  const { getRuntime, setRuntime } = Core;
+  const runtime = getRuntime();
+  const oldHook = runtime.wipNodeChain?.alternate?.hooks?.[runtime.hookIndex];
 
-  const hook = hooks[hookIndex] || {
-    deps: null,
-    cleanup: null,
+  const hook = {
+    deps: deps,
+    cleanup: oldHook ? oldHook.cleanup : undefined,
   };
 
-  // 첫 실행(이전 의존성 x), 의존성 배열 제공 x, 의존성 값 변경 경우
-  const hasChanged =
-    !hook.deps || !deps || deps.some((dep, i) => dep !== hook.deps[i]);
+  const depsChanged = oldHook
+    ? !deps || !oldHook.deps || deps.some((dep, i) => dep !== oldHook.deps[i])
+    : true;
 
-  if (hasChanged) {
+  // 의존성 변경 되어을 때 이전 cleanup 실행, 새 effect 등록
+  if (depsChanged) {
     if (hook.cleanup) {
-      hook.cleanup();
+      runtime.cleanupEffects.push(hook.cleanup);
     }
-
-    hook.cleanup = callback();
-    hook.deps = deps;
   }
 
-  hooks[hookIndex] = hook;
-  hookIndex++;
+  // 다음 업데이트에서 effect 실행 예약
+  Promise.resolve().then(() => {
+    hook.cleanup = callback();
+  });
+
+  runtime.wipNodeChain.hooks.push(hook);
+  runtime.hookIndex++;
+  setRuntime(runtime);
 }

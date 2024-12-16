@@ -1,54 +1,69 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Supereact Hooks Test</title>
-  </head>
 
-  <body>
-    <div id="root"></div>
-    <script type="module">
-      import Supereact from './index.js';
+<head>
+  <title>Supereact Hooks Test</title>
+</head>
 
-      // 카운터 컴포넌트
-      function Counter(props) {
-        const [count, setCount] = Supereact.useState(0);
-        const [count1, setCount1] = Supereact.useState(10);
+<body>
+  <div id="root"></div>
+  <script type="module">
+    import Supereact from './index.js';
 
-        const handleClickPlus = () => {
-          console.log('버튼 클릭됨, 현재 count:', count); // 추가
-          setCount(count + 1);
+    // 카운터 컴포넌트
+    function Counter(props) {
+      const [lastSubmittedName, setLastSubmittedName] = Supereact.useState("");
+
+      Supereact.useEffect(() => {
+        console.log("Name changed to:", lastSubmittedName);
+
+        // cleanup function
+        return () => {
+          console.log("Cleaning up effect for:", lastSubmittedName);
         };
-        const handleClickMinus = () => {
-          console.log('버튼 클릭됨, 현재 count:', count1); // 추가
-          setCount1(count1 - 1);
-        };
+      }, [lastSubmittedName]);
 
-        return Supereact.createElement(
-          'div',
+      return Supereact.createElement(
+        "div",
+        null,
+        Supereact.createElement("input", {
+          onBlur: async (e) => {
+            const inputValue = e.target.value;
+            try {
+              const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  title: 'Nickname Update',
+                  body: inputValue,
+                  userId: 1
+                })
+              });
+              const data = await response.json();
+              console.log('API Response:', data);
+              setLastSubmittedName(inputValue);
+            } catch (error) {
+              console.error('API Error:', error);
+            }
+          },
+          placeholder: "Enter nickname"
+        }),
+        Supereact.createElement(
+          "p",
           null,
-          Supereact.createElement('h1', null, 'Count: ', count),
-          Supereact.createElement('h1', null, 'Count1: ', count1),
-          Supereact.createElement(
-            'button',
-            {
-              onClick: handleClickPlus,
-            },
-            'Increment'
-          ),
-          Supereact.createElement(
-            'button',
-            {
-              onClick: handleClickMinus,
-            },
-            'Decrement'
-          )
-        );
-      }
+          "Last submitted nickname: ",
+          lastSubmittedName || "None"
+        )
+      );
+    }
 
-      // Counter 컴포넌트 렌더링
-      const element = Supereact.createElement(Counter, null);
-      const container = document.getElementById('root');
-      Supereact.render(element, container);
-    </script>
-  </body>
+    // Counter 컴포넌트 렌더링
+    const element = Supereact.createElement(Counter, null);
+    const container = document.getElementById('root');
+    Supereact.render(element, container);
+  </script>
+</body>
+
 </html>

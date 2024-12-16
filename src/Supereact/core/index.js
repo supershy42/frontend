@@ -1,7 +1,7 @@
-import { useState } from '../hooks/useState.js';
 import createElement from './createElement.js';
 import render from './render.js';
-import { workLoop } from './scheduler.js';
+import { useState } from '../hooks/useState.js';
+import { useEffect } from '../hooks/useEffect.js';
 
 /**
  * @typedef {Object} NodeChain
@@ -70,6 +70,7 @@ const Supereact = {
   createElement,
   render,
   useState,
+  useEffect,
 };
 
 export const Core = createCore();
