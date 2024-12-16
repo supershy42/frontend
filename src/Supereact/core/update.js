@@ -2,7 +2,7 @@ import { Core } from './index.js';
 
 /**
  * 변경사항 적용
- * @param {Object} nodeChain - 적용할 변경사항 있는 nodeChain
+ * @param {NodeChain} nodeChain - 적용할 변경사항 있는 nodeChain
  */
 function updateWork(nodeChain) {
   if (!nodeChain) return;
@@ -26,8 +26,8 @@ function updateWork(nodeChain) {
 }
 
 /**
- * @param {Array} deletions - 삭제될 노드들
- * @param {Object} wipRoot - 작업 중인 루트 nodeChain
+ * @param {NodeChain[]} deletions - 삭제될 노드들
+ * @param {NodeChain} wipRoot - 작업 중인 루트 nodeChain
  */
 function updateRoot(deletions, wipRoot) {
   const { getRuntime, setRuntime } = Core;

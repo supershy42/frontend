@@ -1,48 +1,54 @@
 <!DOCTYPE html>
 <html>
-
-<head>
+  <head>
     <title>Supereact Hooks Test</title>
-</head>
+  </head>
 
-<body>
+  <body>
     <div id="root"></div>
     <script type="module">
-        import Supereact from './index.js';
+      import Supereact from './index.js';
 
-        // 카운터 컴포넌트
-        function Counter(props) {
-            const [count, setCount] = Supereact.useState(0);
+      // 카운터 컴포넌트
+      function Counter(props) {
+        const [count, setCount] = Supereact.useState(0);
+        const [count1, setCount1] = Supereact.useState(10);
 
-            const handleClick = () => {
-                console.log('버튼 클릭됨, 현재 count:', count);  // 추가
-                setCount(count + 1);
-            };
+        const handleClickPlus = () => {
+          console.log('버튼 클릭됨, 현재 count:', count); // 추가
+          setCount(count + 1);
+        };
+        const handleClickMinus = () => {
+          console.log('버튼 클릭됨, 현재 count:', count1); // 추가
+          setCount1(count1 - 1);
+        };
 
-            return Supereact.createElement(
-                'div',
-                null,
-                Supereact.createElement(
-                    'h1',
-                    null,
-                    'Count: ',
-                    count
-                ),
-                Supereact.createElement(
-                    'button',
-                    {
-                        onClick: handleClick  // 익명 함수 대신 명명된 함수 사용
-                    },
-                    'Increment'
-                )
-            );
-        }
+        return Supereact.createElement(
+          'div',
+          null,
+          Supereact.createElement('h1', null, 'Count: ', count),
+          Supereact.createElement('h1', null, 'Count1: ', count1),
+          Supereact.createElement(
+            'button',
+            {
+              onClick: handleClickPlus,
+            },
+            'Increment'
+          ),
+          Supereact.createElement(
+            'button',
+            {
+              onClick: handleClickMinus,
+            },
+            'Decrement'
+          )
+        );
+      }
 
-        // Counter 컴포넌트 렌더링
-        const element = Supereact.createElement(Counter, null);
-        const container = document.getElementById('root');
-        Supereact.render(element, container);
+      // Counter 컴포넌트 렌더링
+      const element = Supereact.createElement(Counter, null);
+      const container = document.getElementById('root');
+      Supereact.render(element, container);
     </script>
-</body>
-
+  </body>
 </html>

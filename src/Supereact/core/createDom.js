@@ -5,9 +5,7 @@ const isGone = (prev, next) => (key) => !(key in next);
 
 /**
  * 해당하는 실제 DOM 요소를 생성
- * @param {Object} nodeChain - DOM 요소를 생성할 fiber 노드
- * @param {string} nodeChain.type - 생성할 DOM 요소의 타입 ('div', 'span', 'TEXT_ELEMENT' 등)
- * @param {Object} nodeChain.props - DOM 요소에 적용할 속성들
+ * @param {NodeChain} nodeChain - DOM 요소를 생성할 노드
  * @returns {HTMLElement|Text} 생성된 DOM 요소
  */
 export function createDom(nodeChain) {

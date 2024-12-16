@@ -2,8 +2,8 @@ import { Core } from './index.js';
 
 /**
  * 이전 nodeChain과 새로운 엘리먼트들 비교 후 업데이트
- * @param {Object} wipNodeChain
- * @param {Array} elements
+ * @param {NodeChain} wipNodeChain - 작업 중인 nodeChain
+ * @param {NodeChain[]} elements - 새로운 엘리먼트 배열
  */
 export function reconcileChildren(wipNodeChain, elements) {
   let index = 0;

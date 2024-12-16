@@ -4,8 +4,8 @@ import { reconcileChildren } from './reconciler.js';
 
 /**
  * 함수형 컴포넌트 실행 및 처리
- * @param {Object} nodeChain - 함수형 컴포넌트를 포함한 nodeChain
- * @returns {Object} 컴포넌트가 반환한 엘리먼트 nodeChain
+ * @param {NodeChain} nodeChain - 함수형 컴포넌트를 포함한 nodeChain
+ * @returns {NodeChain} 컴포넌트가 반환한 엘리먼트 nodeChain
  */
 export function updateFunctionComponent(nodeChain) {
   const { getRuntime, setRuntime } = Core;

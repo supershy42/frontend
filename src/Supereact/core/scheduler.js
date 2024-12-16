@@ -7,7 +7,7 @@ import { Core } from './index.js';
  */
 export function workLoop(deadline) {
   const { getRuntime, setRuntime } = Core;
-  const runtime = getRuntime();
+  let runtime = getRuntime();
   let shouldYield = false;
 
   while (runtime.nextUnitOfWork && !shouldYield) {
@@ -17,6 +17,7 @@ export function workLoop(deadline) {
       nextUnitOfWork: nextWork,
     });
     shouldYield = deadline.timeRemaining() < 1;
+    runtime = getRuntime();
   }
 
   if (!getRuntime().nextUnitOfWork && getRuntime().wipRoot) {
@@ -24,15 +25,16 @@ export function workLoop(deadline) {
   }
 
   // 다음 작업이 있을 때만 requestIdleCallback 호출
-  if (runtime.nextUnitOfWork || runtime.wipRoot) {
+  const currentRuntime = getRuntime();
+  if (currentRuntime.nextUnitOfWork || currentRuntime.wipRoot) {
     requestIdleCallback(workLoop);
   }
 }
 
 /**
  * 각 작업 단위 수행 후 다음 작업 단위 반환
- * @param {Object} nodeChain - 현재 작업
- * @returns {Object|null} - 다음 작업
+ * @param {NodeChain} nodeChain - 현재 작업
+ * @returns {NodeChain|null} - 다음 작업
  */
 function performUnitOfWork(nodeChain) {
   const isFunctionComponent = nodeChain.type instanceof Function;
