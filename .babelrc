@@ -1,3 +1,3 @@
 {
-  "presets": ["@babel/preset-env"]
+  "presets": ["./src/Supereact/jsx/index.js", "@babel/preset-env"]
 }

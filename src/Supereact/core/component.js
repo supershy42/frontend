@@ -1,5 +1,5 @@
 import { createDom } from './createDom.js';
-import { Core } from './index.js';
+import { Core } from './runtime.js';
 import { reconcileChildren } from './reconciler.js';
 
 /**
@@ -10,19 +10,22 @@ import { reconcileChildren } from './reconciler.js';
 export function updateFunctionComponent(nodeChain) {
   const { getRuntime, setRuntime } = Core;
 
-  let runtime = getRuntime();
+  const runtime = getRuntime();
   runtime.wipNodeChain = nodeChain;
   runtime.hookIndex = 0;
   runtime.wipNodeChain.hooks = [];
   setRuntime(runtime);
 
-  const children = [nodeChain.type(nodeChain.props)];
+  const children = [nodeChain.type(nodeChain.props || {})];
+
   reconcileChildren(nodeChain, children);
 }
 
 export function updateHostComponent(nodeChain) {
+  const { getRuntime } = Core;
   if (!nodeChain.dom) {
     nodeChain.dom = createDom(nodeChain);
   }
-  reconcileChildren(nodeChain, nodeChain.props.children);
+  const children = nodeChain.props?.children || [];
+  reconcileChildren(nodeChain, children);
 }

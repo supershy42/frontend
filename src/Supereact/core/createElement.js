@@ -28,6 +28,9 @@ export default function createElement(type, props, ...children) {
  * // "Hello" => { type: "TEXT_ELEMENT", props: { nodeValue: "Hello", children: [] } }
  */
 function createTextElement(text) {
+  if (text === false || text === null || text === undefined) {
+    return null;
+  }
   return {
     type: 'TEXT_ELEMENT',
     props: {

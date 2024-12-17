@@ -1,4 +1,4 @@
-import { Core } from '../core/index.js';
+import { Core } from '../core/runtime.js';
 import { workLoop } from '../core/scheduler.js';
 
 export function useState(initial) {

@@ -14,14 +14,14 @@ export function createDom(nodeChain) {
       ? document.createTextNode('')
       : document.createElement(nodeChain.type);
 
-  updateDom(dom, {}, nodeChain.props);
+  updateDom(dom, {}, nodeChain.props || {});
   return dom;
 }
 
 /**
  * DOM 속성들 업데이트
  */
-export function updateDom(dom, prevProps, nextProps) {
+export function updateDom(dom, prevProps = {}, nextProps = {}) {
   // 이전 이벤트 리스너 제거
   Object.keys(prevProps || {})
     .filter(isEvent)

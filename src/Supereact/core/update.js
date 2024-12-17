@@ -1,4 +1,4 @@
-import { Core } from './index.js';
+import { Core } from './runtime.js';
 
 /**
  * 변경사항 적용
@@ -29,7 +29,7 @@ function updateWork(nodeChain) {
  * @param {NodeChain[]} deletions - 삭제될 노드들
  * @param {NodeChain} wipRoot - 작업 중인 루트 nodeChain
  */
-function updateRoot(deletions, wipRoot) {
+function updateRoot() {
   const { getRuntime, setRuntime } = Core;
   const runtime = getRuntime();
 

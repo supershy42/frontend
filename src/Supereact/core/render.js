@@ -1,4 +1,4 @@
-import { Core } from './index.js';
+import { Core } from './runtime.js';
 import { workLoop } from './scheduler.js';
 
 /**

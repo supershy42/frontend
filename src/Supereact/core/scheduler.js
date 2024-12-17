@@ -1,6 +1,6 @@
 import { updateRoot } from './update.js';
 import { updateFunctionComponent, updateHostComponent } from './component.js';
-import { Core } from './index.js';
+import { Core } from './runtime.js';
 
 /**
  * @param {IdleDeadline} deadline - 브라우저의 idle 상태정보를 가진 객체
@@ -13,7 +13,7 @@ export function workLoop(deadline) {
   while (runtime.nextUnitOfWork && !shouldYield) {
     const nextWork = performUnitOfWork(runtime.nextUnitOfWork);
     setRuntime({
-      ...runtime,
+      ...getRuntime(),
       nextUnitOfWork: nextWork,
     });
     shouldYield = deadline.timeRemaining() < 1;

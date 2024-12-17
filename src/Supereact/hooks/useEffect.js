@@ -1,4 +1,4 @@
-import { Core } from '../core/index.js';
+import { Core } from '../core/runtime.js';
 
 export function useEffect(callback, deps) {
   const { getRuntime, setRuntime } = Core;
@@ -23,7 +23,9 @@ export function useEffect(callback, deps) {
 
   // 다음 업데이트에서 effect 실행 예약
   Promise.resolve().then(() => {
-    hook.cleanup = callback();
+    if (typeof callback === 'function') {
+      hook.cleanup = callback();
+    }
   });
 
   runtime.wipNodeChain.hooks.push(hook);
