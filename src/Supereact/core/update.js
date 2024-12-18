@@ -13,12 +13,17 @@ function updateWork(nodeChain) {
   }
   const domParent = domParentNodeChain.dom;
 
+  // DELETION이면 하위 노드 작업을 하지 않고 바로 종료
+  if (nodeChain.effectTag === 'DELETION') {
+    doDeletion(nodeChain, domParent);
+    // 삭제 후 하위 작업 중단
+    return;
+  }
+
   if (nodeChain.effectTag === 'PLACEMENT' && nodeChain.dom != null) {
     domParent.appendChild(nodeChain.dom);
   } else if (nodeChain.effectTag === 'UPDATE' && nodeChain.dom != null) {
     updateDom(nodeChain.dom, nodeChain.alternate.props, nodeChain.props);
-  } else if (nodeChain.effectTag === 'DELETION') {
-    doDeletion(nodeChain, domParent);
   }
 
   updateWork(nodeChain.child);
@@ -50,9 +55,27 @@ function updateRoot() {
 }
 
 function doDeletion(nodeChain, domParent) {
+  // 함수형 컴포넌트인 경우
+  if (typeof nodeChain.type === 'function') {
+    // 실제 DOM을 가진 첫번째 자식 노드 찾기
+    let current = nodeChain;
+    while (current && !current.dom) {
+      current = current.child;
+    }
+
+    if (current && current.dom) {
+      // 부모에서 해당 DOM 요소 삭제
+      domParent.removeChild(current.dom);
+    }
+
+    return;
+  }
+
+  // 일반 DOM 노드인 경우
   if (nodeChain.dom) {
     domParent.removeChild(nodeChain.dom);
-  } else {
+  } else if (nodeChain.child) {
+    // child가 있지만 dom이 없는 경우 (중간 노드)
     doDeletion(nodeChain.child, domParent);
   }
 }

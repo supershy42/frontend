@@ -10,9 +10,6 @@ const { Route, Router, Link } = SupereactRouter;
 function App() {
   return (
     <Router>
-      <nav style="margin-bottom: 20px;">
-        <Link to="/">Home</Link>
-      </nav>
       <Route path="/" component={Home} />
       <Route path="/register" component={Register} />
       <Route path="/login" component={Login} />

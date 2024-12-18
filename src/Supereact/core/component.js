@@ -14,6 +14,7 @@ export function updateFunctionComponent(nodeChain) {
   runtime.wipNodeChain = nodeChain;
   runtime.hookIndex = 0;
   runtime.wipNodeChain.hooks = [];
+
   setRuntime(runtime);
 
   const children = [nodeChain.type(nodeChain.props || {})];
@@ -26,6 +27,7 @@ export function updateHostComponent(nodeChain) {
   if (!nodeChain.dom) {
     nodeChain.dom = createDom(nodeChain);
   }
+
   const children = nodeChain.props?.children || [];
   reconcileChildren(nodeChain, children);
 }
