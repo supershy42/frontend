@@ -85,12 +85,10 @@ function Register() {
             required
           />
           <span className="message">{state.nicknameMessage}</span>
-          {state.nicknameMessage == '' && <div>HELLOHELLO</div>}
         </div>
 
         <div>
           <label htmlFor="password">Password:</label>
-          {state.nicknameMessage == '' && <Tempcomp />}
           <input type="password" id="password" name="password" required />
           <label htmlFor="confirm-password">Confirm Password:</label>
           <input
