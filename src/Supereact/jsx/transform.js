@@ -66,6 +66,13 @@ export default function (babel) {
 
             let value = attr.value;
 
+            // style 속성 특별 처리
+            if (key === 'style' && t.isJSXExpressionContainer(value)) {
+              console.log({ props: props });
+              props.push(t.objectProperty(t.identifier(key), value.expression));
+              continue;
+            }
+
             // 이벤트 핸들러 처리
             if (key.startsWith('on')) {
               value = value.expression;

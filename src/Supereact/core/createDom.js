@@ -31,6 +31,13 @@ export function updateDom(dom, prevProps = {}, nextProps = {}) {
       dom.removeEventListener(eventType, prevProps[name]);
     });
 
+  // 이전 style 제거
+  if (prevProps.style) {
+    Object.keys(prevProps.style).forEach((styleKey) => {
+      dom.style[styleKey] = '';
+    });
+  }
+
   // 이전 속성 제거
   Object.keys(prevProps || {})
     .filter(isProperty)
@@ -46,6 +53,13 @@ export function updateDom(dom, prevProps = {}, nextProps = {}) {
     .forEach((name) => {
       dom[name] = nextProps[name];
     });
+
+  // 새로운 style 설정
+  if (nextProps.style) {
+    Object.keys(nextProps.style).forEach((styleKey) => {
+      dom.style[styleKey] = nextProps.style[styleKey];
+    });
+  }
 
   // 새로운 이벤트 리스너 추가
   Object.keys(nextProps)

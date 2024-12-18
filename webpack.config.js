@@ -13,6 +13,7 @@ export default {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',
     publicPath: '/',
+    assetModuleFilename: 'images/[hash][ext][query]',
   },
   module: {
     rules: [
@@ -26,6 +27,15 @@ export default {
           },
         },
       },
+      {
+        test: /\.(png|jpg|jpeg|gif|svg)$/i,
+        type: 'asset',
+        parser: {
+          dataUrlCondition: {
+            maxSize: 8 * 1024, // 8kb 이하는 inline base64로
+          },
+        },
+      },
     ],
   },
   resolve: {
@@ -33,6 +43,7 @@ export default {
     alias: {
       '@': path.resolve(__dirname, 'src/'),
       Supereact: path.resolve(__dirname, 'src/Supereact/index.js'),
+      '@images': path.resolve(__dirname, 'public/images'),
     },
   },
   plugins: [
@@ -42,9 +53,15 @@ export default {
     }),
   ],
   devServer: {
-    static: {
-      directory: path.resolve('dist'),
-    },
+    static: [
+      {
+        directory: path.resolve(__dirname, 'dist'),
+      },
+      {
+        directory: path.resolve(__dirname, 'public'),
+        publicPath: '/public',
+      },
+    ],
     historyApiFallback: true,
     compress: true,
     port: 3000,
