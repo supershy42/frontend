@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Supereact Router Test</title>
+  <style>
+    .active {
+      color: blue;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module">
+    import { Supereact } from './index.js';
+    import { SupereactRouter } from '../router/index.js';
+
+    function Home() {
+      return Supereact.createElement(
+        'div',
+        null,
+        Supereact.createElement('h1', null, 'Home Page'),
+        Supereact.createElement('p', null, 'Welcome to the home page!')
+      );
+    }
+
+    function About() {
+      return Supereact.createElement(
+        'div',
+        null,
+        Supereact.createElement('h1', null, 'About Page'),
+        Supereact.createElement('p', null, 'This is a simple about page.')
+      );
+    }
+
+    function Contact() {
+      return Supereact.createElement(
+        'div',
+        null,
+        Supereact.createElement('h1', null, 'Contact Page'),
+        Supereact.createElement('p', null, 'Contact us at: example@email.com')
+      );
+    }
+
+    function App() {
+      return Supereact.createElement(
+        SupereactRouter.Router,
+        null,
+        Supereact.createElement(
+          'nav',
+          { style: 'margin-bottom: 20px;' },
+          Supereact.createElement(SupereactRouter.Link, { to: '/' }, 'Home'),
+          ' | ',
+          Supereact.createElement(SupereactRouter.Link, { to: '/about' }, 'About'),
+          ' | ',
+          Supereact.createElement(SupereactRouter.Link, { to: '/contact' }, 'Contact')
+        ),
+        Supereact.createElement(SupereactRouter.Route, {
+          path: '/',
+          component: Home
+        }),
+        Supereact.createElement(SupereactRouter.Route, {
+          path: '/about',
+          component: About
+        }),
+        Supereact.createElement(SupereactRouter.Route, {
+          path: '/contact',
+          component: Contact
+        })
+      );
+    }
+
+    const container = document.getElementById('root');
+    Supereact.render(Supereact.createElement(App), container);
+  </script>
+</body>
+
+</html>

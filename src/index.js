@@ -1,6 +1,5 @@
-import App from './app.js';
+import Supereact from './Supereact/core/index.js';
+import App from './App.jsx';
 
-document.addEventListener('DOMContentLoaded', () => {
-  const app = document.getElementById('app');
-  new App(app);
-});
+const root = document.getElementById('root');
+Supereact.render(<App />, root);
