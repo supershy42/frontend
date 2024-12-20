@@ -46,7 +46,11 @@ function Router({ children }) {
     };
   }, [update]);
 
-  const result = Supereact.createElement('div', null, ...children);
+  const result = Supereact.createElement(
+    'div',
+    { style: { width: '100%', height: '100%' } },
+    ...children
+  );
   return result;
 }
 

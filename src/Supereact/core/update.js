@@ -47,6 +47,7 @@ function updateRoot() {
   runtime.cleanupEffects = [];
 
   // 기존 DOM에서 변경
+  console.log({ deletion: runtime.deletions });
   runtime.deletions.forEach(updateWork);
   updateWork(runtime.wipRoot.child);
   runtime.currentRoot = runtime.wipRoot;
@@ -84,9 +85,8 @@ function doDeletion(nodeChain, domParent) {
  * DOM 속성들 업데이트
  */
 function updateDom(dom, prevProps, nextProps) {
-  // 이벤트 리스너인지 확인
   const isEvent = (key) => key.startsWith('on');
-  // 일반 속성인지 확인
+  const isStyle = (key) => key === 'style';
   const isProperty = (key) => key !== 'children' && !isEvent(key);
 
   // 이전 이벤트 리스너 제거
@@ -96,6 +96,13 @@ function updateDom(dom, prevProps, nextProps) {
       const eventType = name.toLowerCase().substring(2);
       dom.removeEventListener(eventType, prevProps[name]);
     });
+
+  // 이전 스타일 제거
+  if (prevProps.style) {
+    Object.keys(prevProps.style).forEach((styleKey) => {
+      dom.style[styleKey] = '';
+    });
+  }
 
   // 이전 속성 제거
   Object.keys(prevProps || {})
@@ -111,6 +118,13 @@ function updateDom(dom, prevProps, nextProps) {
     .forEach((name) => {
       dom[name] = nextProps[name];
     });
+
+  // 새로운 스타일 설정
+  if (nextProps.style) {
+    Object.keys(nextProps.style).forEach((styleKey) => {
+      dom.style[styleKey] = nextProps.style[styleKey];
+    });
+  }
 
   // 새로운 이벤트 리스너 추가
   Object.keys(nextProps || {})
