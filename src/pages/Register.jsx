@@ -1,7 +1,6 @@
 import Supereact from '../Supereact/core/index.js';
 import SupereactRouter from '../Supereact/router/index.js';
 import { checkNickname, registerUser, verifyEmail } from '../api/userApi.js';
-import Tempcomp from './Tempcomp.jsx';
 
 const { navigate } = SupereactRouter;
 
@@ -73,7 +72,7 @@ function Register() {
 
   return (
     <div className="register_page">
-      <h1>Register</h1>
+      <h1 style={{ color: 'blue' }}>Register</h1>
       <form id="register-form" onSubmit={handleSubmit}>
         <div>
           <label htmlFor="nickname">Nickname:</label>

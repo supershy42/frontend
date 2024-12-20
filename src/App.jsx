@@ -12,9 +12,9 @@ function App() {
   return (
     <Router>
       <Background />
-      <Route path="/" component={Home} />
       <Route path="/register" component={Register} />
       <Route path="/login" component={Login} />
+      <Route path="/" component={Home} />
     </Router>
   );
 }
