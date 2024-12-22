@@ -1,4 +1,3 @@
-import { updateDom } from './createDom.js';
 import { Core } from './runtime.js';
 
 /**
@@ -79,6 +78,61 @@ function doDeletion(nodeChain, domParent) {
     // child가 있지만 dom이 없는 경우 (중간 노드)
     doDeletion(nodeChain.child, domParent);
   }
+}
+
+/**
+ * DOM 속성들 업데이트
+ */
+function updateDom(dom, prevProps = {}, nextProps = {}) {
+  const isEvent = (key) => key.startsWith('on');
+  const isStyle = (key) => key === 'style';
+  const isProperty = (key) =>
+    key !== 'children' && !isEvent(key) && !isStyle(key);
+
+  // 이전 이벤트 리스너 제거
+  Object.keys(prevProps || {})
+    .filter(isEvent)
+    .forEach((name) => {
+      const eventType = name.toLowerCase().substring(2);
+      dom.removeEventListener(eventType, prevProps[name]);
+    });
+
+  // 이전 스타일 제거
+  if (prevProps.style) {
+    Object.keys(prevProps.style).forEach((styleKey) => {
+      dom.style[styleKey] = '';
+    });
+  }
+
+  // 이전 속성 제거
+  Object.keys(prevProps || {})
+    .filter(isProperty)
+    .filter((key) => !(key in nextProps))
+    .forEach((name) => {
+      dom[name] = '';
+    });
+
+  // 새로운 속성 설정
+  Object.keys(nextProps || {})
+    .filter(isProperty)
+    .forEach((name) => {
+      dom[name] = nextProps[name];
+    });
+
+  // 새로운 스타일 설정
+  if (nextProps.style) {
+    Object.keys(nextProps.style).forEach((styleKey) => {
+      dom.style[styleKey] = nextProps.style[styleKey];
+    });
+  }
+
+  // 새로운 이벤트 리스너 추가
+  Object.keys(nextProps || {})
+    .filter(isEvent)
+    .forEach((name) => {
+      const eventType = name.toLowerCase().substring(2);
+      dom.addEventListener(eventType, nextProps[name]);
+    });
 }
 
 export { updateWork, updateRoot };

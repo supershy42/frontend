@@ -1,6 +1,6 @@
 import Supereact from '../Supereact/core';
 
-function HomeTextButton({ text, onClick }) {
+function HomeTextButton({ text, onClick, type = 'button' }) {
   const [isHover, setIsHover] = Supereact.useState(false);
 
   const handleMouseEnter = () => {
@@ -56,8 +56,6 @@ function HomeTextButton({ text, onClick }) {
         alignItems: 'flex-start',
         gap: '90px',
         cursor: 'pointer',
-        position: 'relative',
-        zIndex: 1,
       }}
     >
       <>
@@ -74,6 +72,8 @@ function HomeTextButton({ text, onClick }) {
         style={isHover ? hoverStyle : defaultStyle}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onClick={onClick}
+        type={type}
       >
         {text}
       </button>
