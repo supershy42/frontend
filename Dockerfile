@@ -13,4 +13,4 @@ COPY . .
 EXPOSE 3000
 
 # Run application
-CMD ["npm", "start"]~
+CMD ["npm", "start"]

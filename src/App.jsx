@@ -1,19 +1,21 @@
 /** @jsx Supereact.createElement */
-import Supereact from './Supereact/core/index.js';
+import Supereact from './Supereact/index.js';
 import Home from './pages/Home.jsx';
 import Register from './pages/Register.jsx';
 import Login from './pages/Login.jsx';
-import SupereactRouter from './Supereact/router/index.js';
-
-const { Route, Router, Link } = SupereactRouter;
+import Background from './pages/Background.jsx';
+import Router, { Route } from './router.jsx';
 
 function App() {
   return (
-    <Router>
-      <Route path="/" component={Home} />
-      <Route path="/register" component={Register} />
-      <Route path="/login" component={Login} />
-    </Router>
+    <div style={{ width: '100%', height: '100vh' }}>
+      <Background />
+      <Router>
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Home />} />
+      </Router>
+    </div>
   );
 }
 

@@ -13,6 +13,7 @@ export default {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',
     publicPath: '/',
+    assetModuleFilename: 'images/[hash][ext][query]',
   },
   module: {
     rules: [
@@ -22,9 +23,22 @@ export default {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env', './src/Supereact/jsx/index.js'],
+            presets: ['@babel/preset-env',],
           },
         },
+      },
+      {
+        test: /\.(png|jpg|jpeg|gif|svg)$/i,
+        type: 'asset',
+        parser: {
+          dataUrlCondition: {
+            maxSize: 8 * 1024, // 8kb 이하는 inline base64로
+          },
+        },
+      },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
       },
     ],
   },
@@ -32,7 +46,8 @@ export default {
     extensions: ['.js', '.jsx'],
     alias: {
       '@': path.resolve(__dirname, 'src/'),
-      Supereact: path.resolve(__dirname, 'src/Supereact/index.js'),
+      '@images': path.resolve(__dirname, 'public/images'),
+      ft_react: path.resolve(__dirname, 'src/ft_supereact'),
     },
   },
   plugins: [
@@ -42,9 +57,15 @@ export default {
     }),
   ],
   devServer: {
-    static: {
-      directory: path.resolve('dist'),
-    },
+    static: [
+      {
+        directory: path.resolve(__dirname, 'dist'),
+      },
+      {
+        directory: path.resolve(__dirname, 'public'),
+        publicPath: '/public',
+      },
+    ],
     historyApiFallback: true,
     compress: true,
     port: 3000,
