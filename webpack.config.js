@@ -23,7 +23,7 @@ export default {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env', './src/Supereact/jsx/index.js'],
+            presets: ['@babel/preset-env',],
           },
         },
       },
@@ -46,8 +46,8 @@ export default {
     extensions: ['.js', '.jsx'],
     alias: {
       '@': path.resolve(__dirname, 'src/'),
-      Supereact: path.resolve(__dirname, 'src/Supereact/index.js'),
       '@images': path.resolve(__dirname, 'public/images'),
+      ft_react: path.resolve(__dirname, 'src/ft_supereact'),
     },
   },
   plugins: [

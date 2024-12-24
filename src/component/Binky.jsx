@@ -1,4 +1,5 @@
-import Supereact from '../Supereact/core';
+/** @jsx Supereact.createElement */
+import Supereact from '../Supereact';
 
 const Binky = ({ isOn }) => {
   return (

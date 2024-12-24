@@ -1,10 +1,8 @@
-import Supereact from '../Supereact/core/index.js';
-import SupereactRouter from '../Supereact/router/index.js';
+/** @jsx Supereact.createElement */
+import Supereact from '../Supereact/index.js';
 import { checkNickname, registerUser, verifyEmail } from '../api/userApi.js';
 import HomeTextButton from '../component/HomeTextButton.jsx';
-import Home from './Home.jsx';
-
-const { navigate } = SupereactRouter;
+import Timer from '../component/Timer.jsx';
 
 const registerPageStyle = {
   width: '100%',
@@ -17,7 +15,7 @@ const registerPageStyle = {
 const centerBlockStyle = {
   display: 'flex',
   width: '700px',
-  padding: '80px 112.5px',
+  padding: '80px 62.5px',
   flexDirection: 'column',
   justifyContent: 'space-between',
   alignItems: 'center',
@@ -113,17 +111,7 @@ const verificationButtonStyle = {
   zIndex: 3,
 };
 
-const timerStyle = {
-  position: 'absolute',
-  right: '15px',
-  top: '50%',
-  transform: 'translateY(-50%)',
-  color: '#004FC6',
-  fontSize: '14px',
-  fontWeight: '500',
-  zIndex: 3,
-};
-function Register() {
+function Register(props) {
   const [state, setState] = Supereact.useState({
     nickname: '',
     password: '',
@@ -134,33 +122,9 @@ function Register() {
     emailMessage: '',
     passwordMessage: '',
     verificationCodeMessage: '',
-    timer: 300,
-    isTimerRunning: false,
   });
 
-  Supereact.useEffect(() => {
-    let interval;
-    if (state.isTimerRunning && state.timer > 0) {
-      interval = setInterval(() => {
-        setState((prev) => ({
-          ...prev,
-          timer: prev.timer - 1,
-        }));
-      }, 1000);
-    } else if (state.timer === 0) {
-      setState((prev) => ({
-        ...prev,
-        isTimerRunning: false,
-      }));
-    }
-    return () => clearInterval(interval);
-  }, [state.isTimerRunning, state.timer]);
-
-  const formatTime = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
+  const [isTimerRunning, setIsTimerRunning] = Supereact.useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -204,6 +168,7 @@ function Register() {
   };
 
   const sendVerificationCode = async () => {
+    console.log('sendVerificationCode');
     if (!state.email) {
       setState((prev) => ({
         ...prev,
@@ -214,13 +179,8 @@ function Register() {
 
     try {
       await verifyEmail({ email: state.email });
-      setState((prev) => ({
-        ...prev,
-        emailMessage: '',
-        showVerificationSection: true,
-        timer: 300,
-        isTimerRunning: true,
-      }));
+      setIsTimerRunning(false);
+      setTimeout(() => setIsTimerRunning(true), 0);
     } catch (error) {
       setState((prev) => ({
         ...prev,
@@ -230,13 +190,13 @@ function Register() {
   };
 
   const handleRegister = async () => {
-    console.log({
-      nickname: state.nickname,
-      password: state.password,
-      confirmPassword: state.confirmPassword,
-      email: state.email,
-      verificationCode: state.verificationCode,
-    });
+    // console.log({
+    //   nickname: state.nickname,
+    //   password: state.password,
+    //   confirmPassword: state.confirmPassword,
+    //   email: state.email,
+    //   verificationCode: state.verificationCode,
+    // });
     // 모든 필수 필드 검사
     const errors = {};
     if (!state.nickname) errors.nicknameMessage = '필수 입력 항목입니다';
@@ -265,7 +225,7 @@ function Register() {
         nickname: state.nickname,
         password: state.password,
         email: state.email,
-        verificationCode: state.verificationCode,
+        code: state.verificationCode,
       };
 
       await registerUser(formData);
@@ -274,7 +234,7 @@ function Register() {
         verificationCodeMessage:
           'Registration successful. Redirecting to login page...',
       }));
-      setTimeout(() => navigate('/login'), 2000);
+      setTimeout(() => props.route('/login'), 2000);
     } catch (error) {
       setState((prev) => ({
         ...prev,
@@ -418,9 +378,10 @@ function Register() {
                   onClick={sendVerificationCode}
                   style={verificationButtonStyle}
                 >
-                  {state.showVerificationSection ? '인증 재요청' : '인증 요청'}
+                  {isTimerRunning ? '인증 재요청' : '인증 요청'}
                 </button>
               </div>
+
               {state.emailMessage && (
                 <div style={errorMessageStyle}>{state.emailMessage}</div>
               )}
@@ -451,10 +412,8 @@ function Register() {
                   style={inputStyle}
                   maxLength={6}
                 />
-                {state.isTimerRunning && state.timer > 0 && (
-                  <div style={timerStyle}>{formatTime(state.timer)}</div>
-                )}
               </div>
+              {isTimerRunning && <Timer />}
               {state.verificationCodeMessage && (
                 <div style={errorMessageStyle}>
                   {state.verificationCodeMessage}

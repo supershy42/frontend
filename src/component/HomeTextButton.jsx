@@ -1,4 +1,5 @@
-import Supereact from '../Supereact/core';
+/** @jsx Supereact.createElement */
+import Supereact from '../Supereact';
 
 function HomeTextButton({ text, onClick, type = 'button' }) {
   const [isHover, setIsHover] = Supereact.useState(false);
@@ -58,7 +59,7 @@ function HomeTextButton({ text, onClick, type = 'button' }) {
         cursor: 'pointer',
       }}
     >
-      <>
+      <div>
         {isHover && (
           <img
             src="/public/images/left_arrow.png"
@@ -67,7 +68,7 @@ function HomeTextButton({ text, onClick, type = 'button' }) {
             height={48}
           />
         )}
-      </>
+      </div>
       <button
         style={isHover ? hoverStyle : defaultStyle}
         onMouseEnter={handleMouseEnter}
@@ -77,7 +78,7 @@ function HomeTextButton({ text, onClick, type = 'button' }) {
       >
         {text}
       </button>
-      <>
+      <div>
         {isHover && (
           <img
             src="/public/images/right_arrow.png"
@@ -86,7 +87,7 @@ function HomeTextButton({ text, onClick, type = 'button' }) {
             height={48}
           />
         )}
-      </>
+      </div>
     </div>
   );
 }
