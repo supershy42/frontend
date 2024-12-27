@@ -3,7 +3,7 @@ import Supereact from './Supereact';
 
 let prevEventListener = null;
 
-const useRouter = () => {
+export const useRouter = () => {
   const [path, setPath] = Supereact.useState(location.pathname);
   const route = (newPath, state) => {
     if (newPath !== path) {
@@ -84,6 +84,18 @@ const RouterIn = (props) => {
 export const Router = (props) => {
   const routes = props.children.filter((ch) => ch.props.path);
   return <RouterIn routes={routes}>{props.children[0].children}</RouterIn>;
+};
+
+let routerInstance = null;
+
+export const setRouterInstance = (route) => {
+  routerInstance = route;
+};
+
+export const navigate = (path) => {
+  if (routerInstance) {
+    routerInstance(path);
+  }
 };
 
 export default Router;

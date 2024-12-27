@@ -1,7 +1,7 @@
-/** @jsx Supereact.createElement */
+/** @jsx ftReact.createElement */
 import Binky from '../component/Binky.jsx';
 import HomeTextButton from '../component/HomeTextButton.jsx';
-import Supereact from '../Supereact/index.js';
+import ftReact from '../Supereact/index.js';
 
 const centerStyle = {
   width: '100%',
@@ -26,7 +26,7 @@ const bingkyContainerStyle = {
 };
 
 function Home(props) {
-  const [isLogin, setIsLogin] = Supereact.useState(
+  const [isLogin, setIsLogin] = ftReact.useState(
     !!localStorage.getItem('access')
   );
 
@@ -35,13 +35,21 @@ function Home(props) {
       props.route('/register');
     } else if (action === 'Login') {
       props.route('/login');
-    } else if (action === 'Logout') {
-      localStorage.removeItem('access');
-      document.cookie =
-        'refresh=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-      setIsLogin(false);
-      props.route('/');
+    } else if (action === 'CreateGame') {
+      props.route('/create-game');
+    } else if (action === 'SearchGame') {
+      props.route('/search-game');
+    } else if (action === 'PlayerOption') {
+      props.route('/player-option');
     }
+
+    // else if (action === 'Logout') {
+    //   localStorage.removeItem('access');
+    //   document.cookie =
+    //     'refresh=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    //   setIsLogin(false);
+    //   props.route('/');
+    // }
   };
 
   return (

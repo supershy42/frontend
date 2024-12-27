@@ -1,4 +1,4 @@
-import Router from '../router';
+import { navigate } from '../router.jsx';
 
 let isRefreshing = false;
 let failedQueue = [];
@@ -28,7 +28,7 @@ const autoFetch = async (url, options = {}) => {
 
     const response = await fetch(url, options);
 
-    if ((response.status = 401)) {
+    if ((response.status === 401)) {
       // 이미 토큰 갱신 중이면 현재 요청을 대기열에 추가
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -67,7 +67,7 @@ const autoFetch = async (url, options = {}) => {
         localStorage.removeItem('access');
         document.cookie =
           'refresh=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        Router.instance.navigate('/login');
+        navigate('/login');
         throw error;
       } finally {
         isRefreshing = false;
@@ -84,3 +84,5 @@ const autoFetch = async (url, options = {}) => {
     throw error;
   }
 };
+
+export default autoFetch;

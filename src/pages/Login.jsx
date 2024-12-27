@@ -1,6 +1,7 @@
 /** @jsx Supereact.createElement */
 import Supereact from '../Supereact/index.js';
 import { loginUser } from '../api/userApi.js';
+import Bunnies from '../component/Bunnies.jsx';
 import HomeTextButton from '../component/HomeTextButton.jsx';
 
 const loginPageStyle = {
@@ -106,6 +107,11 @@ function Login(props) {
       const data = await loginUser(formData);
       document.cookie = `refresh=${data.refresh}; path=/; secure: HttpOnly`;
       localStorage.setItem('access', data.access);
+      // user id 해독
+      const payload = data.access.split('.')[1];
+      const decodedPayload = atob(payload);
+      const userId = JSON.parse(decodedPayload).user_id;
+      localStorage.setItem('user_id', userId);
       setLoginMessage('Login successful. Redirecting to home page...');
       setTimeout(() => props.route('/'), 2000);
     } catch (error) {
@@ -116,33 +122,7 @@ function Login(props) {
   return (
     <div style={loginPageStyle}>
       <div style={centerBlockStyle}>
-        <div
-          style={{
-            display: 'flex',
-            height: '46.5px',
-            alignItems: 'flex-start',
-            gap: '80px',
-          }}
-        >
-          <img
-            src="/public/images/bunny.png"
-            alt="bunny"
-            width="50"
-            height="46.5"
-          />
-          <img
-            src="/public/images/bunny.png"
-            alt="bunny"
-            width="50"
-            height="46.5"
-          />
-          <img
-            src="/public/images/bunny.png"
-            alt="bunny"
-            width="50"
-            height="46.5"
-          />
-        </div>
+        <Bunnies />
         <form id="login-form" style={formStyle}>
           <div style={fieldStyle}>
             <label htmlFor="email" style={labelStyle}>
