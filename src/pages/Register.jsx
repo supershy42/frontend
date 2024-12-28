@@ -1,6 +1,7 @@
 /** @jsx Supereact.createElement */
 import Supereact from '../Supereact/index.js';
 import { checkNickname, registerUser, verifyEmail } from '../api/userApi.js';
+import Bunnies from '../component/Bunnies.jsx';
 import HomeTextButton from '../component/HomeTextButton.jsx';
 import Timer from '../component/Timer.jsx';
 
@@ -246,33 +247,7 @@ function Register(props) {
   return (
     <div className="register_page" style={registerPageStyle}>
       <div style={centerBlockStyle}>
-        <div
-          style={{
-            display: 'flex',
-            height: '46.5px',
-            alignItems: 'flex-start',
-            gap: '80px',
-          }}
-        >
-          <img
-            src="/public/images/bunny.png"
-            alt="bunny"
-            width="50"
-            height="46.5"
-          />
-          <img
-            src="/public/images/bunny.png"
-            alt="bunny"
-            width="50"
-            height="46.5"
-          />
-          <img
-            src="/public/images/bunny.png"
-            alt="bunny"
-            width="50"
-            height="46.5"
-          />
-        </div>
+        <Bunnies />
         <form id="register-form" style={formStyle}>
           <div style={fieldStyle}>
             <label htmlFor="nickname" style={labelStyle}>

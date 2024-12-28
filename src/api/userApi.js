@@ -1,3 +1,5 @@
+import autoFetch from './autoFetch.js';
+
 const USER_API_URL = process.env.USER_API_URL;
 
 export const checkNickname = async (nickname) => {
@@ -66,4 +68,20 @@ export const loginUser = async (userData) => {
   }
 
   return data;
+};
+
+export const getUserInfo = async (userId) => {
+  try {
+    const data = await autoFetch(`${USER_API_URL}/user/${userId}/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    return data;
+  } catch (error) {
+    console.error('Get user info error:', error);
+    throw error;
+  }
 };

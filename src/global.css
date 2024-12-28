@@ -6,9 +6,14 @@
   box-sizing: border-box;
 }
 
-:root {
+html,
+body,
+#root {
   font-family: 'Jersey 10', 'Pretendard', -apple-system, BlinkMacSystemFont,
-    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+}
+
+:root {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -69,4 +74,70 @@ img {
 #root {
   width: 100%;
   height: 100%;
+}
+
+@keyframes blinking {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes glowing {
+  0% {
+    box-shadow: 0 0 5px #004fc6, 0 0 10px #004fc6, 0 0 15px #004fc6;
+  }
+  50% {
+    box-shadow: 0 0 10px #004fc6, 0 0 20px #004fc6, 0 0 30px #004fc6;
+  }
+  100% {
+    box-shadow: 0 0 5px #004fc6, 0 0 10px #004fc6, 0 0 15px #004fc6;
+  }
+}
+
+@keyframes blink {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes slideIn {
+  0% {
+    transform: translateX(-100%);
+  }
+  20% {
+    transform: translateX(0);
+  }
+  80% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
