@@ -186,22 +186,6 @@ export const getFriendRequests = async () => {
   }
 };
 
-export const getChatList = async (chatroomId) => {
-  try {
-    const data = await autoFetch(`${FRIEND_API_URL}/${chatroomId}/messages/`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    return data;
-  } catch (error) {
-    console.error('Get chat list error:', error);
-    throw error;
-  }
-};
-
 export const getChattingRoom = async (chatroom_id) => {
   try {
     const data = await autoFetch(`${CHAT_API_URL}/${chatroom_id}/messages/`, {

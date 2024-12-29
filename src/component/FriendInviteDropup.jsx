@@ -95,7 +95,7 @@ const FriendInviteDropup = ({ show, onClose }) => {
           {friends.map(
             (friend) =>
               friend.is_online && (
-                <div key={friend.friend_id} style={friendItemStyle}>
+                <div key={friend.id} style={friendItemStyle}>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <div style={onlineIndicatorStyle} />
                     <span>{friend.nickname}</span>
@@ -107,7 +107,7 @@ const FriendInviteDropup = ({ show, onClose }) => {
                       color: '#004FC6',
                       cursor: 'pointer',
                     }}
-                    onClick={() => handleInvite(friend.frend_id)}
+                    onClick={() => handleInvite(friend.id)}
                   >
                     <i className="fas fa-paper-plane"></i>
                   </button>
