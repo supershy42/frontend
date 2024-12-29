@@ -35,7 +35,7 @@ export const joinReception = async (joinData) => {
       }
     );
 
-    return data; // WebSocket URL + token
+    return data;
   } catch (error) {
     console.error('Join reception error:', error);
     throw error;
@@ -59,4 +59,61 @@ export const getReceptionList = async (page) => {
     console.error('Get reception list error:', error);
     throw error;
   }
-}
+};
+
+export const inviteFriend = async (friend_id) => {
+  try {
+    const data = await autoFetch(`${GAME_API_URL}/reception/invite/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ to_user_id: friend_id }),
+    });
+
+    return data;
+  } catch (error) {
+    console.error('Invite friend error:', error);
+    throw error;
+  }
+};
+
+export const createTournament = async (tournamentData) => {
+  try {
+    const data = await autoFetch(`${GAME_API_URL}/tournament/create/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(tournamentData),
+    });
+
+    return data;
+  } catch (error) {
+    console.error('Create tournament error:', error);
+    throw error;
+  }
+};
+
+export const getTournamentList = async (page) => {
+  try {
+    const data = await autoFetch(
+      `${GAME_API_URL}/tournament/list/?page=${page}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    return data;
+  } catch (error) {
+    console.error('Get tournament list error:', error);
+    throw error;
+  }
+};
+
+export const getTournamentInfo = async (tournamentId) => {};
+
+export const joinTournament = async (joinData) => {};

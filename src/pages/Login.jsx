@@ -1,8 +1,9 @@
 /** @jsx Supereact.createElement */
 import Supereact from '../Supereact/index.js';
-import { loginUser } from '../api/userApi.js';
+import { getFriendRequests, loginUser } from '../api/userApi.js';
 import Bunnies from '../component/Bunnies.jsx';
 import HomeTextButton from '../component/HomeTextButton.jsx';
+import { addFriendRequest, initNotification } from '../utils/store.js';
 
 const loginPageStyle = {
   width: '100%',
@@ -83,19 +84,32 @@ const inputStyle = {
   outline: 'none',
 };
 
-const errorMessageStyle = {
+const messageStyle = {
   fontSize: '13px',
   fontFamily: 'Pretendard',
-  color: 'rgba(198, 0, 3, 0.64)',
   marginTop: '4px',
 };
 
 function Login(props) {
-  const [loginMessage, setLoginMessage] = Supereact.useState('');
+  const [loginStatus, setLoginStatus] = Supereact.useState({
+    message: '',
+    error: false,
+  });
   const [state, setState] = Supereact.useState({
     email: '',
     password: '',
   });
+
+  const processLoginSuccess = async (data) => {
+    document.cookie = `refresh=${data.refresh}; path=/; secure: HttpOnly`;
+    localStorage.setItem('access', data.access);
+    localStorage.setItem('refresh', data.refresh);
+    localStorage.setItem('user_id', data.id);
+    localStorage.setItem('nickname', data.nickname);
+    localStorage.setItem('email', data.email);
+    localStorage.setItem('avatar', data.avatar);
+    initNotification();
+  };
 
   const handleLogin = async () => {
     const formData = {
@@ -105,17 +119,25 @@ function Login(props) {
 
     try {
       const data = await loginUser(formData);
-      document.cookie = `refresh=${data.refresh}; path=/; secure: HttpOnly`;
-      localStorage.setItem('access', data.access);
-      // user id 해독
-      const payload = data.access.split('.')[1];
-      const decodedPayload = atob(payload);
-      const userId = JSON.parse(decodedPayload).user_id;
-      localStorage.setItem('user_id', userId);
-      setLoginMessage('Login successful. Redirecting to home page...');
+      await processLoginSuccess(data);
+      setLoginStatus({
+        message: 'Login successful. Redirecting to home page...',
+        error: false,
+      });
+
+      const friendRequests = await getFriendRequests();
+      if (friendRequests.message?.length > 0) {
+        friendRequests.message.forEach((request) => {
+          console.log('addFriendRequest', request);
+          addFriendRequest(request);
+        });
+      }
       setTimeout(() => props.route('/'), 2000);
     } catch (error) {
-      setLoginMessage('Login failed. Please check your email and password.');
+      setLoginStatus({
+        message: 'Login failed. Please check your email and password.',
+        error: true,
+      });
     }
   };
 
@@ -164,8 +186,15 @@ function Login(props) {
               </div>
             </div>
           </div>
-          <span className="message" style={errorMessageStyle}>
-            {loginMessage}
+          <span
+            className="message"
+            style={
+              loginStatus.error
+                ? { ...messageStyle, color: 'rgba(198, 0, 3, 0.64)' }
+                : { ...loginStatus, color: 'rgba(0, 102, 198, 0.32)' }
+            }
+          >
+            {loginStatus.message}
           </span>
           <HomeTextButton text="LOGIN" onClick={handleLogin} />
         </form>

@@ -141,3 +141,7 @@ img {
     transform: translateX(100%);
   }
 }
+
+*::placeholder {
+  color: rgba(0, 79, 198, 0.50)
+}
