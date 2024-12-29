@@ -1,9 +1,18 @@
 /** @jsx Supereact.createElement */
 import Supereact from '../Supereact';
+import { useStore } from '../utils/useStore';
 
-const Binky = ({ isOn }) => {
+const Binky = ({ onClick }) => {
+  const { friendRequests, gameInvites, roundStartAlert, tournamentEndAlert } =
+    useStore();
+  const isOn =
+    friendRequests.length ||
+    gameInvites.length ||
+    roundStartAlert.length ||
+    tournamentEndAlert.length;
+
   return (
-    <button>
+    <button onClick={onClick}>
       <img
         src={isOn ? '/public/images/binky_on.png' : '/public/images/binky.png'}
         alt="bingky"

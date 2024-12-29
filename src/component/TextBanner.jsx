@@ -17,6 +17,7 @@ const textStyle = {
   `,
   fontSize: '48px',
   fontWeight: '400',
+  margin: '0',
 };
 
 const TextBanner = ({ text, width }) => {

@@ -1,11 +1,10 @@
 /** @jsx Supereact.createElement */
 import Supereact from '../../Supereact/index.js';
 import TextBanner from '../../component/TextBanner.jsx';
-import JoinGameModal from './JoinGameModal.jsx';
-import { getReceptionList, joinReception } from '../../api/gameApi.js';
+import { getTournamentList } from '../../api/gameApi.js';
 
 const centerBlockStyle = {
-  position: 'relative',
+    position: 'relative',
   display: 'flex',
   width: '700px',
   padding: '80px 62.5px',
@@ -41,56 +40,27 @@ const blankBox = {
   fontSize: '24px',
 };
 
-const SearchGame = (props) => {
-  const [gameList, setGameList] = Supereact.useState([]);
+const SearchTournament = (props) => {
+  const [tournamentList, setTournamentList] = Supereact.useState(null);
   const [currentPage, setCurrentPage] = Supereact.useState(1);
-  const [selectedGame, setSelectedGame] = Supereact.useState(null);
 
-  const fetchGameList = async (page) => {
+  const fetchTournamentList = async (page) => {
     try {
-      const response = await getReceptionList(page);
-      setGameList(response);
+      const response = await getTournamentList(page);
+      setTournamentList(response);
     } catch (error) {
-      console.error('Failed to fetch game list:', error);
+      console.error('Failed to fetch tournament list:', error);
     }
   };
 
   Supereact.useEffect(() => {
     console.log('SearchGame mounted');
-    fetchGameList(1);
+    fetchTournamentList(1);
   }, []);
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
-    fetchGameList(newPage);
-  };
-
-  const handleCardClick = (game) => {
-    setSelectedGame(game);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedGame(null);
-  };
-
-  const handleJoinGame = async (password) => {
-    console.log('handleJoinGame');
-    if (!selectedGame) return;
-    try {
-      const joinData = {
-        receptionId: selectedGame.id,
-      };
-
-      if (password) {
-        joinData.password = password;
-      }
-
-      const response = await joinReception(joinData);
-      setSelectedGame(null);
-      props.route(`/reception/${selectedGame.id}`);
-    } catch (error) {
-      alert('Failed to join game:', error);
-    }
+    fetchTournamentList(newPage);
   };
 
   return (
@@ -104,7 +74,7 @@ const SearchGame = (props) => {
       }}
     >
       <div style={centerBlockStyle}>
-        <button
+      <button
           type="button"
           class="btn"
           style={{
@@ -122,19 +92,19 @@ const SearchGame = (props) => {
         >
           <i className="fas fa-home"></i>
         </button>
-        <TextBanner text="Search Game" width={370} />
+        <TextBanner text="Search Tournament" width={370} />
         <div style={listContainerStyle}>
           <div style={buttonContainerStyle}>
             <button
               className="btn btn-transparent me-2"
               style={{ fontSize: '20px', color: '#004FC6' }}
-              onClick={() => props.route('/create-game')}
+              onClick={() => props.route('/create-tournament')}
             >
-              Create Game
+              Create Tournament
             </button>
             <button
               className="btn btn-transparent"
-              onClick={() => fetchGameList(currentPage)}
+              onClick={() => fetchTournamentList(currentPage)}
               style={{
                 background: 'transparent',
                 border: 'none',
@@ -145,39 +115,35 @@ const SearchGame = (props) => {
             </button>
           </div>
 
-          {/* 게임 리스트 */}
-          {gameList?.results ? (
-            gameList.results.map((game) => (
+          {/* 토너먼트 리스트 */}
+          {tournamentList?.results ? (
+            tournamentList.results.map((tournament) => (
               <div
-                key={game.id}
+                key={tournament.id}
                 className="card"
                 style={{ cursor: 'pointer' }}
-                onClick={() => handleCardClick(game)}
+                onClick={() => props.route(`/tournament/${tournament.id}`)}
               >
                 <div className="card-body d-flex justify-content-between align-items-center">
-                  <h5 className="card-title mb-0">{game.name}</h5>
-                  {game.has_password ? (
-                    <span className="badge bg-warning">Password</span>
-                  ) : (
-                    <span className="badge bg-success">Open</span>
-                  )}
+                  <h5 className="card-title mb-0">{tournament.name}</h5>
+                  <span className="badge bg-success">View</span>
                 </div>
               </div>
             ))
           ) : (
-            <div style={blankBox}>No game found.</div>
+            <div style={blankBox}>No tournament found.</div>
           )}
 
           {/* 페이지네이션 */}
           <nav aria-label="Game list pagination">
             <ul className="pagination justify-content-center">
               <li
-                className={`page-item ${!gameList?.previous ? 'disabled' : ''}`}
+                className={`page-item ${!tournamentList?.previous ? 'disabled' : ''}`}
               >
                 <button
                   className="page-link"
                   onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={!gameList?.previous}
+                  disabled={!tournamentList?.previous}
                 >
                   Previous
                 </button>
@@ -185,11 +151,11 @@ const SearchGame = (props) => {
               <li className="page-item disabled">
                 <button className="page-link">{currentPage}</button>
               </li>
-              <li className={`page-item ${!gameList?.next ? 'disabled' : ''}`}>
+              <li className={`page-item ${!tournamentList?.next ? 'disabled' : ''}`}>
                 <button
                   className="page-link"
                   onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={!gameList?.next}
+                  disabled={!tournamentList?.next}
                 >
                   Next
                 </button>
@@ -198,15 +164,8 @@ const SearchGame = (props) => {
           </nav>
         </div>
       </div>
-      {selectedGame && (
-        <JoinGameModal
-          game={selectedGame}
-          onClose={handleCloseModal}
-          onJoin={handleJoinGame}
-        />
-      )}
     </div>
   );
 };
 
-export default SearchGame;
+export default SearchTournament;

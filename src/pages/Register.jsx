@@ -94,7 +94,7 @@ const errorMessageStyle = {
   left: '12px',
   fontSize: '13px',
   fontFamily: 'Pretendard',
-  color: 'rgba(198, 0, 3, 0.64)',
+  color: 'rgba(0, 102, 198, 0.32)',
   marginTop: '4px',
 };
 
@@ -148,9 +148,14 @@ function Register(props) {
         nicknameMessage: '',
       }));
     } catch (error) {
+      console.log(error);
+      const errmessage =
+        error.status === 409
+          ? 'Nickname is already in use.'
+          : 'Failed to check nickname';
       setState((prev) => ({
         ...prev,
-        nicknameMessage: error.message,
+        nicknameMessage: errmessage,
       }));
     }
   };
@@ -183,10 +188,19 @@ function Register(props) {
       setIsTimerRunning(false);
       setTimeout(() => setIsTimerRunning(true), 0);
     } catch (error) {
-      setState((prev) => ({
-        ...prev,
-        emailMessage: error.message,
-      }));
+      console.log(error.status);
+      if (error.status === 409) {
+        setState((prev) => ({
+          ...prev,
+          emailMessage: '이미 가입된 이메일입니다',
+        }));
+        return;
+      } else {
+        setState((prev) => ({
+          ...prev,
+          emailMessage: '인증 코드 전송에 실패했습니다',
+        }));
+      }
     }
   };
 

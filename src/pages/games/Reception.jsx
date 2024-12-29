@@ -1,8 +1,12 @@
 /** @jsx Supereact.createElement */
 import HomeTextButton from '../../component/HomeTextButton';
 import LoadingDots from '../../component/LoadingDots.jsx';
+import ReceptionHandler from '../../component/ReceptionHandler.jsx';
 import TextBanner from '../../component/TextBanner.jsx';
 import Supereact from '../../Supereact/index.js';
+import FriendInviteDropup from '../../component/FriendInviteDropup.jsx';
+
+const IMG_URL = process.env.IMG_URL;
 
 const pageContainerStyle = {
   position: 'relative',
@@ -116,87 +120,72 @@ const gameBannerStyle = {
 };
 
 const Reception = (props) => {
-  const [isConnected, setIsConnected] = Supereact.useState(false);
-  const [receptionId, setReceptionId] = Supereact.useState(history.state.id);
+  const [gameState, setGameState] = Supereact.useState({
+    isConnected: false,
+    myself: null,
+    player: null,
+    readyToStart: false,
+  });
+
   const [socket, setSocket] = Supereact.useState(null);
-  const [readyToStart, setReadyToStart] = Supereact.useState(false);
 
-  const [myself, setMyself] = Supereact.useState(null);
-  const [player, setPlayer] = Supereact.useState(null);
+  const [showInvite, setShowInvite] = Supereact.useState(false);
 
-  Supereact.useEffect(() => {
-    console.log('room id:', receptionId);
-
-    // WebSocket 연결 설정
-    const token = localStorage.getItem('access');
-    if (token === null) {
-      console.error('유효하지 않은 접근입니다.');
-      props.route('/');
+  const handleReadyClick = () => {
+    if (socket && socket.readyState === WebSocket.OPEN && gameState.myself) {
+      socket.send(
+        JSON.stringify({
+          type: 'ready',
+          is_ready: !gameState.myself.is_ready,
+        })
+      );
     }
+  };
 
-    const ws = new WebSocket(
-      `ws://localhost:8003/ws/reception/${receptionId}/?token=${token}`
-    );
-
-    ws.onopen = () => {
-      console.log('WebSocket Connected');
-      setIsConnected(true);
-    };
-
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      console.log('Received:', data);
-      if (data.type === 'participants') {
-        const participants = data.message;
-        participants.forEach((participant) => {
-          if (participant.user_id === localStorage.getItem('user_id')) {
-            setMyself(participant);
-          } else {
-            setPlayer(participant);
-          }
-        });
-      } else if (data.type === 'move') {
-        setReadyToStart(true);
-        setInterval(() => {
-          props.route(`/arena/${receptionId}`);
-        }, 2000);
-      }
-    };
-
-    ws.onerror = (error) => {
-      console.error('WebSocket Error:', error);
-      setIsConnected(false);
-      // alert('Failed to connect to the server. Please try again later.');
-      // props.route('/search-game');
-    };
-
-    ws.onclose = () => {
-      console.log('WebSocket Disconnected');
-      setIsConnected(false);
-    };
-
-    setSocket(ws);
-
-    // 컴포넌트 언마운트 시 연결 종료
-    return () => {
-      if (ws) {
-        ws.close();
-      }
-    };
-  }, []);
+  const handleStateChange = (action) => {
+    switch (action.type) {
+      case 'connection':
+        console.log('connection', action.isConnected);
+        setGameState((prev) => ({ ...prev, isConnected: action.isConnected }));
+        break;
+      case 'participants':
+        console.log('participants', action.myself, action.player);
+        setGameState((prev) => ({
+          ...prev,
+          myself: action.myself,
+          player: action.player,
+        }));
+        break;
+      case 'gameStart':
+        setGameState((prev) => ({ ...prev, readyToStart: true }));
+        if (action.readyToStart) {
+          setTimeout(() => {
+            props.route(`/arena/${history.state.id}`);
+          }, 2000);
+        }
+        break;
+    }
+  };
 
   return (
     <div style={pageContainerStyle}>
+      <ReceptionHandler
+        receptionId={history.state.id}
+        onStateChange={handleStateChange}
+        onSocketReady={setSocket}
+      />
       <TextBanner text="Waiting Room" width={500} />
       <div style={mainContainerStyle}>
-        {myself ? (
+        {gameState.myself ? (
           <div style={playerContainerStyle}>
             <div
               style={
-                myself.is_ready ? readyProfileStyle : profileContainerStyle
+                gameState.myself.is_ready
+                  ? readyProfileStyle
+                  : profileContainerStyle
               }
             >
-              {myself.is_ready ? (
+              {gameState.myself.is_ready ? (
                 <div style={speechBubbleStyle}>
                   Ready!
                   <div style={speechBubbleAfter}></div>
@@ -210,26 +199,28 @@ const Reception = (props) => {
               )}
               <img
                 src={
-                  myself.avatar
-                    ? myself.avatar
-                    : '/public/images/Woorim_Profile.png'
+                  gameState.myself.avatar
+                    ? `${IMG_URL}${gameState.myself.avatar}`
+                    : '/public/images/Spark_Profile.png'
                 }
                 alt="profile_img"
                 width="200px"
                 height="200px"
               />
             </div>
-            <h2>{myself.user_name}</h2>
+            <h2>{gameState.myself.user_name}</h2>
           </div>
         ) : null}
-        {player ? (
+        {gameState.player ? (
           <div style={playerContainerStyle}>
             <div
               style={
-                player.is_ready ? readyProfileStyle : profileContainerStyle
+                gameState.player.is_ready
+                  ? readyProfileStyle
+                  : profileContainerStyle
               }
             >
-              {player.is_ready ? (
+              {gameState.player.is_ready ? (
                 <div style={speechBubbleStyle}>
                   Ready!
                   <div style={speechBubbleAfter}></div>
@@ -243,27 +234,42 @@ const Reception = (props) => {
               )}
               <img
                 src={
-                  player.avatar
-                    ? player.avatar
+                  gameState.player.avatar
+                    ? `${IMG_URL}${gameState.player.avatar}`
                     : '/public/images/Spark_Profile.png'
                 }
                 alt="profile_img"
                 width="200px"
               />
             </div>
-            <h2>{player.user_name}</h2>
+            <h2>{gameState.player.user_name}</h2>
           </div>
         ) : null}
       </div>
-      {player && myself ? (
-        <HomeTextButton text={myself.is_ready ? 'Cancel Ready' : 'Get Ready'} />
+      {gameState.player && gameState.myself ? (
+        <HomeTextButton
+          text={gameState.myself.is_ready ? 'Cancel Ready' : 'Get Ready'}
+          onClick={() => handleReadyClick()}
+        />
       ) : (
         <p style={blinkingText}>
           Waiting for another player
           <LoadingDots />
         </p>
       )}
-      {readyToStart && (
+      <div style={{ position: 'absolute', bottom: '50px' }}>
+        <button
+          class="btn btn-outline-dark"
+          onClick={() => setShowInvite(!showInvite)}
+        >
+          Invite Friend
+        </button>
+        <FriendInviteDropup
+          show={showInvite}
+          onClose={() => setShowInvite(false)}
+        />
+      </div>
+      {gameState.readyToStart && (
         <div style={gameBannerContainerStyle}>
           <div style={gameBannerStyle}>GAME START!</div>
         </div>

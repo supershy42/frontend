@@ -1,5 +1,5 @@
 /** @jsx Supereact.createElement */
-import { createReception, joinReception } from '../../api/gameApi';
+import { createReception, createTournament, joinReception } from '../../api/gameApi';
 import Bunnies from '../../component/Bunnies';
 import HomeTextButton from '../../component/HomeTextButton';
 import Supereact from '../../Supereact/index.js';
@@ -83,17 +83,29 @@ const errorMessageStyle = {
   marginTop: '4px',
 };
 
-function CreateGame(props) {
+const descriptionStyle = {
+    fontFamily: 'Pretendard',
+    fontSize: '14px',
+    color: 'rgba(0, 79, 198, 0.60)',
+    marginTop: '8px',
+    textAlign: 'right',
+};
+  
+  // fieldStyle을 수정해서 설명을 포함할 수 있도록
+  const fieldContainerStyle = {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
+  };
+
+function CreateTournament(props) {
   const [name, setName] = Supereact.useState('');
   const [password, setPassword] = Supereact.useState('');
   const [errorMessage, setErrorMessage] = Supereact.useState('');
 
   const handleNameChange = (e) => {
     setName(e.target.value);
-  };
-
-  const handlePasswordChange = (e) => {
-    setPassword(e.target.value);
   };
 
   const handleSubmit = async (e) => {
@@ -103,25 +115,12 @@ function CreateGame(props) {
     const formData = {
       name,
     };
-    if (password) {
-      formData.password = password;
-    }
 
     try {
       const response = await createReception(formData);
       console.log(response);
-      const receptionId = response.id;
-
-      const joinData = {
-        receptionId,
-      };
-      if (password) {
-        joinData.password = password;
-      }
-      const joinResponse = await joinReception(joinData);
-      console.log(joinResponse);
-
-      props.route(`/reception/${receptionId}`);
+      const tournamentId = response.id;
+      props.route(`/tournament/${tournamentId}`);
     } catch (error) {
       console.error(error);
     }
@@ -139,52 +138,42 @@ function CreateGame(props) {
     >
       <div style={centerBlockStyle}>
         <button
-            type="button"
-            class="btn-close"
-            aria-label="Close"
-            style={{
-              position: 'absolute',
-              top: '35px',
-              right: '32px',
-            }}
-            onClick={() => {
-              if (history.state?.from?.path) {
-                props.route(history.state.from.path);
-              } else {
-                props.route('/');
-              }
-            }}
-          ></button>
+          type="button"
+          class="btn-close"
+          aria-label="Close"
+          style={{
+            position: 'absolute',
+            top: '35px',
+            right: '32px',
+          }}
+          onClick={() => {
+            if (history.state?.from?.path) {
+              props.route(history.state.from.path);
+            } else {
+              props.route('/');
+            }
+          }}
+        ></button>
         <Bunnies />
         <form style={formStyle} onSubmit={handleSubmit}>
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Game Name</label>
-            <div style={inputFieldContainerStyle}>
-              <div style={textFieldsStyle}>
-                <input
-                  type="text"
-                  style={inputStyle}
-                  value={name}
-                  onChange={handleNameChange}
-                  maxLength={20}
-                  required
-                />
+          <div style={fieldContainerStyle}>
+            <div style={fieldStyle}>
+              <label style={labelStyle}>Tournament Name</label>
+              <div style={inputFieldContainerStyle}>
+                <div style={textFieldsStyle}>
+                  <input
+                    type="text"
+                    style={inputStyle}
+                    value={name}
+                    onChange={handleNameChange}
+                    maxLength={20}
+                    required
+                  />
+                </div>
               </div>
             </div>
-          </div>
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Password</label>
-            <div style={inputFieldContainerStyle}>
-              <div style={textFieldsStyle}>
-                <input
-                  type="password"
-                  style={inputStyle}
-                  value={password}
-                  onChange={handlePasswordChange}
-                  maxLength={20}
-                  placeholder="비밀번호는 선택사항입니다"
-                />
-              </div>
+            <div style={descriptionStyle}>
+              4명의 플레이어가 모여 2라운드의 토너먼트를 진행합니다
             </div>
           </div>
           <span className="message" style={errorMessageStyle}></span>
@@ -195,4 +184,4 @@ function CreateGame(props) {
   );
 }
 
-export default CreateGame;
+export default CreateTournament;

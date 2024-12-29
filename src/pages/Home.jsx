@@ -1,6 +1,7 @@
 /** @jsx ftReact.createElement */
 import Binky from '../component/Binky.jsx';
 import HomeTextButton from '../component/HomeTextButton.jsx';
+import Supereact from '../Supereact/index.js';
 import ftReact from '../Supereact/index.js';
 
 const centerStyle = {
@@ -30,6 +31,8 @@ function Home(props) {
     !!localStorage.getItem('access')
   );
 
+  Supereact.useEffect(() => {}, []);
+
   const handleClick = (action) => {
     if (action === 'Register') {
       props.route('/register');
@@ -39,6 +42,10 @@ function Home(props) {
       props.route('/create-game');
     } else if (action === 'SearchGame') {
       props.route('/search-game');
+    } else if (action === 'CreateTournament') {
+      props.route('/create-tournament');
+    } else if (action === 'SearchTournament') {
+      props.route('/search-tournament');
     } else if (action === 'PlayerOption') {
       props.route('/player-option');
     }
@@ -72,6 +79,14 @@ function Home(props) {
                 onClick={() => handleClick('SearchGame')}
               />
               <HomeTextButton
+                text="Create Tournament"
+                onClick={() => handleClick('CreateTournament')}
+              />
+              <HomeTextButton
+                text="Search Tournament"
+                onClick={() => handleClick('SearchTournament')}
+              />
+              <HomeTextButton
                 text="Player Option"
                 onClick={() => handleClick('PlayerOption')}
               />
@@ -91,7 +106,9 @@ function Home(props) {
         </div>
       </div>
       <div style={bingkyContainerStyle}>
-        {isLogin && <Binky isOn={false} />}
+        {isLogin && (
+          <Binky isOn={false} onClick={() => props.route('/chatting')} />
+        )}
       </div>
     </div>
   );
