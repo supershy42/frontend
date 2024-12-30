@@ -6,6 +6,8 @@ import AlertCookie from '../component/AlertCookie';
 import ChatRoom from '../component/ChatRoom.jsx';
 import HandleFriendList from '../component/HandleFriendList.jsx';
 
+const IMG_URL = process.env.IMG_URL;
+
 const pageStyle = {
   width: '100%',
   height: '100%',
@@ -160,7 +162,7 @@ const FriendChat = (props) => {
     } catch (error) {
       setSearchResult({
         nickname: 'User not found',
-        avatar: 'https://via.placeholder.com/40',
+        avatar: 'public/avatars/Spark_profile.png',
       });
       console.error('Failed to search user:', error);
     }
@@ -321,7 +323,7 @@ const FriendChat = (props) => {
                     }}
                   >
                     <img
-                      src={searchResult.avatar}
+                      src={`${IMG_URL}${searchResult.avatar}`}
                       alt="user_avatar"
                       style={{ width: '40px', height: '40px' }}
                     />
@@ -387,7 +389,7 @@ const FriendChat = (props) => {
               <div style={friendItemStyle}>
                 <div style={avatarContainerStyle}>
                   <img
-                    src={friend.avatar}
+                    src={`${IMG_URL}${friend.avatar}`}
                     alt={friend.nickname}
                     style={avatarStyle}
                   />

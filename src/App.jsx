@@ -43,7 +43,7 @@ function App() {
       if (data.type === 'friend.request') {
         addFriendRequest(data.content);
       } else if (data.type === 'reception.invitation') {
-        addGameInvites(data);
+        addGameInvites(data.content);
       } else if (data.type === 'tournament.round.start') {
         addRoundStartAlert(data.content);
       } else if (data.type === 'tournament.end') {

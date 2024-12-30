@@ -1,10 +1,9 @@
 /** @jsx Supereact.createElement */
-// components/ChatRoom.jsx
 import Supereact from '../Supereact/index.js';
-import autoFetch from '../api/autoFetch.js';
 import { getChattingRoom } from '../api/userApi.js';
 
 const CHAT_WS_URL = process.env.CHAT_WS_URL;
+const IMG_URL = process.env.IMG_URL;
 
 const ChatRoom = ({ chatRoomId }) => {
   const [messages, setMessages] = Supereact.useState([]);
@@ -46,12 +45,12 @@ const ChatRoom = ({ chatRoomId }) => {
   const fetchMessages = async () => {
     try {
       const data = await getChattingRoom(chatRoomId);
-      console.log(data);
       setMessages(data);
       scrollToBottom();
     } catch (error) {
       console.error('Failed to fetch messages:', error);
     }
+    console.log('Messages:', messages);
   };
 
   // 웹소켓 연결 설정
@@ -68,7 +67,10 @@ const ChatRoom = ({ chatRoomId }) => {
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      setMessages((prev) => [...prev, data]);
+      if (data.type === 'chat.message') {
+        console.log('Received:', data);
+        setMessages((prev) => [...prev, data]);
+      }
       scrollToBottom();
     };
 
@@ -102,7 +104,6 @@ const ChatRoom = ({ chatRoomId }) => {
     if (!newMessage.trim()) return;
 
     if (socket) {
-      console.log('socket state :', socket.readyState);
       if (socket.readyState === WebSocket.OPEN) {
         socket.send(
           JSON.stringify({
@@ -148,7 +149,11 @@ const ChatRoom = ({ chatRoomId }) => {
     return (
       <div style={containerStyle}>
         {!isMine && (
-          <img src={message.avatar} alt={message.sender} style={avatarStyle} />
+          <img
+            src={`${IMG_URL}${avatar}`}
+            alt={message.sender}
+            style={avatarStyle}
+          />
         )}
         <div style={messageContentStyle}>
           {!isMine && (
@@ -178,7 +183,7 @@ const ChatRoom = ({ chatRoomId }) => {
       <div style={messagesContainerStyle}>
         {messages.map((message) => (
           <MessageBubble
-            key={message.id}
+            key={message.timestamp}
             message={message}
             isMine={message.sender === localStorage.getItem('nickname')}
           />
