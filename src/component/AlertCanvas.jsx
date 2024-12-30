@@ -113,9 +113,7 @@ const AlertCanvas = ({ props, show, onClose, refreshList }) => {
 
   const handleEnterGame = async (request) => {
     if (!request) return;
-    console.log('Enter game:', request.reception_id);
     try {
-      console.log('Joining game:', request.reception_id);
       const joinData = { receptionId: request.reception_id };
       const data = await joinReception(joinData);
       props.route(`/reception/${request.reception_id}`);
@@ -177,10 +175,7 @@ const AlertCanvas = ({ props, show, onClose, refreshList }) => {
                 <div style={textContainer}>
                   <p style={fromStyle}>{invite.inviter}</p>
                   <p style={contentText}>
-                    <span style={{ fontWeight: '600' }}>
-                      {invite.game_name}
-                    </span>
-                    에 초대되었습니다!
+                    게임에 초대되었습니다!
                   </p>
                 </div>
                 <div>

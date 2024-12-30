@@ -145,11 +145,9 @@ const Reception = (props) => {
   const handleStateChange = (action) => {
     switch (action.type) {
       case 'connection':
-        console.log('connection', action.isConnected);
         setGameState((prev) => ({ ...prev, isConnected: action.isConnected }));
         break;
       case 'participants':
-        console.log('participants', action.myself, action.player);
         setGameState((prev) => ({
           ...prev,
           myself: action.myself,

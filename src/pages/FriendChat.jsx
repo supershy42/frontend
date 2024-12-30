@@ -6,6 +6,8 @@ import AlertCookie from '../component/AlertCookie';
 import ChatRoom from '../component/ChatRoom.jsx';
 import HandleFriendList from '../component/HandleFriendList.jsx';
 
+const IMG_URL = process.env.IMG_URL;
+
 const pageStyle = {
   width: '100%',
   height: '100%',
@@ -152,7 +154,6 @@ const FriendChat = (props) => {
   const handleSearch = async () => {
     try {
       const data = await searchUser(searchQuery);
-      console.log(data);
       if (data) {
         setSearchResult(data);
         setShowSearchResults(true);
@@ -160,7 +161,7 @@ const FriendChat = (props) => {
     } catch (error) {
       setSearchResult({
         nickname: 'User not found',
-        avatar: 'https://via.placeholder.com/40',
+        avatar: 'public/avatars/Spark_profile.png',
       });
       console.error('Failed to search user:', error);
     }
@@ -170,10 +171,6 @@ const FriendChat = (props) => {
   const fetchFriendList = async () => {
     try {
       const data = await getFriendList();
-      console.log(data.message);
-      data.message.forEach((friend) => {
-        console.log(friend);
-      });
       setFriendList(data.message);
     } catch (error) {
       console.error('Failed to fetch friend list:', error);
@@ -275,7 +272,6 @@ const FriendChat = (props) => {
           </h2>
           <AlertCookie
             onClick={() => {
-              console.log('cookie clicked');
               setShowAlert(true);
             }}
           />
@@ -321,7 +317,7 @@ const FriendChat = (props) => {
                     }}
                   >
                     <img
-                      src={searchResult.avatar}
+                      src={`${IMG_URL}${searchResult.avatar}`}
                       alt="user_avatar"
                       style={{ width: '40px', height: '40px' }}
                     />
@@ -387,7 +383,7 @@ const FriendChat = (props) => {
               <div style={friendItemStyle}>
                 <div style={avatarContainerStyle}>
                   <img
-                    src={friend.avatar}
+                    src={`${IMG_URL}${friend.avatar}`}
                     alt={friend.nickname}
                     style={avatarStyle}
                   />

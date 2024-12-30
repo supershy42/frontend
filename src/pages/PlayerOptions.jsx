@@ -1,15 +1,16 @@
 /** @jsx Supereact.createElement */
 import Supereact from '../Supereact/index.js';
 import TextBanner from '../component/TextBanner.jsx';
-import autoFetch from '../api/autoFetch.js';
 import { modifyProfile } from '../api/userApi.js';
+
+const IMG_URL = process.env.IMG_URL;
 
 const defaultAvatars = [
   '/public/images/Spark_profile.png',
   '/public/images/Suhbaek_profile.png',
   '/public/images/Woorim_profile.png',
   '/public/images/Jooahn_profile.png',
-  '/public/images/Yeolee_profile.png'
+  '/public/images/Yeolee_profile.png',
 ];
 
 const pageContainerStyle = {
@@ -84,8 +85,12 @@ const rightPanelStyle = {
 };
 
 const PlayerOption = (props) => {
-  const [nickname, setNickname] = Supereact.useState(localStorage.getItem('nickname'));
-  const [currentAvatar, setCurrentAvatar] = Supereact.useState(defaultAvatars[0]);
+  const [nickname, setNickname] = Supereact.useState(
+    localStorage.getItem('nickname')
+  );
+  const [currentAvatar, setCurrentAvatar] = Supereact.useState(
+    `${IMG_URL}${localStorage.getItem('avatar')}`
+  );
   const [selectedAvatar, setSelectedAvatar] = Supereact.useState(null);
   const [isModified, setIsModified] = Supereact.useState(false);
 
@@ -124,8 +129,10 @@ const PlayerOption = (props) => {
       }
       formData.append('nickname', nickname);
 
-      await modifyProfile({formData});
-
+      const data = await modifyProfile(formData);
+      let avatar = data.avatar.split('/').slice(3).join('/');
+      avatar = '/' + avatar;
+      localStorage.setItem('avatar', avatar);
       setIsModified(false);
     } catch (error) {
       console.error('Failed to update profile:', error);
@@ -136,15 +143,23 @@ const PlayerOption = (props) => {
     <div style={pageContainerStyle}>
       <div style={leftPanelStyle}>
         <TextBanner text={nickname} width={370} />
-        <img src={currentAvatar} alt="Current Profile" style={profileImageStyle} />
-        
+        <img
+          src={`${currentAvatar}`}
+          alt="Current Profile"
+          style={profileImageStyle}
+        />
+
         <div style={avatarGridStyle}>
           {defaultAvatars.map((avatar, index) => (
             <img
               key={index}
               src={avatar}
               alt={`Avatar option ${index + 1}`}
-              style={selectedAvatar === avatar ? selectedAvatarStyle : avatarOptionStyle}
+              style={
+                selectedAvatar === avatar
+                  ? selectedAvatarStyle
+                  : avatarOptionStyle
+              }
               onClick={() => handleAvatarSelect(avatar)}
             />
           ))}
@@ -160,8 +175,8 @@ const PlayerOption = (props) => {
         </div>
 
         <button
-          onClick={handleSubmit}
-          disabled={!isModified}
+          type="button"
+          onClick={() => handleSubmit()}
           style={{
             padding: '10px 20px',
             backgroundColor: isModified ? '#004FC6' : 'rgba(0, 79, 198, 0.5)',
@@ -174,9 +189,7 @@ const PlayerOption = (props) => {
           Update Profile
         </button>
       </div>
-      <div style={rightPanelStyle}>
-        
-      </div>
+      <div style={rightPanelStyle}></div>
     </div>
   );
 };

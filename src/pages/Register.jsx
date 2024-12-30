@@ -129,7 +129,6 @@ function Register(props) {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log(name, value);
     setState((prev) => ({
       ...prev,
       [name]: value,
@@ -148,7 +147,6 @@ function Register(props) {
         nicknameMessage: '',
       }));
     } catch (error) {
-      console.log(error);
       const errmessage =
         error.status === 409
           ? 'Nickname is already in use.'
@@ -174,7 +172,6 @@ function Register(props) {
   };
 
   const sendVerificationCode = async () => {
-    console.log('sendVerificationCode');
     if (!state.email) {
       setState((prev) => ({
         ...prev,
@@ -188,7 +185,6 @@ function Register(props) {
       setIsTimerRunning(false);
       setTimeout(() => setIsTimerRunning(true), 0);
     } catch (error) {
-      console.log(error.status);
       if (error.status === 409) {
         setState((prev) => ({
           ...prev,

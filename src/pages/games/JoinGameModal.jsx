@@ -5,7 +5,6 @@ import Supereact from '../../Supereact/index.js';
 const JoinGameModal = ({ game, onClose, onJoin }) => {
   const [password, setPassword] = Supereact.useState('');
 
-  console.log('JoinGameModal', game);
   const handleSubmit = async () => {
     if (!game || (game.has_password && !password)) {
       alert('Please enter the password');
