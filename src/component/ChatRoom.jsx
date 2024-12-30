@@ -50,7 +50,6 @@ const ChatRoom = ({ chatRoomId }) => {
     } catch (error) {
       console.error('Failed to fetch messages:', error);
     }
-    console.log('Messages:', messages);
   };
 
   // 웹소켓 연결 설정
@@ -68,7 +67,6 @@ const ChatRoom = ({ chatRoomId }) => {
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.type === 'chat.message') {
-        console.log('Received:', data);
         setMessages((prev) => [...prev, data]);
       }
       scrollToBottom();

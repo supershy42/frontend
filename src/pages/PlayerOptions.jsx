@@ -118,7 +118,6 @@ const PlayerOption = (props) => {
       const formData = new FormData();
       // 선택된 이미지가 base64 문자열이라면 파일로 변환
       if (selectedAvatar.startsWith('data:')) {
-        console.log('selectedAvatar:', selectedAvatar);
         const response = await fetch(selectedAvatar);
         const blob = await response.blob();
         formData.append('avatar', blob, 'avatar.png');

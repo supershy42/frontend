@@ -128,7 +128,6 @@ function Login(props) {
       const friendRequests = await getFriendRequests();
       if (friendRequests.message?.length > 0) {
         friendRequests.message.forEach((request) => {
-          console.log('addFriendRequest', request);
           addFriendRequest(request);
         });
       }

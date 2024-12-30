@@ -154,7 +154,6 @@ const FriendChat = (props) => {
   const handleSearch = async () => {
     try {
       const data = await searchUser(searchQuery);
-      console.log(data);
       if (data) {
         setSearchResult(data);
         setShowSearchResults(true);
@@ -172,10 +171,6 @@ const FriendChat = (props) => {
   const fetchFriendList = async () => {
     try {
       const data = await getFriendList();
-      console.log(data.message);
-      data.message.forEach((friend) => {
-        console.log(friend);
-      });
       setFriendList(data.message);
     } catch (error) {
       console.error('Failed to fetch friend list:', error);
@@ -277,7 +272,6 @@ const FriendChat = (props) => {
           </h2>
           <AlertCookie
             onClick={() => {
-              console.log('cookie clicked');
               setShowAlert(true);
             }}
           />

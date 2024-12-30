@@ -56,7 +56,6 @@ const SearchGame = (props) => {
   };
 
   Supereact.useEffect(() => {
-    console.log('SearchGame mounted');
     fetchGameList(1);
   }, []);
 
@@ -74,7 +73,6 @@ const SearchGame = (props) => {
   };
 
   const handleJoinGame = async (password) => {
-    console.log('handleJoinGame');
     if (!selectedGame) return;
     try {
       const joinData = {
