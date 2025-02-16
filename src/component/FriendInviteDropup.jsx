@@ -107,7 +107,7 @@ const FriendInviteDropup = ({ show, onClose }) => {
                       color: '#004FC6',
                       cursor: 'pointer',
                     }}
-                    onClick={() => handleInvite(friend.id)}
+                    onClick={() => handleInvite(friend.friend_id)}
                   >
                     <i className="fas fa-paper-plane"></i>
                   </button>
