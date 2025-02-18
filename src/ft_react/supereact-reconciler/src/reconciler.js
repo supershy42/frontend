@@ -168,17 +168,16 @@ function workLoop(root, deadline) {
 function performUnitOfWork(fiber) {
   console.log('4. performUnitOfWork for:', fiber.type);
 
-  // 1. DOM 없으면 생성
-  if (!fiber.dom && fiber.type !== null && fiber.flags !== 'DELETION') {
-    fiber.dom = createDom(fiber);
+  const isFunctionComponent = typeof fiber.type === 'function';
+  if (isFunctionComponent) {
+    console.log('4-1. updateFunctionComponent for:', fiber.type);
+    updateFunctionComponent(fiber);
+  } else {
+    console.log('4-2. updateHostComponent for:', fiber.type);
+    updateHostComponent(fiber);
   }
 
-  // 2. children 처리
-  const elements = fiber.props?.children || [];
-
-  reconcileChildren(fiber, elements);
-
-  // 3. 다음 작업 단위 찾기 dfs
+  // 다음 작업 단위 찾기 dfs
   //   a. 자식이 있으면 자식으로 이동
   if (fiber.child) {
     return fiber.child;
@@ -194,6 +193,20 @@ function performUnitOfWork(fiber) {
   }
 
   return null;
+}
+
+function updateFunctionComponent(fiber) {
+  const children = [fiber.type(fiber.props)];
+  reconcileChildren(fiber, children);
+}
+
+function updateHostComponent(fiber) {
+  if (!fiber.dom && fiber.type !== null && fiber.flags !== 'DELETION') {
+    fiber.dom = createDom(fiber);
+  }
+
+  const elements = fiber.props?.children || [];
+  reconcileChildren(fiber, elements);
 }
 
 /**
