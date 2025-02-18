@@ -1,1 +1,1 @@
-export { updateContainer } from './src/reconciler.js';
+export { createFiberRoot, updateContainer } from './src/reconciler.js';

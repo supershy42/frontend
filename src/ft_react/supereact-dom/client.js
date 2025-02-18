@@ -1,4 +1,4 @@
-import { updateContainer } from '../supereact-reconciler/index.js';
+import { createFiberRoot, updateContainer } from '../supereact-reconciler/index.js';
 /**
  * 1. createRoot(): React 애플리케이션의 진입점을 생성, 컨테이너 DOM에 React를 마운트
  * 2. 생성된 root 객체의 render(): React 트리를 DOM에 렌더링
@@ -29,16 +29,14 @@ SupereactDomRoot.prototype.unmount = function () {
  * @returns {Object} 렌더와 언마운트 메서드를 가진 객체
  */
 export function createRoot(container) {
+  console.log('1. createRoot called with container:', container);
   if (!isValidContainer(container)) {
     throw new Error(
       'Target container is not a DOM element or Document Fragment'
     );
   }
 
-  const root = {
-    containerInfo: container,
-    current: null,
-  };
+  const root = createFiberRoot(container);
 
   return new SupereactDomRoot(root);
 }

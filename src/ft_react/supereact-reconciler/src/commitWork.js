@@ -1,50 +1,82 @@
-
 /**
  * Fiber 트리의 변경사항을 실제 DOM에 반영
  * 동기적 실행으로 중단될 수 없음
- * 
+ *
  * @param {Object} wipRoot - 작업이 완료된 Fiber 트리의 루트
  */
-function commitRoot(wipRoot) {
-  // 삭제된 노드들 처리
-  wipRoot.deletions.forEach(commitDeletion);
+function commitRoot(root) {
+  console.log('9. commitRoot called with root:', root);
+  const finishedWork = root.finishedWork;
+  if (!finishedWork) return;
 
-  // 변경된 노드들 처리
-  commitWork(wipRoot.child);
+  // 삭제된 노드들 처리
+  if (finishedWork.deletions) {
+    finishedWork.deletions.forEach(commitDeletion);
+  }
+
+  // // 루트 div를 컨테이너에 마운트
+  // if (finishedWork.child && finishedWork.child.dom) {
+  //   console.log('mounting root child:', finishedWork.child);
+  //   root.containerInfo.appendChild(finishedWork.child.dom);
+  // }
+
+  // 변경된 노드들 커밋
+  commitWork(finishedWork.child, root);
 
   // 현재 트리를 workInProgress 트리로 교체
-  currentRoot = wipRoot;
-  wipRoot = null;
+  console.log('10. committing finished, new current:', finishedWork);
+  root.current = finishedWork;
+  root.finishedWork = null;
 }
 
 /**
  * 단일 Fiber 노드의 변경사항을 DOM에 반영
- * 
+ *
  * @param {Object} fiber - 처리할 Fiber 노드
  */
-function commitWork(fiber) {
+function commitWork(fiber, root) {
   if (!fiber) {
     return;
   }
 
-  let parentFiber = fiber.parent;
-  while (!parentFiber.dom) {
-    parentFiber = parentFiber.parent;
+  let parentDom = null;
+
+  if (!fiber.parent) {
+    parentDom = root.containerInfo;
+  } else {
+    let parentFiber = fiber.parent;
+    while (parentFiber && !parentFiber.dom) {
+      parentFiber = parentFiber.parent;
+    }
+    parentDom = parentFiber ? parentFiber.dom : root.containerInfo;
   }
 
-  const parentDom = parentFiber.dom;
-
-  if (fiber.flags === 'PLACEMENT' && fiber.dom !== null) {
+  if (fiber.flags === 'PLACEMENT' && fiber.dom) {
     // 새로운 노드 추가
+    console.log(
+      '11. appending new node:',
+      fiber.type,
+      'to parent:',
+      parentDom
+    );
     parentDom.appendChild(fiber.dom);
   } else if (fiber.flags === 'UPDATE' && fiber.dom !== null) {
     // 노드 업데이트
-    updateDom(fiber.dom, fiber.alternate.props, fiber.props);
+    console.log('11. updating node:', fiber.type);
+    updateDom(
+      fiber.dom,
+      fiber.alternate ? fiber.alternate.props : {},
+      fiber.props
+    );
+  } else if (fiber.flags === 'DELETION') {
+    // 노드 삭제
+    console.log('11. deleting node:', fiber.type);
+    commitDeletion(fiber);
   }
 
   // 자식 형제 노드들 처리
-  commitWork(fiber.child);
-  commitWork(fiber.sibling);
+  commitWork(fiber.child, root);
+  commitWork(fiber.sibling, root);
 }
 
 /**
@@ -53,13 +85,16 @@ function commitWork(fiber) {
 function commitDeletion(fiber) {
   if (!fiber) return;
 
-  // DOM 노드를 찾을 때까지 부모 노드를 탐색
   let parentFiber = fiber.parent;
-  while (!parentFiber.dom) {
+  if (!parentFiber) return;
+
+  // DOM 노드를 찾을 때까지 부모 노드를 탐색
+  while (parentFiber && !parentFiber.dom) {
     parentFiber = parentFiber.parent;
   }
 
   if (fiber.dom) {
+    console.log('12. removing node:', fiber.type);
     parentFiber.dom.removeChild(fiber.dom);
   } else {
     //DOM이 없는 경우 자식을 재귀적으로 삭제
@@ -67,17 +102,16 @@ function commitDeletion(fiber) {
   }
 }
 
-
 /**
  * DOM 노드의 속성을 업데이트
- * 
+ *
  * @param {HTMLElement} dom - 업데이트할 DOM 노드
  * @param {Object} prevProps - 이전 속성들
  * @param {Object} nextProps - 새로운 속성들
  */
 function updateDom(dom, prevProps, nextProps) {
   // 이전 속성 제거
-  Object.keys(prevProps).forEach(key => {
+  Object.keys(prevProps).forEach((key) => {
     if (key !== 'children' && !(key in nextProps)) {
       if (key.startsWith('on')) {
         // 이벤트 리스너 제거
@@ -88,10 +122,10 @@ function updateDom(dom, prevProps, nextProps) {
         dom[key] = '';
       }
     }
-  })
+  });
 
   // 새로운 속성 설정
-  Object.keys(nextProps).forEach(key => {
+  Object.keys(nextProps).forEach((key) => {
     if (key !== 'children' && prevProps[key] !== nextProps[key]) {
       if (key.startsWith('on')) {
         // 이벤트 리스너 업데이트
@@ -102,7 +136,7 @@ function updateDom(dom, prevProps, nextProps) {
         dom[key] = nextProps[key];
       }
     }
-  })
+  });
 }
 
 export { commitRoot };
