@@ -84,6 +84,51 @@ function updateContainer(element, root) {
 }
 
 /**
+ * 두 객체 간의 얕은 비교(객체의 최상위 속성들만 비교, 중첩 객체는 참조만 비교)
+ * props나 state 변경 여부 확인
+ *
+ * @param {Object} objA
+ * @param {Object} objB
+ * @returns
+ */
+function shallowEqual(objA, objB) {
+  // 1. 참조가 같으면 무조건 true
+  if (objA === objB) {
+    return true;
+  }
+
+  // 2. 객체가 아니면 false
+  if (
+    typeof objA !== 'object' ||
+    objA === null ||
+    typeof objB !== 'object' ||
+    objB === null
+  ) {
+    return false;
+  }
+
+  // 3. 객체 속성 개수가 다르면 false
+  const keysA = Object.keys(objA);
+  const keysB = Object.keys(objB);
+  if (keysA.length !== keysB.length) {
+    return false;
+  }
+
+  // 4. 속성 값 비교
+  for (let i = 0; i < keysA.length; i++) {
+    const key = keysA[i];
+    if (
+      !Object.prototype.hasOwnProperty.call(objB, key) ||
+      objA[key] !== objB[key]
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
  * 현재 Fiber 트리 기반으로 작업용(WorkInProgress) Fiber 트리 생성
  *
  * React는 더블 버퍼링을 위해 두 개의 Fiber 트리를 사용한다.
@@ -196,8 +241,27 @@ function performUnitOfWork(fiber) {
 }
 
 function updateFunctionComponent(fiber) {
-  const children = [fiber.type(fiber.props)];
-  reconcileChildren(fiber, children);
+  const shouldUpdate =
+    !fiber.alternate || !shallowEqual(fiber.props, fiber.alternate.props);
+
+  if (shouldUpdate) {
+    const children = [fiber.type(fiber.props)];
+    reconcileChildren(fiber, children);
+  } else {
+    // props가 변경되지 않았다면 이전 children 재사용
+    const oldChildren = fiber.alternate.child;
+    if (oldChildren) {
+      fiber.child = oldChildren;
+      fiber.child.parent = fiber;
+    }
+  }
+
+  console.log(
+    `Component ${fiber.type.name || 'Anonymous'} ${
+      shouldUpdate ? 'updated' : 'skipped'
+    } with props:`,
+    fiber.props
+  );
 }
 
 function updateHostComponent(fiber) {
