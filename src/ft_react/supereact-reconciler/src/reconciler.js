@@ -1,4 +1,5 @@
 import { commitRoot } from './commitWork.js';
+import { finishHooks, prepareHooks } from './hooks.js';
 
 function createFiberRoot(containerInfo) {
   const root = {
@@ -10,19 +11,24 @@ function createFiberRoot(containerInfo) {
     finishedWork: null,
     // 다음 작업 단위
     nextUnitOfWork: null,
+    // 업데이트 큐
+    pendingUpdates: [],
+    // 업데이트 진행 여부
+    isUpdating: false,
   };
 
   const rootFiber = {
-    type: null,
+    type: 'ROOT',
     stateNode: root,
-    props: null,
-    dom: null,
+    props: { children: [] },
+    dom: containerInfo,
     parent: null,
     child: null,
     sibling: null,
     alternate: null,
     flags: 'PLACEMENT',
     deletions: [],
+    hooks: [],
   };
 
   root.current = rootFiber;
@@ -40,6 +46,7 @@ function createFiberNode(type, props) {
   const fiber = {
     type,
     props,
+    stateNode: null,
     dom: null,
     parent: null,
     child: null,
@@ -47,6 +54,7 @@ function createFiberNode(type, props) {
     alternate: null,
     flags: 'PLACEMENT',
     deletions: [],
+    hooks: [],
   };
 
   return fiber;
@@ -62,23 +70,17 @@ function createFiberNode(type, props) {
  */
 function updateContainer(element, root) {
   console.log('2. updateContainer called with element:', element);
+  console.log('2-1. root:', root);
 
   const current = root.current;
-  const elementType = element.type;
-  const elementProps = element.props;
-
-  if (!current.child) {
-    // 최초 렌더링시 element에 해당하는 Fiber 생성
-    const newChild = createFiberNode(elementType, elementProps);
-    newChild.parent = current;
-    current.child = newChild;
-  }
+  current.props = { children: element };
 
   // workInProgress 트리 생성
   const workInProgress = createWorkInProgress(current);
 
-  root.finishedWork = workInProgress;
-  root.nextUnitOfWork = workInProgress.child;
+  // 작업 예약
+  root.finishedWork = null;
+  root.nextUnitOfWork = workInProgress;
 
   scheduleUpdateOnFiber(root);
 }
@@ -150,6 +152,7 @@ function createWorkInProgress(current) {
     workInProgress.stateNode = current.stateNode;
     workInProgress.dom = current.dom; // DOM 노드는 재사용
     workInProgress.flags = current.flags;
+    workInProgress.hooks = current.hooks ? [...current.hooks] : [];
     workInProgress.alternate = current; // 이전 Fiber 노드와 연결
     current.alternate = workInProgress;
   } else {
@@ -159,15 +162,9 @@ function createWorkInProgress(current) {
     workInProgress.type = current.type;
     workInProgress.props = current.props;
     workInProgress.flags = current.flags;
+    workInProgress.hooks = current.hooks ? [...current.hooks] : [];
     workInProgress.deletions = [];
   }
-
-  if (current.child) {
-    workInProgress.child = current.child;
-    workInProgress.child.parent = workInProgress;
-  }
-
-  workInProgress.sibling = current.sibling;
 
   return workInProgress;
 }
@@ -178,7 +175,18 @@ function createWorkInProgress(current) {
  *
  * @param {Object} fiber - 업데이트 필요한 Fiber 노드
  */
-function scheduleUpdateOnFiber(root) {
+export function scheduleUpdateOnFiber(root) {
+  console.log('scheduleUpdateOnFiber with root:', root);
+  console.log('isUpdating:', root.isUpdating);
+  console.log('pendingUpdates:', root.pendingUpdates);
+
+  // if (!root.isUpdating) {
+  //   root.isUpdating = true;
+  //   requestIdleCallback((deadline) => workLoop(root, deadline));
+  // } else {
+  //   console.log('already updating, skip scheduling');
+  // }
+  // root.isUpdating = true;
   requestIdleCallback((deadline) => workLoop(root, deadline));
 }
 
@@ -187,6 +195,18 @@ function scheduleUpdateOnFiber(root) {
  */
 function workLoop(root, deadline) {
   console.log('3. workLoop running with root:', root);
+  console.log('3-1. root.pendingUpdates', root.pendingUpdates);
+  console.log('3-2. root.nextUnitOfWork', root.nextUnitOfWork);
+  console.log('3-3. root.isUpdating', root.isUpdating);
+
+  if (root.pendingUpdates.length > 0 && !root.nextUnitOfWork) {
+    // 새 작업 트리 생성
+    const current = root.current;
+    const workInProgress = createWorkInProgress(current);
+
+    root.finishedWork = null;
+    root.nextUnitOfWork = workInProgress;
+  }
 
   let nextUnitOfWork = root.nextUnitOfWork;
 
@@ -198,8 +218,14 @@ function workLoop(root, deadline) {
   if (root.nextUnitOfWork) {
     // 작업이 남아있다면 다시 스케쥴링
     requestIdleCallback((deadline) => workLoop(root, deadline));
-  } else if (root.finishedWork) {
-    // 작업 완료 후 finishedWork가 있으면
+  } else {
+    finishWork(root);
+  }
+}
+
+function finishWork(root) {
+  if (root.current.alternate) {
+    root.finishedWork = root.current.alternate;
     commitRoot(root);
   }
 }
@@ -214,6 +240,7 @@ function performUnitOfWork(fiber) {
   console.log('4. performUnitOfWork for:', fiber.type);
 
   const isFunctionComponent = typeof fiber.type === 'function';
+
   if (isFunctionComponent) {
     console.log('4-1. updateFunctionComponent for:', fiber.type);
     updateFunctionComponent(fiber);
@@ -241,27 +268,28 @@ function performUnitOfWork(fiber) {
 }
 
 function updateFunctionComponent(fiber) {
-  const shouldUpdate =
-    !fiber.alternate || !shallowEqual(fiber.props, fiber.alternate.props);
+  console.log('5. updateFunctionComponent for:', fiber.type);
+  console.log('5-1. fiber:', fiber);
 
-  if (shouldUpdate) {
-    const children = [fiber.type(fiber.props)];
-    reconcileChildren(fiber, children);
-  } else {
-    // props가 변경되지 않았다면 이전 children 재사용
-    const oldChildren = fiber.alternate.child;
-    if (oldChildren) {
-      fiber.child = oldChildren;
-      fiber.child.parent = fiber;
-    }
-  }
+  prepareHooks(fiber);
 
-  console.log(
-    `Component ${fiber.type.name || 'Anonymous'} ${
-      shouldUpdate ? 'updated' : 'skipped'
-    } with props:`,
-    fiber.props
-  );
+  fiber.hooks = [];
+  // // 이전 hooks 상태 복사
+  // if (fiber.alternate?.hooks) {
+  //   fiber.hooks = fiber.alternate.hooks.map((hook) => ({
+  //     state: hook.state,
+  //     queue: [...hook.queue],
+  //   }));
+  // } else {
+  //   fiber.hooks = [];
+  // }
+
+  // 컴포넌트 함수 실행
+  const children = [fiber.type(fiber.props)];
+
+  reconcileChildren(fiber, children);
+
+  finishHooks();
 }
 
 function updateHostComponent(fiber) {
@@ -297,13 +325,12 @@ function createDom(fiber) {
   Object.keys(props).forEach((prop) => {
     // children은 별도 처리
     if (prop !== 'children') {
-      // 이벤트 리스너
-      if (prop.startsWith('on')) {
+      // 이벤트 리스너 - 대소문자 구분없이 처리
+      if (prop.toLowerCase().startsWith('on')) {
         const eventType = prop.toLowerCase().substring(2);
-        dom.addEventListener(eventType, fiber.props[prop]);
+        dom.addEventListener(eventType, props[prop]);
       } else {
-        // 속성
-        dom[prop] = fiber.props[prop];
+        dom[prop] = props[prop];
       }
     }
   });
@@ -320,14 +347,21 @@ function createDom(fiber) {
  */
 function reconcileChildren(wipFiber, elements) {
   let index = 0;
-  let oldFiber = wipFiber.alternate && wipFiber.alternate.child;
+  let oldFiber = wipFiber.alternate?.child;
   let prevSibling = null;
 
-  const elementArray = Array.isArray(elements) ? elements : [elements];
-
+  const elementArray = Array.isArray(elements)
+    ? elements.filter(Boolean)
+    : elements
+    ? [elements]
+    : [];
   wipFiber.deletions = [];
 
-  while (index < elementArray.length || oldFiber !== null) {
+  if (elementArray.length == 0 && !oldFiber) {
+    return;
+  }
+
+  while (index < elementArray.length || oldFiber) {
     const element = elementArray[index];
     console.log('6. processing element:', element);
 
@@ -339,13 +373,12 @@ function reconcileChildren(wipFiber, elements) {
       };
     }
 
-    let newFiber = null;
-
     const sameType =
       oldFiber && processedElement && processedElement.type === oldFiber.type;
+    let newFiber = null;
 
     if (sameType) {
-      // 업데이트: 타입이 같으면 DOM 재사용
+      // 1. 업데이트 케이스: 동일한 타입
       newFiber = {
         type: oldFiber.type,
         props: processedElement.props,
@@ -355,27 +388,31 @@ function reconcileChildren(wipFiber, elements) {
         child: null,
         sibling: null,
         flags: 'UPDATE',
+        hooks: oldFiber.hooks
+          ? oldFiber.hooks.map((h) => ({ state: h.state, queue: [...h.queue] }))
+          : [],
       };
-    }
+    } else {
+      // 2. 새로운 요소가 있는 경우: 생성
+      if (processedElement) {
+        newFiber = {
+          type: processedElement.type,
+          props: processedElement.props,
+          dom: null,
+          parent: wipFiber,
+          alternate: null,
+          child: null,
+          sibling: null,
+          flags: 'PLACEMENT',
+          hooks: [],
+        };
+      }
 
-    if (processedElement && !sameType) {
-      // 생성: 타입이 다르면 새로운 DOM 생성
-      newFiber = {
-        type: processedElement.type,
-        props: processedElement.props,
-        dom: null,
-        parent: wipFiber,
-        alternate: null,
-        child: null,
-        sibling: null,
-        flags: 'PLACEMENT',
-      };
-    }
-
-    if (oldFiber && !sameType) {
-      // 삭제: 타입이 다르면 이전 DOM 제거
-      oldFiber.flags = 'DELETION';
-      wipFiber.deletions.push(oldFiber);
+      // 3. 이전 요소가 있는 경우: 삭제
+      if (oldFiber) {
+        oldFiber.flags = 'DELETION';
+        wipFiber.deletions.push(oldFiber);
+      }
     }
 
     if (oldFiber) {
@@ -384,11 +421,14 @@ function reconcileChildren(wipFiber, elements) {
 
     if (index === 0) {
       wipFiber.child = newFiber;
-    } else if (processedElement) {
+    } else if (newFiber && prevSibling) {
       prevSibling.sibling = newFiber;
     }
 
-    prevSibling = newFiber;
+    if (newFiber) {
+      prevSibling = newFiber;
+    }
+
     index++;
   }
 }

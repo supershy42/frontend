@@ -10,23 +10,29 @@ function commitRoot(root) {
   if (!finishedWork) return;
 
   // 삭제된 노드들 처리
-  if (finishedWork.deletions) {
-    finishedWork.deletions.forEach(commitDeletion);
+  if (finishedWork.deletions && finishedWork.deletions.length > 0) {
+    finishedWork.deletions.forEach((fiber) => {
+      commitDeletion(fiber, root.containerInfo);
+    });
   }
 
-  // // 루트 div를 컨테이너에 마운트
+  // 루트 div를 컨테이너에 마운트
   // if (finishedWork.child && finishedWork.child.dom) {
   //   console.log('mounting root child:', finishedWork.child);
   //   root.containerInfo.appendChild(finishedWork.child.dom);
   // }
 
   // 변경된 노드들 커밋
-  commitWork(finishedWork.child, root);
+  commitWork(finishedWork.child, root.containerInfo);
 
   // 현재 트리를 workInProgress 트리로 교체
   console.log('10. committing finished, new current:', finishedWork);
   root.current = finishedWork;
   root.finishedWork = null;
+  root.nextUnitOfWork = null;
+
+  root.isUpdating = false;
+  root.pendingUpdates = [];
 }
 
 /**
@@ -34,21 +40,23 @@ function commitRoot(root) {
  *
  * @param {Object} fiber - 처리할 Fiber 노드
  */
-function commitWork(fiber, root) {
+function commitWork(fiber, parentDom) {
   if (!fiber) {
     return;
   }
 
-  let parentDom = null;
+  // 실제 부모 DOM 노드 찾기
+  let actualParentDom = parentDom;
 
-  if (!fiber.parent) {
-    parentDom = root.containerInfo;
-  } else {
-    let parentFiber = fiber.parent;
-    while (parentFiber && !parentFiber.dom) {
-      parentFiber = parentFiber.parent;
+  // 함수형 컴포넌트는 DOM이 없으므로 가장 가까운 부모 DOM을 찾음
+  if (fiber.parent) {
+    let parent = fiber.parent;
+    while (parent && !parent.dom) {
+      parent = parent.parent;
     }
-    parentDom = parentFiber ? parentFiber.dom : root.containerInfo;
+    if (parent) {
+      actualParentDom = parent.dom;
+    }
   }
 
   if (fiber.flags === 'PLACEMENT' && fiber.dom) {
@@ -57,48 +65,44 @@ function commitWork(fiber, root) {
       '11. appending new node:',
       fiber.type,
       'to parent:',
-      parentDom
+      actualParentDom
     );
-    parentDom.appendChild(fiber.dom);
-  } else if (fiber.flags === 'UPDATE' && fiber.dom !== null) {
+    actualParentDom.appendChild(fiber.dom);
+  } else if (fiber.flags === 'UPDATE' && fiber.dom) {
     // 노드 업데이트
     console.log('11. updating node:', fiber.type);
-    updateDom(
-      fiber.dom,
-      fiber.alternate ? fiber.alternate.props : {},
-      fiber.props
-    );
+    updateDom(fiber.dom, fiber.alternate?.props || {}, fiber.props);
   } else if (fiber.flags === 'DELETION') {
-    // 노드 삭제
-    console.log('11. deleting node:', fiber.type);
-    commitDeletion(fiber);
+    // commitDeletion(fiber, domParent);
+    return;
   }
 
   // 자식 형제 노드들 처리
-  commitWork(fiber.child, root);
-  commitWork(fiber.sibling, root);
+  if (fiber.child) {
+    commitWork(fiber.child, fiber.dom || actualParentDom);
+  }
+
+  if (fiber.sibling) {
+    commitWork(fiber.sibling, actualParentDom);
+  }
 }
 
 /**
  * 삭제된 Fiber 노드를 DOM에서 제거
  */
-function commitDeletion(fiber) {
+function commitDeletion(fiber, parentDom) {
   if (!fiber) return;
 
-  let parentFiber = fiber.parent;
-  if (!parentFiber) return;
-
-  // DOM 노드를 찾을 때까지 부모 노드를 탐색
-  while (parentFiber && !parentFiber.dom) {
-    parentFiber = parentFiber.parent;
-  }
-
+  // DOM이 있으면 직접 삭제
   if (fiber.dom) {
-    console.log('12. removing node:', fiber.type);
-    parentFiber.dom.removeChild(fiber.dom);
+    parentDom.removeChild(fiber.dom);
   } else {
-    //DOM이 없는 경우 자식을 재귀적으로 삭제
-    commitDeletion(fiber.child);
+    // DOM이 없는 컴포넌트의 경우 자식을 재귀적으로 삭제
+    let child = fiber.child;
+    while (child) {
+      commitDeletion(child, parentDom);
+      child = child.sibling;
+    }
   }
 }
 
@@ -113,8 +117,8 @@ function updateDom(dom, prevProps, nextProps) {
   // 이전 속성 제거
   Object.keys(prevProps).forEach((key) => {
     if (key !== 'children' && !(key in nextProps)) {
-      if (key.startsWith('on')) {
-        // 이벤트 리스너 제거
+      if (key.toLowerCase().startsWith('on')) {
+        // 이벤트 리스너 제거 - 대소문자 구분 없이
         const eventType = key.toLowerCase().substring(2);
         dom.removeEventListener(eventType, prevProps[key]);
       } else {
@@ -127,9 +131,13 @@ function updateDom(dom, prevProps, nextProps) {
   // 새로운 속성 설정
   Object.keys(nextProps).forEach((key) => {
     if (key !== 'children' && prevProps[key] !== nextProps[key]) {
-      if (key.startsWith('on')) {
-        // 이벤트 리스너 업데이트
+      if (key.toLowerCase().startsWith('on')) {
+        // 이벤트 리스너 업데이트 - 대소문자 구분 없이
         const eventType = key.toLowerCase().substring(2);
+        // 이전 이벤트 리스너 제거 후 새로운 리스너 추가
+        if (prevProps[key]) {
+          dom.removeEventListener(eventType, prevProps[key]);
+        }
         dom.addEventListener(eventType, nextProps[key]);
       } else {
         // 일반 속성 업데이트
