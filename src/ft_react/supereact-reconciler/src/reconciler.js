@@ -29,6 +29,7 @@ function createFiberRoot(containerInfo) {
     flags: 'PLACEMENT',
     deletions: [],
     hooks: [],
+    effects: [],
   };
 
   root.current = rootFiber;
@@ -55,6 +56,7 @@ function createFiberNode(type, props) {
     flags: 'PLACEMENT',
     deletions: [],
     hooks: [],
+    effects: [],
   };
 
   return fiber;
@@ -153,6 +155,7 @@ function createWorkInProgress(current) {
     workInProgress.dom = current.dom; // DOM 노드는 재사용
     workInProgress.flags = current.flags;
     workInProgress.hooks = current.hooks ? [...current.hooks] : [];
+    workInProgress.effects = [];
     workInProgress.alternate = current; // 이전 Fiber 노드와 연결
     current.alternate = workInProgress;
   } else {
@@ -163,6 +166,7 @@ function createWorkInProgress(current) {
     workInProgress.props = current.props;
     workInProgress.flags = current.flags;
     workInProgress.hooks = current.hooks ? [...current.hooks] : [];
+    workInProgress.effects = [];
     workInProgress.deletions = [];
   }
 
@@ -274,6 +278,7 @@ function updateFunctionComponent(fiber) {
   prepareHooks(fiber);
 
   fiber.hooks = [];
+  fiber.effects = [];
   // // 이전 hooks 상태 복사
   // if (fiber.alternate?.hooks) {
   //   fiber.hooks = fiber.alternate.hooks.map((hook) => ({
@@ -389,8 +394,16 @@ function reconcileChildren(wipFiber, elements) {
         sibling: null,
         flags: 'UPDATE',
         hooks: oldFiber.hooks
-          ? oldFiber.hooks.map((h) => ({ state: h.state, queue: [...h.queue] }))
+          ? oldFiber.hooks.map((h) => ({
+              state: h.state,
+              queue: h.queue ? [...h.queue] : [],
+              tag: h.tag,
+              callback: h.callback,
+              deps: h.deps,
+              cleanup: h.cleanup,
+            }))
           : [],
+        effects: [],
       };
     } else {
       // 2. 새로운 요소가 있는 경우: 생성
@@ -405,6 +418,7 @@ function reconcileChildren(wipFiber, elements) {
           sibling: null,
           flags: 'PLACEMENT',
           hooks: [],
+          effects: [],
         };
       }
 

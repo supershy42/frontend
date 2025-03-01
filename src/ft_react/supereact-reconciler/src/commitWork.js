@@ -9,6 +9,9 @@ function commitRoot(root) {
   const finishedWork = root.finishedWork;
   if (!finishedWork) return;
 
+  // 이펙트 큐 실행
+  runEffect(finishedWork);
+
   // 삭제된 노드들 처리
   if (finishedWork.deletions && finishedWork.deletions.length > 0) {
     finishedWork.deletions.forEach((fiber) => {
@@ -145,6 +148,39 @@ function updateDom(dom, prevProps, nextProps) {
       }
     }
   });
+}
+
+function runEffect(fiber) {
+  if (!fiber) return;
+
+  if (fiber.effects && fiber.effects.length > 0) {
+    fiber.effects.forEach((effect) => {
+      if (effect.cleanup) {
+        try {
+          effect.cleanup();
+        }
+        catch (e) {
+          console.error(e);
+        }
+      }
+
+      try {
+        const cleanup = effect.callback();
+        effect.cleanup = typeof cleanup === 'function' ? cleanup : undefined;
+      } catch (e) {
+        console.error(e);
+      }
+    });
+  }
+
+  if (fiber.child) {
+    runEffect(fiber.child);
+  }
+
+  if (fiber.sibling) {
+    runEffect(fiber.sibling);
+  }
+
 }
 
 export { commitRoot };

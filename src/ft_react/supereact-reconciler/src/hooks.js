@@ -79,3 +79,33 @@ export function useState(initial) {
 
   return [hook.state, setState];
 }
+
+export function useEffect(callback, deps) {
+  const fiber = currentlyRenderingFiber;
+  const oldHook = fiber.alternate?.hooks?.[hookIndex];
+
+  const hook = {
+    tag: 'effect',
+    callback,
+    deps,
+    cleanup: oldHook?.cleanup,
+  };
+
+  const depsChanged =
+    !oldHook ||
+    !hook.deps ||
+    !oldHook.deps ||
+    hook.deps.length !== oldHook.deps.length ||
+    hook.deps.some((dep, i) => dep !== oldHook.deps[i]);
+
+  if (depsChanged) {
+    fiber.effects = fiber.effects || [];
+    fiber.effects.push({
+      callback,
+      cleanup: oldHook?.cleanup,
+    });
+  }
+
+  fiber.hooks[hookIndex] = hook;
+  hookIndex++;
+}
