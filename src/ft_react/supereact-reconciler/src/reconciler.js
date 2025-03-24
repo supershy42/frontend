@@ -1,4 +1,5 @@
 import { commitRoot } from './commitWork.js';
+import { setInitialProperties } from './domProperties.js';
 import { finishHooks, prepareHooks } from './hooks.js';
 
 function createFiberRoot(containerInfo) {
@@ -324,21 +325,7 @@ function createDom(fiber) {
   // 일반 DOM 엘리먼트 생성
   const dom = document.createElement(fiber.type);
 
-  const props = fiber.props || {};
-
-  // 이벤트 리스너, 속성 처리
-  Object.keys(props).forEach((prop) => {
-    // children은 별도 처리
-    if (prop !== 'children') {
-      // 이벤트 리스너 - 대소문자 구분없이 처리
-      if (prop.toLowerCase().startsWith('on')) {
-        const eventType = prop.toLowerCase().substring(2);
-        dom.addEventListener(eventType, props[prop]);
-      } else {
-        dom[prop] = props[prop];
-      }
-    }
-  });
+  setInitialProperties(dom, fiber.props);
 
   return dom;
 }

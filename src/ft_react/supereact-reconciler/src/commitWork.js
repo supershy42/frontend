@@ -1,3 +1,5 @@
+import { updateProperties } from './domProperties.js';
+
 /**
  * Fiber 트리의 변경사항을 실제 DOM에 반영
  * 동기적 실행으로 중단될 수 없음
@@ -8,9 +10,6 @@ function commitRoot(root) {
   console.log('9. commitRoot called with root:', root);
   const finishedWork = root.finishedWork;
   if (!finishedWork) return;
-
-  // 이펙트 큐 실행
-  runEffect(finishedWork);
 
   // 삭제된 노드들 처리
   if (finishedWork.deletions && finishedWork.deletions.length > 0) {
@@ -27,6 +26,9 @@ function commitRoot(root) {
 
   // 변경된 노드들 커밋
   commitWork(finishedWork.child, root.containerInfo);
+
+  // 이펙트 실행 (Dom 업데이트 이후에 실행)
+  runEffects(finishedWork);
 
   // 현재 트리를 workInProgress 트리로 교체
   console.log('10. committing finished, new current:', finishedWork);
@@ -76,7 +78,7 @@ function commitWork(fiber, parentDom) {
     console.log('11. updating node:', fiber.type);
     updateDom(fiber.dom, fiber.alternate?.props || {}, fiber.props);
   } else if (fiber.flags === 'DELETION') {
-    // commitDeletion(fiber, domParent);
+    commitDeletion(fiber, actualParentDom);
     return;
   }
 
@@ -96,13 +98,36 @@ function commitWork(fiber, parentDom) {
 function commitDeletion(fiber, parentDom) {
   if (!fiber) return;
 
+  runCleanup(fiber);
+
   // DOM이 있으면 직접 삭제
   if (fiber.dom) {
-    parentDom.removeChild(fiber.dom);
+    try {
+      if (parentDom.contains(fiber.dom)) {
+        parentDom.removeChild(fiber.dom);
+      } else {
+        console.warn('Cannot remove node: not a child of parent', {
+          child: fiber.dom,
+          parent: parentDom,
+        });
+      }
+    } catch (e) {
+      console.error('Error removing node:', e);
+    }
   } else {
     // DOM이 없는 컴포넌트의 경우 자식을 재귀적으로 삭제
     let child = fiber.child;
     while (child) {
+      let actualParentDom = parentDom;
+      if (fiber.parent) {
+        let parent = fiber.parent;
+        while (parent && !parent.dom) {
+          parent = parent.parent;
+        }
+        if (parent) {
+          actualParentDom = parent.dom;
+        }
+      }
       commitDeletion(child, parentDom);
       child = child.sibling;
     }
@@ -117,53 +142,24 @@ function commitDeletion(fiber, parentDom) {
  * @param {Object} nextProps - 새로운 속성들
  */
 function updateDom(dom, prevProps, nextProps) {
-  // 이전 속성 제거
-  Object.keys(prevProps).forEach((key) => {
-    if (key !== 'children' && !(key in nextProps)) {
-      if (key.toLowerCase().startsWith('on')) {
-        // 이벤트 리스너 제거 - 대소문자 구분 없이
-        const eventType = key.toLowerCase().substring(2);
-        dom.removeEventListener(eventType, prevProps[key]);
-      } else {
-        // 일반 속성 제거
-        dom[key] = '';
-      }
-    }
-  });
-
-  // 새로운 속성 설정
-  Object.keys(nextProps).forEach((key) => {
-    if (key !== 'children' && prevProps[key] !== nextProps[key]) {
-      if (key.toLowerCase().startsWith('on')) {
-        // 이벤트 리스너 업데이트 - 대소문자 구분 없이
-        const eventType = key.toLowerCase().substring(2);
-        // 이전 이벤트 리스너 제거 후 새로운 리스너 추가
-        if (prevProps[key]) {
-          dom.removeEventListener(eventType, prevProps[key]);
-        }
-        dom.addEventListener(eventType, nextProps[key]);
-      } else {
-        // 일반 속성 업데이트
-        dom[key] = nextProps[key];
-      }
-    }
-  });
+  updateProperties(dom, prevProps, nextProps);
 }
 
-function runEffect(fiber) {
+function runEffects(fiber) {
   if (!fiber) return;
 
   if (fiber.effects && fiber.effects.length > 0) {
     fiber.effects.forEach((effect) => {
+      // 이전 클린업
       if (effect.cleanup) {
         try {
           effect.cleanup();
-        }
-        catch (e) {
+        } catch (e) {
           console.error(e);
         }
       }
 
+      // 새 이펙트 실행
       try {
         const cleanup = effect.callback();
         effect.cleanup = typeof cleanup === 'function' ? cleanup : undefined;
@@ -174,13 +170,28 @@ function runEffect(fiber) {
   }
 
   if (fiber.child) {
-    runEffect(fiber.child);
+    runEffects(fiber.child);
   }
 
   if (fiber.sibling) {
-    runEffect(fiber.sibling);
+    runEffects(fiber.sibling);
   }
+}
 
+function runCleanup(fiber) {
+  if (!fiber) return;
+
+  if (fiber.effects && fiber.effects.length > 0) {
+    fiber.effects.forEach((effect) => {
+      if (effect.cleanup) {
+        try {
+          effect.cleanup();
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    });
+  }
 }
 
 export { commitRoot };
