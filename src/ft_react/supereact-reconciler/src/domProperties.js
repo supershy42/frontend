@@ -19,7 +19,7 @@ export function setProperty(dom, name, value, prevValue) {
     return;
   }
 
-  if (name === 'children') {
+  if (name === 'children' || name === 'key') {
     return;
   }
 
@@ -147,7 +147,7 @@ export function removeProperty(dom, name, prevValue) {
  */
 export function setInitialProperties(dom, props) {
   Object.keys(props).forEach((propName) => {
-    if (propName !== 'children') {
+    if (propName !== 'children' && propName !== 'key') {
       setProperty(dom, propName, props[propName], null);
     }
   });

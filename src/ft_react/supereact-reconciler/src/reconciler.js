@@ -76,8 +76,9 @@ function updateContainer(element, root) {
   console.log('2-1. root:', root);
 
   const current = root.current;
-  current.props = { children: element };
-
+  current.props = {
+    children: element != null ? [element].filter(Boolean) : [],
+  };
   // workInProgress 트리 생성
   const workInProgress = createWorkInProgress(current);
 
@@ -171,6 +172,14 @@ function createWorkInProgress(current) {
     workInProgress.deletions = [];
   }
 
+  workInProgress.child = null;
+  workInProgress.sibling = null;
+
+  workInProgress.key = current.key;
+  workInProgress.ref = current.ref;
+
+  workInProgress.index = current.index;
+
   return workInProgress;
 }
 
@@ -185,14 +194,14 @@ export function scheduleUpdateOnFiber(root) {
   console.log('isUpdating:', root.isUpdating);
   console.log('pendingUpdates:', root.pendingUpdates);
 
-  // if (!root.isUpdating) {
-  //   root.isUpdating = true;
-  //   requestIdleCallback((deadline) => workLoop(root, deadline));
-  // } else {
-  //   console.log('already updating, skip scheduling');
-  // }
-  // root.isUpdating = true;
-  requestIdleCallback((deadline) => workLoop(root, deadline));
+  if (!root.isUpdating) {
+    root.isUpdating = true;
+    requestIdleCallback((deadline) => workLoop(root, deadline));
+  } else {
+    console.log('already updating, skip scheduling');
+  }
+  root.isUpdating = true;
+  // requestIdleCallback((deadline) => workLoop(root, deadline));
 }
 
 /**
@@ -228,9 +237,30 @@ function workLoop(root, deadline) {
   }
 }
 
+function logFiberTree(fiber, depth = 0) {
+  if (!fiber) return;
+
+  const indent = '  '.repeat(depth);
+  console.log(
+    `${indent}Fiber: ${fiber.type}, key: ${fiber.key}, flags: ${fiber.flags}`
+  );
+
+  if (fiber.child) {
+    console.log(`${indent}Children:`);
+    logFiberTree(fiber.child, depth + 1);
+  }
+
+  if (fiber.sibling) {
+    logFiberTree(fiber.sibling, depth);
+  }
+}
+
 function finishWork(root) {
   if (root.current.alternate) {
     root.finishedWork = root.current.alternate;
+    console.log('=== FIBER TREE BEFORE COMMIT ===');
+    logFiberTree(root.finishedWork);
+    console.log('===============================');
     commitRoot(root);
   }
 }
@@ -242,7 +272,12 @@ function finishWork(root) {
  * @returns {Object} 다음 작업 단위 Fiber 노드
  */
 function performUnitOfWork(fiber) {
-  console.log('4. performUnitOfWork for:', fiber.type);
+  console.log('4. performUnitOfWork for:', fiber.type, 'flags:', fiber.flags);
+
+  if (!fiber.deletions) {
+    fiber.deletions = [];
+    console.log('Initialized deletions array for:', fiber.type);
+  }
 
   const isFunctionComponent = typeof fiber.type === 'function';
 
@@ -291,7 +326,14 @@ function updateFunctionComponent(fiber) {
   // }
 
   // 컴포넌트 함수 실행
-  const children = [fiber.type(fiber.props)];
+  let children;
+  try {
+    const res = fiber.type(fiber.props);
+    children = [res];
+  } catch (error) {
+    console.error('Function component error:', error);
+    children = [];
+  }
 
   reconcileChildren(fiber, children);
 
@@ -322,6 +364,11 @@ function createDom(fiber) {
     return textNode;
   }
 
+  // null/undefined 요소 처리
+  if (!fiber.type) {
+    return document.createComment('empty node');
+  }
+
   // 일반 DOM 엘리먼트 생성
   const dom = document.createElement(fiber.type);
 
@@ -338,25 +385,71 @@ function createDom(fiber) {
  * @param {Array} elements - 자식 엘리먼트들
  */
 function reconcileChildren(wipFiber, elements) {
+  console.log('reconcileChildren for:', wipFiber.type);
+  console.log('elements count:', elements ? elements.length : 0);
+
   let index = 0;
   let oldFiber = wipFiber.alternate?.child;
   let prevSibling = null;
 
   const elementArray = Array.isArray(elements)
-    ? elements.filter(Boolean)
-    : elements
+    ? elements.filter((el) => el != null)
+    : elements != null
     ? [elements]
     : [];
-  wipFiber.deletions = [];
 
-  if (elementArray.length == 0 && !oldFiber) {
+  // 이전 자식이 있었지만 지금은 없는 경우 (조건부 렌더링이 false가 된 경우)
+  if (elementArray.length === 0 && wipFiber.alternate?.child) {
+    console.log('No elements but had children before - removing all children');
+    // 모든 이전 자식을 제거
+    let oldChild = wipFiber.alternate.child;
+    while (oldChild) {
+      console.log(
+        'Marking for deletion (empty elements):',
+        oldChild.type,
+        'key:',
+        oldChild.key
+      );
+      oldChild.flags = 'DELETION';
+      wipFiber.deletions.push(oldChild);
+      oldChild = oldChild.sibling;
+    }
+    wipFiber.child = null;
     return;
   }
 
-  while (index < elementArray.length || oldFiber) {
+  // key 기반 매핑을 위한 맵
+  const oldFiberMap = new Map();
+
+  // 이전 fiber들을 맵에 저장
+  if (oldFiber) {
+    let fiber = oldFiber;
+    while (fiber) {
+      // key가 있는 경우 key, 아니면 index
+      const key =
+        fiber.key !== undefined ? fiber.key : `index_${fiber.index || 0}`;
+      oldFiberMap.set(key, fiber);
+      fiber = fiber.sibling;
+    }
+  }
+
+  wipFiber.deletions = [];
+
+  // 실제 reconcile 작업
+  while (index < elementArray.length) {
+    console.log(
+      `Processing element ${index}:`,
+      elementArray[index]?.type || 'null/undefined'
+    );
+
     const element = elementArray[index];
     console.log('6. processing element:', element);
 
+    let newFiber = null;
+    let sameType = false;
+    let oldFiberForElement = null;
+
+    // 텍스트/숫자 요소 처리
     let processedElement = element;
     if (typeof element === 'string' || typeof element === 'number') {
       processedElement = {
@@ -365,23 +458,51 @@ function reconcileChildren(wipFiber, elements) {
       };
     }
 
-    const sameType =
-      oldFiber && processedElement && processedElement.type === oldFiber.type;
-    let newFiber = null;
+    // key 추출
+    const key =
+      processedElement?.props?.key !== undefined
+        ? processedElement.props.key
+        : `${processedElement?.type || ''}_index_${index}`;
+
+    console.log('Processing element with key:', key, 'at index:', index);
+
+    // key 값으로 매칭되는 oldFiber 찾기
+    if (processedElement && oldFiberMap.has(key)) {
+      console.log('Found existing fiber with key:', key);
+      oldFiberForElement = oldFiberMap.get(key);
+      oldFiberMap.delete(key); // 맵에서 제거하여 중복 처리 방지
+      sameType =
+        oldFiberForElement &&
+        processedElement &&
+        processedElement.type === oldFiberForElement.type;
+    } else if (oldFiber && index === 0) {
+      // 첫 번째 요소는 이전 첫 번째 요소와 비교
+      sameType =
+        oldFiber && processedElement && processedElement.type === oldFiber.type;
+      oldFiberForElement = oldFiber;
+      if (oldFiberMap.has(oldFiber.key)) {
+        oldFiberMap.delete(oldFiber.key);
+      }
+    }
 
     if (sameType) {
+      console.log(`Element ${index}: UPDATE - same type`, element?.type);
+
       // 1. 업데이트 케이스: 동일한 타입
       newFiber = {
-        type: oldFiber.type,
+        type: oldFiberForElement.type,
         props: processedElement.props,
-        dom: oldFiber.dom,
+        dom: oldFiberForElement.dom,
         parent: wipFiber,
-        alternate: oldFiber,
+        alternate: oldFiberForElement,
         child: null,
         sibling: null,
         flags: 'UPDATE',
-        hooks: oldFiber.hooks
-          ? oldFiber.hooks.map((h) => ({
+        key: key,
+        index: index,
+        stateNode: oldFiberForElement.stateNode,
+        hooks: oldFiberForElement.hooks
+          ? oldFiberForElement.hooks.map((h) => ({
               state: h.state,
               queue: h.queue ? [...h.queue] : [],
               tag: h.tag,
@@ -391,10 +512,16 @@ function reconcileChildren(wipFiber, elements) {
             }))
           : [],
         effects: [],
+        deletions: [],
       };
     } else {
       // 2. 새로운 요소가 있는 경우: 생성
       if (processedElement) {
+        console.log(
+          `Element ${index}: PLACEMENT - new element`,
+          processedElement.type
+        );
+
         newFiber = {
           type: processedElement.type,
           props: processedElement.props,
@@ -404,19 +531,31 @@ function reconcileChildren(wipFiber, elements) {
           child: null,
           sibling: null,
           flags: 'PLACEMENT',
+          key: key,
+          index: index,
+          stateNode: null,
           hooks: [],
           effects: [],
+          deletions: [],
         };
       }
 
       // 3. 이전 요소가 있는 경우: 삭제
-      if (oldFiber) {
-        oldFiber.flags = 'DELETION';
-        wipFiber.deletions.push(oldFiber);
+      if (oldFiberForElement) {
+        console.log(
+          `Element ${index}: DELETION - old fiber`,
+          oldFiberForElement.type
+        );
+
+        oldFiberForElement.flags = 'DELETION';
+        // 중복 삭제 방지를 위한 체크
+        if (!wipFiber.deletions.some((f) => f.key === oldFiberForElement.key)) {
+          wipFiber.deletions.push(oldFiberForElement);
+        }
       }
     }
 
-    if (oldFiber) {
+    if (oldFiber === oldFiberForElement && oldFiber) {
       oldFiber = oldFiber.sibling;
     }
 
@@ -432,6 +571,18 @@ function reconcileChildren(wipFiber, elements) {
 
     index++;
   }
+
+  // 남은 oldFiber 삭제 처리
+  oldFiberMap.forEach((fiber) => {
+    console.log('Marking for deletion:', fiber.type, 'key:', fiber.key);
+    fiber.flags = 'DELETION';
+    // 중복 삭제 방지를 위한 체크
+    if (!wipFiber.deletions.some((f) => f === fiber)) {
+      wipFiber.deletions.push(fiber);
+    }
+  });
+
+  console.log('Total deletions:', wipFiber.deletions.length);
 }
 
 export { updateContainer, createFiberRoot };

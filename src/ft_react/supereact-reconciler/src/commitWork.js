@@ -9,20 +9,26 @@ import { updateProperties } from './domProperties.js';
 function commitRoot(root) {
   console.log('9. commitRoot called with root:', root);
   const finishedWork = root.finishedWork;
-  if (!finishedWork) return;
-
-  // 삭제된 노드들 처리
-  if (finishedWork.deletions && finishedWork.deletions.length > 0) {
-    finishedWork.deletions.forEach((fiber) => {
-      commitDeletion(fiber, root.containerInfo);
-    });
+  if (!finishedWork) {
+    console.log('No finishedWork found');
+    return;
   }
 
-  // 루트 div를 컨테이너에 마운트
-  // if (finishedWork.child && finishedWork.child.dom) {
-  //   console.log('mounting root child:', finishedWork.child);
-  //   root.containerInfo.appendChild(finishedWork.child.dom);
-  // }
+  // 루트에서 모든 deletions 배열 찾기
+  let allDeletions = collectAllDeletions(finishedWork);
+
+  console.log('Total collected deletions:', allDeletions.length);
+
+  // 수집된 모든 deletions 처리
+  if (allDeletions.length > 0) {
+    console.log('Processing all collected deletions:', allDeletions.length);
+
+    allDeletions.forEach((fiber) => {
+      // 각 삭제될 fiber마다 부모 DOM 노드 찾기
+      const parentDom = findClosestParentDom(fiber) || root.containerInfo;
+      commitDeletion(fiber, parentDom);
+    });
+  }
 
   // 변경된 노드들 커밋
   commitWork(finishedWork.child, root.containerInfo);
@@ -40,6 +46,36 @@ function commitRoot(root) {
   root.pendingUpdates = [];
 }
 
+function collectAllDeletions(fiber) {
+  if (!fiber) return [];
+
+  let deletions = fiber.deletions || [];
+
+  if (fiber.child) {
+    deletions = deletions.concat(collectAllDeletions(fiber.child));
+  }
+
+  if (fiber.sibling) {
+    deletions = deletions.concat(collectAllDeletions(fiber.sibling));
+  }
+
+  return deletions;
+}
+
+function findClosestParentDom(fiber) {
+  if (!fiber || !fiber.parent) return null;
+
+  let current = fiber.parent;
+  while (current) {
+    if (current.dom) {
+      return current.dom;
+    }
+    current = current.parent;
+  }
+
+  return null;
+}
+
 /**
  * 단일 Fiber 노드의 변경사항을 DOM에 반영
  *
@@ -52,26 +88,22 @@ function commitWork(fiber, parentDom) {
 
   // 실제 부모 DOM 노드 찾기
   let actualParentDom = parentDom;
+  let domParentFiber = fiber.parent;
 
-  // 함수형 컴포넌트는 DOM이 없으므로 가장 가까운 부모 DOM을 찾음
-  if (fiber.parent) {
-    let parent = fiber.parent;
-    while (parent && !parent.dom) {
-      parent = parent.parent;
-    }
-    if (parent) {
-      actualParentDom = parent.dom;
-    }
+  while (domParentFiber && !domParentFiber.dom) {
+    domParentFiber = domParentFiber.parent;
+  }
+
+  if (domParentFiber) {
+    actualParentDom = domParentFiber.dom;
   }
 
   if (fiber.flags === 'PLACEMENT' && fiber.dom) {
     // 새로운 노드 추가
-    console.log(
-      '11. appending new node:',
-      fiber.type,
-      'to parent:',
-      actualParentDom
-    );
+    console.log('Placing new node:', {
+      type: fiber.type,
+      parent: actualParentDom?.nodeName,
+    });
     actualParentDom.appendChild(fiber.dom);
   } else if (fiber.flags === 'UPDATE' && fiber.dom) {
     // 노드 업데이트
@@ -98,40 +130,42 @@ function commitWork(fiber, parentDom) {
 function commitDeletion(fiber, parentDom) {
   if (!fiber) return;
 
+  console.log('Deleting:', {
+    type: fiber.type,
+    key: fiber.key,
+    hasDom: !!fiber.dom,
+    parentDom: parentDom.nodeName,
+  });
+
   runCleanup(fiber);
 
   // DOM이 있으면 직접 삭제
   if (fiber.dom) {
     try {
-      if (parentDom.contains(fiber.dom)) {
+      if (parentDom && parentDom.contains(fiber.dom)) {
         parentDom.removeChild(fiber.dom);
       } else {
-        console.warn('Cannot remove node: not a child of parent', {
-          child: fiber.dom,
-          parent: parentDom,
-        });
+        // 더 위쪽의 부모 DOM에서 찾기
+        let actualParentDom = parentDom;
+        while (actualParentDom && !actualParentDom.contains(fiber.dom)) {
+          actualParentDom = actualParentDom.parentNode;
+        }
+        if (actualParentDom && actualParentDom.contains(fiber.dom)) {
+          actualParentDom.removeChild(fiber.dom);
+        }
       }
-    } catch (e) {
-      console.error('Error removing node:', e);
+    } catch (error) {
+      console.error('Error removing DOM node:', error);
     }
   } else {
-    // DOM이 없는 컴포넌트의 경우 자식을 재귀적으로 삭제
+    // 함수형 컴포넌트의 경우 자식들을 재귀적으로 삭제
     let child = fiber.child;
     while (child) {
-      let actualParentDom = parentDom;
-      if (fiber.parent) {
-        let parent = fiber.parent;
-        while (parent && !parent.dom) {
-          parent = parent.parent;
-        }
-        if (parent) {
-          actualParentDom = parent.dom;
-        }
-      }
       commitDeletion(child, parentDom);
       child = child.sibling;
     }
   }
+
 }
 
 /**
@@ -179,18 +213,27 @@ function runEffects(fiber) {
 }
 
 function runCleanup(fiber) {
+  console.log('runCleanup for:', fiber.type);
+
   if (!fiber) return;
 
   if (fiber.effects && fiber.effects.length > 0) {
-    fiber.effects.forEach((effect) => {
+    console.log('Running cleanup for effects:', fiber.effects.length);
+
+    fiber.effects.forEach((effect, index) => {
       if (effect.cleanup) {
+        console.log(`Running cleanup ${index} for:`, fiber.type);
+
         try {
           effect.cleanup();
+          console.log(`Cleanup ${index} completed`);
         } catch (e) {
           console.error(e);
         }
       }
     });
+  } else {
+    console.log('No effects to clean up');
   }
 }
 
