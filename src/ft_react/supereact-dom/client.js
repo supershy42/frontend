@@ -29,7 +29,7 @@ SupereactDomRoot.prototype.unmount = function () {
  * @returns {Object} 렌더와 언마운트 메서드를 가진 객체
  */
 export function createRoot(container) {
-  console.log('1. createRoot called with container:', container);
+  // console.log('1. createRoot called with container:', container);
   if (!isValidContainer(container)) {
     throw new Error(
       'Target container is not a DOM element or Document Fragment'

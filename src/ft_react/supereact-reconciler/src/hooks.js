@@ -8,9 +8,9 @@ let hookIndex = 0;
  * 컴포넌트 렌더링 전 호출
  */
 export function prepareHooks(fiber) {
-  console.log('prepareHooks', fiber);
+  // console.log('prepareHooks', fiber);
   currentlyRenderingFiber = fiber;
-  console.log('currentlyRenderingFiber', currentlyRenderingFiber);
+  // console.log('currentlyRenderingFiber', currentlyRenderingFiber);
   hookIndex = 0;
 }
 
@@ -31,7 +31,7 @@ export function finishHooks() {
  */
 export function useState(initial) {
   const fiber = currentlyRenderingFiber;
-  console.log('fiber', fiber);
+  // console.log('fiber', fiber);
   const oldHook = fiber.alternate?.hooks?.[hookIndex];
 
   const hook = {
@@ -47,14 +47,14 @@ export function useState(initial) {
   const actions = oldHook?.queue || [];
   if (actions.length > 0) {
     for (const action of actions) {
-      console.log('action', action, 'hook.state', hook.state);
+      // console.log('action', action, 'hook.state', hook.state);
       hook.state = typeof action === 'function' ? action(hook.state) : action;
-      console.log('hook.state', hook.state);
+      // console.log('hook.state', hook.state);
     }
   }
 
   const setState = (action) => {
-    console.log('currentlyRenderingFiber', fiber);
+    // console.log('currentlyRenderingFiber', fiber);
 
     hook.queue.push(action);
 
@@ -64,11 +64,11 @@ export function useState(initial) {
     }
 
     const root = fiberRoot.stateNode;
-    console.log('Found root:', root);
+    // console.log('Found root:', root);
 
     // 업데이트 대기열에 추가
     root.pendingUpdates.push(fiber);
-    console.log('Added to pendingUpdates:', root.pendingUpdates);
+    // console.log('Added to pendingUpdates:', root.pendingUpdates);
 
     scheduleUpdateOnFiber(root);
   };

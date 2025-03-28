@@ -7,21 +7,19 @@ import { updateProperties } from './domProperties.js';
  * @param {Object} wipRoot - 작업이 완료된 Fiber 트리의 루트
  */
 function commitRoot(root) {
-  console.log('9. commitRoot called with root:', root);
+  // console.log('9. commitRoot called with root:', root);
   const finishedWork = root.finishedWork;
   if (!finishedWork) {
-    console.log('No finishedWork found');
+    // console.log('No finishedWork found');
     return;
   }
 
   // 루트에서 모든 deletions 배열 찾기
   let allDeletions = collectAllDeletions(finishedWork);
 
-  console.log('Total collected deletions:', allDeletions.length);
 
   // 수집된 모든 deletions 처리
   if (allDeletions.length > 0) {
-    console.log('Processing all collected deletions:', allDeletions.length);
 
     allDeletions.forEach((fiber) => {
       // 각 삭제될 fiber마다 부모 DOM 노드 찾기
@@ -37,7 +35,7 @@ function commitRoot(root) {
   runEffects(finishedWork);
 
   // 현재 트리를 workInProgress 트리로 교체
-  console.log('10. committing finished, new current:', finishedWork);
+  // console.log('10. committing finished, new current:', finishedWork);
   root.current = finishedWork;
   root.finishedWork = null;
   root.nextUnitOfWork = null;
@@ -100,14 +98,9 @@ function commitWork(fiber, parentDom) {
 
   if (fiber.flags === 'PLACEMENT' && fiber.dom) {
     // 새로운 노드 추가
-    console.log('Placing new node:', {
-      type: fiber.type,
-      parent: actualParentDom?.nodeName,
-    });
     actualParentDom.appendChild(fiber.dom);
   } else if (fiber.flags === 'UPDATE' && fiber.dom) {
     // 노드 업데이트
-    console.log('11. updating node:', fiber.type);
     updateDom(fiber.dom, fiber.alternate?.props || {}, fiber.props);
   } else if (fiber.flags === 'DELETION') {
     commitDeletion(fiber, actualParentDom);
@@ -129,13 +122,6 @@ function commitWork(fiber, parentDom) {
  */
 function commitDeletion(fiber, parentDom) {
   if (!fiber) return;
-
-  console.log('Deleting:', {
-    type: fiber.type,
-    key: fiber.key,
-    hasDom: !!fiber.dom,
-    parentDom: parentDom.nodeName,
-  });
 
   runCleanup(fiber);
 
@@ -213,27 +199,26 @@ function runEffects(fiber) {
 }
 
 function runCleanup(fiber) {
-  console.log('runCleanup for:', fiber.type);
+  // console.log('runCleanup for:', fiber.type);
 
   if (!fiber) return;
 
   if (fiber.effects && fiber.effects.length > 0) {
-    console.log('Running cleanup for effects:', fiber.effects.length);
 
     fiber.effects.forEach((effect, index) => {
       if (effect.cleanup) {
-        console.log(`Running cleanup ${index} for:`, fiber.type);
+        // console.log(`Running cleanup ${index} for:`, fiber.type);
 
         try {
           effect.cleanup();
-          console.log(`Cleanup ${index} completed`);
+          // console.log(`Cleanup ${index} completed`);
         } catch (e) {
           console.error(e);
         }
       }
     });
   } else {
-    console.log('No effects to clean up');
+    // console.log('No effects to clean up');
   }
 }
 

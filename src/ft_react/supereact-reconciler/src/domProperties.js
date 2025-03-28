@@ -7,13 +7,6 @@
  * @param {any} prevValue - 이전 속성 값
  */
 export function setProperty(dom, name, value, prevValue) {
-  console.log('setProperty called with:', {
-    dom: dom,
-    domType: dom ? dom.constructor.name : 'null',
-    nodeType: dom ? dom.nodeType : 'N/A',
-    name: name,
-    value: value,
-  });
 
   if (!dom || !dom.nodeType) {
     return;

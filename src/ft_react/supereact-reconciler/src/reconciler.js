@@ -72,8 +72,7 @@ function createFiberNode(type, props) {
  * 3. 업데이트 작업 스케줄링
  */
 function updateContainer(element, root) {
-  console.log('2. updateContainer called with element:', element);
-  console.log('2-1. root:', root);
+  // console.log('2. updateContainer called with element:', element);
 
   const current = root.current;
   current.props = {
@@ -190,15 +189,13 @@ function createWorkInProgress(current) {
  * @param {Object} fiber - 업데이트 필요한 Fiber 노드
  */
 export function scheduleUpdateOnFiber(root) {
-  console.log('scheduleUpdateOnFiber with root:', root);
-  console.log('isUpdating:', root.isUpdating);
-  console.log('pendingUpdates:', root.pendingUpdates);
+  // console.log('scheduleUpdateOnFiber with root:', root);
 
   if (!root.isUpdating) {
     root.isUpdating = true;
     requestIdleCallback((deadline) => workLoop(root, deadline));
   } else {
-    console.log('already updating, skip scheduling');
+    // console.log('already updating, skip scheduling');
   }
   root.isUpdating = true;
   // requestIdleCallback((deadline) => workLoop(root, deadline));
@@ -208,10 +205,7 @@ export function scheduleUpdateOnFiber(root) {
  * 작업 루프 실행
  */
 function workLoop(root, deadline) {
-  console.log('3. workLoop running with root:', root);
-  console.log('3-1. root.pendingUpdates', root.pendingUpdates);
-  console.log('3-2. root.nextUnitOfWork', root.nextUnitOfWork);
-  console.log('3-3. root.isUpdating', root.isUpdating);
+  // console.log('3. workLoop running with root:', root);
 
   if (root.pendingUpdates.length > 0 && !root.nextUnitOfWork) {
     // 새 작업 트리 생성
@@ -241,12 +235,8 @@ function logFiberTree(fiber, depth = 0) {
   if (!fiber) return;
 
   const indent = '  '.repeat(depth);
-  console.log(
-    `${indent}Fiber: ${fiber.type}, key: ${fiber.key}, flags: ${fiber.flags}`
-  );
 
   if (fiber.child) {
-    console.log(`${indent}Children:`);
     logFiberTree(fiber.child, depth + 1);
   }
 
@@ -258,9 +248,7 @@ function logFiberTree(fiber, depth = 0) {
 function finishWork(root) {
   if (root.current.alternate) {
     root.finishedWork = root.current.alternate;
-    console.log('=== FIBER TREE BEFORE COMMIT ===');
-    logFiberTree(root.finishedWork);
-    console.log('===============================');
+    // logFiberTree(root.finishedWork);
     commitRoot(root);
   }
 }
@@ -272,20 +260,19 @@ function finishWork(root) {
  * @returns {Object} 다음 작업 단위 Fiber 노드
  */
 function performUnitOfWork(fiber) {
-  console.log('4. performUnitOfWork for:', fiber.type, 'flags:', fiber.flags);
+  // console.log('4. performUnitOfWork for:', fiber.type, 'flags:', fiber.flags);
 
   if (!fiber.deletions) {
     fiber.deletions = [];
-    console.log('Initialized deletions array for:', fiber.type);
   }
 
   const isFunctionComponent = typeof fiber.type === 'function';
 
   if (isFunctionComponent) {
-    console.log('4-1. updateFunctionComponent for:', fiber.type);
+    // console.log('4-1. updateFunctionComponent for:', fiber.type);
     updateFunctionComponent(fiber);
   } else {
-    console.log('4-2. updateHostComponent for:', fiber.type);
+    // console.log('4-2. updateHostComponent for:', fiber.type);
     updateHostComponent(fiber);
   }
 
@@ -308,8 +295,7 @@ function performUnitOfWork(fiber) {
 }
 
 function updateFunctionComponent(fiber) {
-  console.log('5. updateFunctionComponent for:', fiber.type);
-  console.log('5-1. fiber:', fiber);
+  // console.log('5. updateFunctionComponent for:', fiber.type);
 
   prepareHooks(fiber);
 
@@ -356,7 +342,7 @@ function updateHostComponent(fiber) {
  * @returns {HTMLElement|Text} 생성된 DOM 노드
  */
 function createDom(fiber) {
-  console.log('7. createDom for:', fiber.type);
+  // console.log('7. createDom for:', fiber.type);
 
   // 텍스트 요소 처리
   if (fiber.type === 'TEXT_ELEMENT') {
@@ -385,8 +371,7 @@ function createDom(fiber) {
  * @param {Array} elements - 자식 엘리먼트들
  */
 function reconcileChildren(wipFiber, elements) {
-  console.log('reconcileChildren for:', wipFiber.type);
-  console.log('elements count:', elements ? elements.length : 0);
+  // console.log('reconcileChildren for:', wipFiber.type);
 
   let index = 0;
   let oldFiber = wipFiber.alternate?.child;
@@ -400,16 +385,9 @@ function reconcileChildren(wipFiber, elements) {
 
   // 이전 자식이 있었지만 지금은 없는 경우 (조건부 렌더링이 false가 된 경우)
   if (elementArray.length === 0 && wipFiber.alternate?.child) {
-    console.log('No elements but had children before - removing all children');
     // 모든 이전 자식을 제거
     let oldChild = wipFiber.alternate.child;
     while (oldChild) {
-      console.log(
-        'Marking for deletion (empty elements):',
-        oldChild.type,
-        'key:',
-        oldChild.key
-      );
       oldChild.flags = 'DELETION';
       wipFiber.deletions.push(oldChild);
       oldChild = oldChild.sibling;
@@ -437,13 +415,8 @@ function reconcileChildren(wipFiber, elements) {
 
   // 실제 reconcile 작업
   while (index < elementArray.length) {
-    console.log(
-      `Processing element ${index}:`,
-      elementArray[index]?.type || 'null/undefined'
-    );
-
     const element = elementArray[index];
-    console.log('6. processing element:', element);
+    // console.log('6. processing element:', element);
 
     let newFiber = null;
     let sameType = false;
@@ -464,11 +437,9 @@ function reconcileChildren(wipFiber, elements) {
         ? processedElement.props.key
         : `${processedElement?.type || ''}_index_${index}`;
 
-    console.log('Processing element with key:', key, 'at index:', index);
 
     // key 값으로 매칭되는 oldFiber 찾기
     if (processedElement && oldFiberMap.has(key)) {
-      console.log('Found existing fiber with key:', key);
       oldFiberForElement = oldFiberMap.get(key);
       oldFiberMap.delete(key); // 맵에서 제거하여 중복 처리 방지
       sameType =
@@ -486,8 +457,6 @@ function reconcileChildren(wipFiber, elements) {
     }
 
     if (sameType) {
-      console.log(`Element ${index}: UPDATE - same type`, element?.type);
-
       // 1. 업데이트 케이스: 동일한 타입
       newFiber = {
         type: oldFiberForElement.type,
@@ -517,11 +486,6 @@ function reconcileChildren(wipFiber, elements) {
     } else {
       // 2. 새로운 요소가 있는 경우: 생성
       if (processedElement) {
-        console.log(
-          `Element ${index}: PLACEMENT - new element`,
-          processedElement.type
-        );
-
         newFiber = {
           type: processedElement.type,
           props: processedElement.props,
@@ -542,11 +506,6 @@ function reconcileChildren(wipFiber, elements) {
 
       // 3. 이전 요소가 있는 경우: 삭제
       if (oldFiberForElement) {
-        console.log(
-          `Element ${index}: DELETION - old fiber`,
-          oldFiberForElement.type
-        );
-
         oldFiberForElement.flags = 'DELETION';
         // 중복 삭제 방지를 위한 체크
         if (!wipFiber.deletions.some((f) => f.key === oldFiberForElement.key)) {
@@ -574,7 +533,6 @@ function reconcileChildren(wipFiber, elements) {
 
   // 남은 oldFiber 삭제 처리
   oldFiberMap.forEach((fiber) => {
-    console.log('Marking for deletion:', fiber.type, 'key:', fiber.key);
     fiber.flags = 'DELETION';
     // 중복 삭제 방지를 위한 체크
     if (!wipFiber.deletions.some((f) => f === fiber)) {
@@ -582,7 +540,6 @@ function reconcileChildren(wipFiber, elements) {
     }
   });
 
-  console.log('Total deletions:', wipFiber.deletions.length);
 }
 
 export { updateContainer, createFiberRoot };
