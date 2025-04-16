@@ -17,10 +17,8 @@ function commitRoot(root) {
   // 루트에서 모든 deletions 배열 찾기
   let allDeletions = collectAllDeletions(finishedWork);
 
-
   // 수집된 모든 deletions 처리
   if (allDeletions.length > 0) {
-
     allDeletions.forEach((fiber) => {
       // 각 삭제될 fiber마다 부모 DOM 노드 찾기
       const parentDom = findClosestParentDom(fiber) || root.containerInfo;
@@ -33,6 +31,19 @@ function commitRoot(root) {
 
   // 이펙트 실행 (Dom 업데이트 이후에 실행)
   runEffects(finishedWork);
+
+  // Handle hooks in a single pass
+  if (finishedWork.hooks) {
+    // Clear queues and preserve states
+    root.current.hooks = finishedWork.hooks.map((hook) => ({
+      state: hook.state,
+      queue: [], // Clear queue while preserving state
+      tag: hook.tag,
+      callback: hook.callback,
+      deps: hook.deps,
+      cleanup: hook.cleanup,
+    }));
+  }
 
   // 현재 트리를 workInProgress 트리로 교체
   // console.log('10. committing finished, new current:', finishedWork);
@@ -151,7 +162,6 @@ function commitDeletion(fiber, parentDom) {
       child = child.sibling;
     }
   }
-
 }
 
 /**
@@ -204,7 +214,6 @@ function runCleanup(fiber) {
   if (!fiber) return;
 
   if (fiber.effects && fiber.effects.length > 0) {
-
     fiber.effects.forEach((effect, index) => {
       if (effect.cleanup) {
         // console.log(`Running cleanup ${index} for:`, fiber.type);

@@ -16,6 +16,8 @@ function createFiberRoot(containerInfo) {
     pendingUpdates: [],
     // 업데이트 진행 여부
     isUpdating: false,
+    // 배치 업데이트 스케줄링 여부
+    batchUpdateScheduled: false,
   };
 
   const rootFiber = {
@@ -146,37 +148,50 @@ function shallowEqual(objA, objB) {
  * @returns {Object} workInProgress Fiber 트리
  */
 function createWorkInProgress(current) {
-  // 이전 workInProgress가 있으면 그대로 사용
   let workInProgress = current.alternate;
 
   if (!workInProgress) {
-    // 새로운 Fiber 노드 생성
     workInProgress = createFiberNode(current.type, current.props);
     workInProgress.stateNode = current.stateNode;
-    workInProgress.dom = current.dom; // DOM 노드는 재사용
+    workInProgress.dom = current.dom;
     workInProgress.flags = current.flags;
-    workInProgress.hooks = current.hooks ? [...current.hooks] : [];
+    workInProgress.hooks = current.hooks
+      ? current.hooks.map((hook) => ({
+          state: hook.state,
+          queue: [...hook.queue],
+          tag: hook.tag,
+          callback: hook.callback,
+          deps: hook.deps,
+          cleanup: hook.cleanup,
+        }))
+      : [];
     workInProgress.effects = [];
-    workInProgress.alternate = current; // 이전 Fiber 노드와 연결
+    workInProgress.alternate = current;
     current.alternate = workInProgress;
   } else {
-    // 기존 workInProgress 재사용하고 필요한 속성만 업데이트
     workInProgress.stateNode = current.stateNode;
     workInProgress.dom = current.dom;
     workInProgress.type = current.type;
     workInProgress.props = current.props;
     workInProgress.flags = current.flags;
-    workInProgress.hooks = current.hooks ? [...current.hooks] : [];
+    workInProgress.hooks = current.hooks
+      ? current.hooks.map((hook) => ({
+          state: hook.state,
+          queue: [...hook.queue],
+          tag: hook.tag,
+          callback: hook.callback,
+          deps: hook.deps,
+          cleanup: hook.cleanup,
+        }))
+      : [];
     workInProgress.effects = [];
     workInProgress.deletions = [];
   }
 
   workInProgress.child = null;
   workInProgress.sibling = null;
-
   workInProgress.key = current.key;
   workInProgress.ref = current.ref;
-
   workInProgress.index = current.index;
 
   return workInProgress;
@@ -191,14 +206,18 @@ function createWorkInProgress(current) {
 export function scheduleUpdateOnFiber(root) {
   // console.log('scheduleUpdateOnFiber with root:', root);
 
-  if (!root.isUpdating) {
-    root.isUpdating = true;
-    requestIdleCallback((deadline) => workLoop(root, deadline));
-  } else {
-    // console.log('already updating, skip scheduling');
+  // if (!root.isUpdating) {
+  //   root.isUpdating = true;
+  //   requestIdleCallback((deadline) => workLoop(root, deadline));
+  // } else {
+  //   // console.log('already updating, skip scheduling');
+  // }
+
+  if (root.isUpdating) {
+    return;
   }
   root.isUpdating = true;
-  // requestIdleCallback((deadline) => workLoop(root, deadline));
+  requestIdleCallback((deadline) => workLoop(root, deadline));
 }
 
 /**
@@ -212,6 +231,7 @@ function workLoop(root, deadline) {
     const current = root.current;
     const workInProgress = createWorkInProgress(current);
 
+    // root.pendingUpdates = [];
     root.finishedWork = null;
     root.nextUnitOfWork = workInProgress;
   }
@@ -299,7 +319,9 @@ function updateFunctionComponent(fiber) {
 
   prepareHooks(fiber);
 
-  fiber.hooks = [];
+  if (!fiber.hooks) {
+    fiber.hooks = [];
+  }
   fiber.effects = [];
   // // 이전 hooks 상태 복사
   // if (fiber.alternate?.hooks) {
@@ -372,6 +394,13 @@ function createDom(fiber) {
  */
 function reconcileChildren(wipFiber, elements) {
   // console.log('reconcileChildren for:', wipFiber.type);
+  // console.log(
+  //   'wipFiber hooks:',
+  //   wipFiber.hooks?.map((h) => ({
+  //     state: h.state,
+  //     queueLength: h.queue?.length || 0,
+  //   }))
+  // );
 
   let index = 0;
   let oldFiber = wipFiber.alternate?.child;
@@ -436,7 +465,6 @@ function reconcileChildren(wipFiber, elements) {
       processedElement?.props?.key !== undefined
         ? processedElement.props.key
         : `${processedElement?.type || ''}_index_${index}`;
-
 
     // key 값으로 매칭되는 oldFiber 찾기
     if (processedElement && oldFiberMap.has(key)) {
@@ -539,7 +567,6 @@ function reconcileChildren(wipFiber, elements) {
       wipFiber.deletions.push(fiber);
     }
   });
-
 }
 
 export { updateContainer, createFiberRoot };

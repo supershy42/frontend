@@ -31,7 +31,6 @@ export function finishHooks() {
  */
 export function useState(initial) {
   const fiber = currentlyRenderingFiber;
-  // console.log('fiber', fiber);
   const oldHook = fiber.alternate?.hooks?.[hookIndex];
 
   const hook = {
@@ -41,20 +40,22 @@ export function useState(initial) {
         : typeof initial === 'function'
         ? initial()
         : initial,
-    queue: [],
+    queue: oldHook?.queue || [],
   };
 
-  const actions = oldHook?.queue || [];
+  const actions = hook.queue;
+
   if (actions.length > 0) {
+    let newState = hook.state;
     for (const action of actions) {
-      // console.log('action', action, 'hook.state', hook.state);
-      hook.state = typeof action === 'function' ? action(hook.state) : action;
-      // console.log('hook.state', hook.state);
+      newState = typeof action === 'function' ? action(newState) : action;
     }
+    hook.state = newState;
+    // console.log('Updated state:', hook.state);
   }
 
   const setState = (action) => {
-    // console.log('currentlyRenderingFiber', fiber);
+    // console.log('setState called for fiber:', fiber.type.name || fiber.type);
 
     hook.queue.push(action);
 
@@ -64,13 +65,19 @@ export function useState(initial) {
     }
 
     const root = fiberRoot.stateNode;
-    // console.log('Found root:', root);
 
-    // 업데이트 대기열에 추가
-    root.pendingUpdates.push(fiber);
-    // console.log('Added to pendingUpdates:', root.pendingUpdates);
+    if (!root.pendingUpdates.includes((f) => f === fiber)) {
+      root.pendingUpdates.push(fiber);
+    }
 
-    scheduleUpdateOnFiber(root);
+    if (!root.batchUpdateScheduled) {
+      root.batchUpdateScheduled = true;
+
+      Promise.resolve().then(() => {
+        root.batchUpdateScheduled = false;
+        scheduleUpdateOnFiber(root);
+      });
+    }
   };
 
   fiber.hooks = fiber.hooks || [];
