@@ -1,5 +1,4 @@
-/** @jsx Supereact.createElement */
-import Supereact from './Supereact/index.js';
+import { useState, useEffect } from 'ft_react';
 import Home from './pages/Home.jsx';
 import Register from './pages/Register.jsx';
 import Login from './pages/Login.jsx';
@@ -24,9 +23,9 @@ const USER_WS_URL = process.env.USER_WS_URL;
 
 function App() {
   const [route] = useRouter();
-  const [isConnected, setIsConnected] = Supereact.useState(false);
+  const [isConnected, setIsConnected] = useState(false);
 
-  Supereact.useEffect(() => {
+  useEffect(() => {
     setRouterInstance(route);
     const ws = new WebSocket(
       `${USER_WS_URL}/notifications/?token=${localStorage.getItem('access')}`

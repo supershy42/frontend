@@ -1,9 +1,8 @@
-/** @jsx Supereact.createElement */
-// JoinGameModal.jsx
-import Supereact from '../../Supereact/index.js';
+import { useState } from 'ft_react';
+
 
 const JoinGameModal = ({ game, onClose, onJoin }) => {
-  const [password, setPassword] = Supereact.useState('');
+  const [password, setPassword] = useState('');
 
   const handleSubmit = async () => {
     if (!game || (game.has_password && !password)) {

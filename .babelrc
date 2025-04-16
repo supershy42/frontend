@@ -1,8 +1,12 @@
 {
-  "presets": ["@babel/preset-env"],
-  "plugins": [
-    ["@babel/plugin-transform-react-jsx", {
-      "pragma": "Supereact.createElement"
-    }]
+  "presets": [
+    "@babel/preset-env",
+    [
+      "@babel/preset-react",
+      {
+        "runtime": "automatic",
+        "importSource": "ft_react"
+      }
+    ]
   ]
 }

@@ -1,5 +1,5 @@
-/** @jsx Supereact.createElement */
-import Supereact from '../../Supereact/index.js';
+import { useState, useEffect } from 'ft_react';
+
 
 const GAME_WS_URL = process.env.GAME_WS_URL;
 
@@ -67,18 +67,18 @@ const myTeamIndicatorStyle = {
 
 const Arena = (props) => {
   // 초기 state 설정
-  const [socket, setSocket] = Supereact.useState(null);
-  const [team, setTeam] = Supereact.useState('left'); // 테스트용으로 left팀으로 고정
-  const [players, setPlayers] = Supereact.useState({
+  const [socket, setSocket] = useState(null);
+  const [team, setTeam] = useState('left'); // 테스트용으로 left팀으로 고정
+  const [players, setPlayers] = useState({
     left: 'Player 1',
     right: 'Player 2',
   });
-  const [leftScore, setLeftScore] = Supereact.useState(0);
-  const [rightScore, setRightScore] = Supereact.useState(0);
-  const [leftPaddleY, setLeftPaddleY] = Supereact.useState(250);
-  const [rightPaddleY, setRightPaddleY] = Supereact.useState(250);
+  const [leftScore, setLeftScore] = useState(0);
+  const [rightScore, setRightScore] = useState(0);
+  const [leftPaddleY, setLeftPaddleY] = useState(250);
+  const [rightPaddleY, setRightPaddleY] = useState(250);
 
-  Supereact.useEffect(() => {
+  useEffect(() => {
     const arenaId = history.state?.id;
     const token = localStorage.getItem('access');
 

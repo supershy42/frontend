@@ -1,14 +1,15 @@
-/** @jsx Supereact.createElement */
-import Supereact from '../Supereact/index.js';
+
 import { getChattingRoom } from '../api/userApi.js';
+import { useState, useEffect } from 'ft_react';
+
 
 const CHAT_WS_URL = process.env.CHAT_WS_URL;
 const IMG_URL = process.env.IMG_URL;
 
 const ChatRoom = ({ chatRoomId }) => {
-  const [messages, setMessages] = Supereact.useState([]);
-  const [newMessage, setNewMessage] = Supereact.useState('');
-  const [socket, setSocket] = Supereact.useState(null);
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [socket, setSocket] = useState(null);
   const messagesEndRef = null; // 실제 DOM 참조를 위한 ref가 있다면 사용
 
   const chatContainerStyle = {
@@ -86,7 +87,7 @@ const ChatRoom = ({ chatRoomId }) => {
     }
   };
 
-  Supereact.useEffect(() => {
+  useEffect(() => {
     fetchMessages();
     const ws = setupWebSocket();
 

@@ -1,10 +1,9 @@
-/** @jsx Supereact.createElement */
-import Supereact from './Supereact';
+import { useState } from 'ft_react';
 
 let prevEventListener = null;
 
 export const useRouter = () => {
-  const [path, setPath] = Supereact.useState(location.pathname);
+  const [path, setPath] = useState(location.pathname);
   const route = (newPath, state) => {
     if (newPath !== path) {
       if (!state) state = {};

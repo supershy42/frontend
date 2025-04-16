@@ -1,7 +1,7 @@
-/** @jsx Supereact.createElement */
+
 import { inviteFriend } from '../api/gameApi.js';
 import { getFriendList } from '../api/userApi';
-import Supereact from '../Supereact/index.js';
+import { useState, useEffect } from 'ft_react';
 
 const FriendInviteDropup = ({ show, onClose }) => {
   const dropupStyle = {
@@ -50,7 +50,7 @@ const FriendInviteDropup = ({ show, onClose }) => {
     backgroundColor: '#004FC6',
     marginRight: '10px',
   };
-  const [friends, setFriends] = Supereact.useState([]);
+  const [friends, setFriends] = useState([]);
 
   const fetchFriends = async () => {
     const data = await getFriendList();
@@ -74,8 +74,8 @@ const FriendInviteDropup = ({ show, onClose }) => {
     }
   };
 
-  Supereact.useEffect(() => {
-    fetchFriends();
+  useEffect(() => {
+    // fetchFriends();
   }, [show]);
 
   return (
@@ -107,7 +107,7 @@ const FriendInviteDropup = ({ show, onClose }) => {
                       color: '#004FC6',
                       cursor: 'pointer',
                     }}
-                    onClick={() => handleInvite(friend.id)}
+                    onClick={() => handleInvite(friend.friend_id)}
                   >
                     <i className="fas fa-paper-plane"></i>
                   </button>

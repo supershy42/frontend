@@ -1,7 +1,6 @@
-/** @jsx Supereact.createElement */
+import { jsx, useState, useEffect } from 'ft_react';
 import Binky from '../component/Binky.jsx';
 import HomeTextButton from '../component/HomeTextButton.jsx';
-import Supereact from '../Supereact/index.js';
 
 const centerStyle = {
   width: '100%',
@@ -26,11 +25,9 @@ const bingkyContainerStyle = {
 };
 
 function Home(props) {
-  const [isLogin, setIsLogin] = Supereact.useState(
-    !!localStorage.getItem('access')
-  );
+  const [isLogin, setIsLogin] = useState(!!localStorage.getItem('access'));
 
-  Supereact.useEffect(() => {}, []);
+  useEffect(() => {}, []);
 
   const handleClick = (action) => {
     if (action === 'Register') {

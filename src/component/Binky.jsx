@@ -1,5 +1,3 @@
-/** @jsx Supereact.createElement */
-import Supereact from '../Supereact';
 import { useStore } from '../utils/useStore';
 
 const Binky = ({ onClick }) => {

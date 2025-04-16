@@ -1,5 +1,4 @@
-/** @jsx Supereact.createElement */
-import Supereact from '../Supereact/index.js';
+
 
 const textStyle = {
   fontFamily: 'Jersey 10',

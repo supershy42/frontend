@@ -1,5 +1,3 @@
-/** @jsx Supereact.createElement */
-import Supereact from '../Supereact';
 
 function Background() {
   const backgroundStyle = {

@@ -1,8 +1,8 @@
-/** @jsx Supereact.createElement */
-import Supereact from '../Supereact';
+import { useState } from 'ft_react';
+
 
 function HomeTextButton({ text, onClick, type = 'button'}) {
-  const [isHover, setIsHover] = Supereact.useState(false);
+  const [isHover, setIsHover] = useState(false);
 
   const handleMouseEnter = () => {
     setIsHover(true);

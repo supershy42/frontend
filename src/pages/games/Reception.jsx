@@ -1,12 +1,12 @@
-/** @jsx Supereact.createElement */
+import { useState, useEffect } from 'ft_react';
 import HomeTextButton from '../../component/HomeTextButton';
 import LoadingDots from '../../component/LoadingDots.jsx';
 import ReceptionHandler from '../../component/ReceptionHandler.jsx';
 import TextBanner from '../../component/TextBanner.jsx';
-import Supereact from '../../Supereact/index.js';
 import FriendInviteDropup from '../../component/FriendInviteDropup.jsx';
 
 const IMG_URL = process.env.IMG_URL;
+const GAME_WS_URL = process.env.GAME_WS_URL;
 
 const pageContainerStyle = {
   position: 'relative',
@@ -120,70 +120,85 @@ const gameBannerStyle = {
 };
 
 const Reception = (props) => {
-  const [gameState, setGameState] = Supereact.useState({
-    isConnected: false,
-    myself: null,
-    player: null,
-    readyToStart: false,
-  });
+  const [myself, setMyself] = useState(null);
+  const [player, setPlayer] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [readyToStart, setReadyToStart] = useState(false);
 
-  const [socket, setSocket] = Supereact.useState(null);
+  const [socket, setSocket] = useState(null);
 
-  const [showInvite, setShowInvite] = Supereact.useState(false);
+  const [showInvite, setShowInvite] = useState(false);
+
+  useEffect(() => {
+    const receptionId = history.state.id;
+    const token = localStorage.getItem('access');
+    if (token === null) {
+      return;
+    }
+
+    const ws = new WebSocket(
+      `${GAME_WS_URL}/reception/${receptionId}/?token=${token}`
+    );
+
+    ws.onopen = () => {
+      setIsConnected(true);
+      setSocket(ws);
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log('Received data:', data);
+
+      if (data.type === 'participants') {
+        console.log('Participants:', data.message);
+        const participants = data.message;
+        const myself = participants.find(
+          (p) => p.user_id === localStorage.getItem('user_id')
+        );
+        const other = participants.find(
+          (p) => p.user_id !== localStorage.getItem('user_id')
+        );
+
+        setMyself(myself);
+        setPlayer(other);
+      } else if (data.type === 'move') {
+        setReadyToStart(true);
+        setTimeout(() => {
+          props.route(`/arena/${receptionId}`);
+        }, 2000);
+      }
+    };
+
+    ws.onclose = () => {
+      setIsConnected(false);
+    };
+
+    return () => ws.close();
+  }, []);
 
   const handleReadyClick = () => {
-    if (socket && socket.readyState === WebSocket.OPEN && gameState.myself) {
+    if (socket && socket.readyState === WebSocket.OPEN && myself) {
       socket.send(
         JSON.stringify({
           type: 'ready',
-          is_ready: !gameState.myself.is_ready,
+          is_ready: !myself.is_ready,
         })
       );
     }
   };
 
-  const handleStateChange = (action) => {
-    switch (action.type) {
-      case 'connection':
-        setGameState((prev) => ({ ...prev, isConnected: action.isConnected }));
-        break;
-      case 'participants':
-        setGameState((prev) => ({
-          ...prev,
-          myself: action.myself,
-          player: action.player,
-        }));
-        break;
-      case 'gameStart':
-        setGameState((prev) => ({ ...prev, readyToStart: true }));
-        if (action.readyToStart) {
-          setTimeout(() => {
-            props.route(`/arena/${history.state.id}`);
-          }, 2000);
-        }
-        break;
-    }
-  };
-
   return (
     <div style={pageContainerStyle}>
-      <ReceptionHandler
-        receptionId={history.state.id}
-        onStateChange={handleStateChange}
-        onSocketReady={setSocket}
-      />
       <TextBanner text="Waiting Room" width={500} />
       <div style={mainContainerStyle}>
-        {gameState.myself ? (
+        {myself ? (
           <div style={playerContainerStyle}>
             <div
               style={
-                gameState.myself.is_ready
-                  ? readyProfileStyle
-                  : profileContainerStyle
+                myself.is_ready ? readyProfileStyle : profileContainerStyle
               }
             >
-              {gameState.myself.is_ready ? (
+              {myself.is_ready ? (
                 <div style={speechBubbleStyle}>
                   Ready!
                   <div style={speechBubbleAfter}></div>
@@ -197,8 +212,8 @@ const Reception = (props) => {
               )}
               <img
                 src={
-                  gameState.myself.avatar
-                    ? `${IMG_URL}${gameState.myself.avatar}`
+                  myself.avatar
+                    ? `${IMG_URL}${myself.avatar}`
                     : '/public/images/Spark_Profile.png'
                 }
                 alt="profile_img"
@@ -206,19 +221,17 @@ const Reception = (props) => {
                 height="200px"
               />
             </div>
-            <h2>{gameState.myself.user_name}</h2>
+            <h2>{myself.user_name}</h2>
           </div>
         ) : null}
-        {gameState.player ? (
+        {player ? (
           <div style={playerContainerStyle}>
             <div
               style={
-                gameState.player.is_ready
-                  ? readyProfileStyle
-                  : profileContainerStyle
+                player.is_ready ? readyProfileStyle : profileContainerStyle
               }
             >
-              {gameState.player.is_ready ? (
+              {player.is_ready ? (
                 <div style={speechBubbleStyle}>
                   Ready!
                   <div style={speechBubbleAfter}></div>
@@ -232,21 +245,21 @@ const Reception = (props) => {
               )}
               <img
                 src={
-                  gameState.player.avatar
-                    ? `${IMG_URL}${gameState.player.avatar}`
+                  player.avatar
+                    ? `${IMG_URL}${player.avatar}`
                     : '/public/images/Spark_Profile.png'
                 }
                 alt="profile_img"
                 width="200px"
               />
             </div>
-            <h2>{gameState.player.user_name}</h2>
+            <h2>{player.user_name}</h2>
           </div>
         ) : null}
       </div>
-      {gameState.player && gameState.myself ? (
+      {player && myself ? (
         <HomeTextButton
-          text={gameState.myself.is_ready ? 'Cancel Ready' : 'Get Ready'}
+          text={myself.is_ready ? 'Cancel Ready' : 'Get Ready'}
           onClick={() => handleReadyClick()}
         />
       ) : (
@@ -267,7 +280,7 @@ const Reception = (props) => {
           onClose={() => setShowInvite(false)}
         />
       </div>
-      {gameState.readyToStart && (
+      {readyToStart && (
         <div style={gameBannerContainerStyle}>
           <div style={gameBannerStyle}>GAME START!</div>
         </div>
