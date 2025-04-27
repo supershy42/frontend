@@ -188,7 +188,7 @@ function App() {
               backgroundColor: '#f8f8f8',
               borderRadius: '5px',
               fontSize: '14px',
-              border: `1px solid ${showHeader ? 'FF0000' : '#00FF00'}`,
+              border: `1px solid ${showHeader ? '#FF0000' : '#00FF00'}`,
             },
             children: [
               {
