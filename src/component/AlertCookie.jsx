@@ -1,5 +1,3 @@
-/** @jsx Supereact.createElement */
-import Supereact from '../Supereact/index.js';
 import { useStore } from '../utils/useStore.js';
 
 const AlertCookie = ({ onClick }) => {

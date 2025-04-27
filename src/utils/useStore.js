@@ -1,10 +1,10 @@
-import Supereact from '../Supereact/index.js';
+import { useState, useEffect } from 'ft_react';
 import { store } from './store.js';
 
 export const useStore = () => {
-  const [state, setState] = Supereact.useState(store.getState());
+  const [state, setState] = useState(store.getState());
 
-  Supereact.useEffect(() => {
+  useEffect(() => {
     return store.subscribe(setState);
   }, []);
 

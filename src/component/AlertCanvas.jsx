@@ -1,8 +1,5 @@
-/** @jsx Supereact.createElement */
-// components/OffCanvas.jsx
 import { joinReception } from '../api/gameApi.js';
 import { acceptFriend } from '../api/userApi.js';
-import Supereact from '../Supereact/index.js';
 import { removeFriendRequest, removeGameInvites } from '../utils/store.js';
 import { useStore } from '../utils/useStore.js';
 import TextBanner from './TextBanner.jsx';

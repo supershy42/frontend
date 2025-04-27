@@ -1,5 +1,4 @@
-/** @jsx Supereact.createElement */
-import Supereact from '../Supereact/index.js';
+import { useState } from 'ft_react';
 import { checkNickname, registerUser, verifyEmail } from '../api/userApi.js';
 import Bunnies from '../component/Bunnies.jsx';
 import HomeTextButton from '../component/HomeTextButton.jsx';
@@ -113,7 +112,7 @@ const verificationButtonStyle = {
 };
 
 function Register(props) {
-  const [state, setState] = Supereact.useState({
+  const [state, setState] = useState({
     nickname: '',
     password: '',
     confirmPassword: '',
@@ -125,7 +124,7 @@ function Register(props) {
     verificationCodeMessage: '',
   });
 
-  const [isTimerRunning, setIsTimerRunning] = Supereact.useState(false);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

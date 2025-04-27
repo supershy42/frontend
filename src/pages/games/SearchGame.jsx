@@ -1,5 +1,4 @@
-/** @jsx Supereact.createElement */
-import Supereact from '../../Supereact/index.js';
+import { useState, useEffect } from 'ft_react';
 import TextBanner from '../../component/TextBanner.jsx';
 import JoinGameModal from './JoinGameModal.jsx';
 import { getReceptionList, joinReception } from '../../api/gameApi.js';
@@ -42,9 +41,9 @@ const blankBox = {
 };
 
 const SearchGame = (props) => {
-  const [gameList, setGameList] = Supereact.useState([]);
-  const [currentPage, setCurrentPage] = Supereact.useState(1);
-  const [selectedGame, setSelectedGame] = Supereact.useState(null);
+  const [gameList, setGameList] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedGame, setSelectedGame] = useState(null);
 
   const fetchGameList = async (page) => {
     try {
@@ -55,7 +54,7 @@ const SearchGame = (props) => {
     }
   };
 
-  Supereact.useEffect(() => {
+  useEffect(() => {
     fetchGameList(1);
   }, []);
 

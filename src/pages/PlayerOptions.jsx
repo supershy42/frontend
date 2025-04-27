@@ -1,5 +1,4 @@
-/** @jsx Supereact.createElement */
-import Supereact from '../Supereact/index.js';
+import { useState } from 'ft_react';
 import TextBanner from '../component/TextBanner.jsx';
 import { modifyProfile } from '../api/userApi.js';
 
@@ -85,14 +84,14 @@ const rightPanelStyle = {
 };
 
 const PlayerOption = (props) => {
-  const [nickname, setNickname] = Supereact.useState(
+  const [nickname, setNickname] = useState(
     localStorage.getItem('nickname')
   );
-  const [currentAvatar, setCurrentAvatar] = Supereact.useState(
+  const [currentAvatar, setCurrentAvatar] = useState(
     `${IMG_URL}${localStorage.getItem('avatar')}`
   );
-  const [selectedAvatar, setSelectedAvatar] = Supereact.useState(null);
-  const [isModified, setIsModified] = Supereact.useState(false);
+  const [selectedAvatar, setSelectedAvatar] = useState(null);
+  const [isModified, setIsModified] = useState(false);
 
   const handleAvatarSelect = (avatar) => {
     setSelectedAvatar(avatar);

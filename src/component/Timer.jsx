@@ -1,8 +1,7 @@
-/** @jsx Supereact.createElement */
-import Supereact from '../Supereact/index.js';
+import { useState } from 'ft_react';
 
 function Timer() {
-  const [time, setTime] = Supereact.useState(300);
+  const [time, setTime] = useState(300);
   const timer = setInterval(() => {
     setTime((prev) => {
       clearInterval(timer);

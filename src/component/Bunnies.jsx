@@ -1,4 +1,3 @@
-import Supereact from '../Supereact';
 
 const Bunnies = (props) => {
   return (

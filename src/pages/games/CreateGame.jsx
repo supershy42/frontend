@@ -1,8 +1,7 @@
-/** @jsx Supereact.createElement */
+import { useState } from 'ft_react';
 import { createReception, joinReception } from '../../api/gameApi';
 import Bunnies from '../../component/Bunnies';
 import HomeTextButton from '../../component/HomeTextButton';
-import Supereact from '../../Supereact/index.js';
 
 const centerBlockStyle = {
   position: 'relative',
@@ -84,9 +83,9 @@ const errorMessageStyle = {
 };
 
 function CreateGame(props) {
-  const [name, setName] = Supereact.useState('');
-  const [password, setPassword] = Supereact.useState('');
-  const [errorMessage, setErrorMessage] = Supereact.useState('');
+  const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleNameChange = (e) => {
     setName(e.target.value);

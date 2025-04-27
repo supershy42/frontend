@@ -1,10 +1,10 @@
-/** @jsx Supereact.createElement */
-import Supereact from '../Supereact/index.js';
+import { useState, useEffect } from 'ft_react';
+
 
 const GAME_WS_URL = process.env.GAME_WS_URL;
 
 const ReceptionHandler = ({ receptionId, onStateChange, onSocketReady }) => {
-  Supereact.useEffect(() => {
+  useEffect(() => {
     const token = localStorage.getItem('access');
     if (token === null) {
       return;
@@ -14,20 +14,15 @@ const ReceptionHandler = ({ receptionId, onStateChange, onSocketReady }) => {
       `${GAME_WS_URL}/reception/${receptionId}/?token=${token}`
     );
 
-    const handleStateChange = (action) => {
-      // Wrap state changes in setTimeout to ensure they're processed in the next tick
-      setTimeout(() => {
-        onStateChange(action);
-      }, 0);
-    };
-
     ws.onopen = () => {
-      handleStateChange({ type: 'connection', isConnected: true });
+      onStateChange({ type: 'connection', isConnected: true });
       onSocketReady(ws);
     };
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
+      console.log('Received data:', data);
+
       if (data.type === 'participants') {
         const participants = data.message;
         const myself = participants.find(
@@ -36,18 +31,21 @@ const ReceptionHandler = ({ receptionId, onStateChange, onSocketReady }) => {
         const other = participants.find(
           (p) => p.user_id !== localStorage.getItem('user_id')
         );
-        handleStateChange({ type: 'participants', myself, player: other });
+        console.log('Myself:', myself);
+        console.log('Other:', other);
+
+        onStateChange({ type: 'participants', myself, player: other });
       } else if (data.type === 'move') {
-        handleStateChange({ type: 'gameStart', readyToStart: true });
+        onStateChange({ type: 'gameStart', readyToStart: true });
       }
     };
 
     ws.onclose = () => {
-      handleStateChange({ type: 'connection', isConnected: false });
+      onStateChange({ type: 'connection', isConnected: false });
     };
 
     return () => ws.close();
-  }, []);
+  }, [receptionId]);
 
   return <div></div>;
 };

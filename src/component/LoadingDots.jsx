@@ -1,5 +1,4 @@
-/** @jsx Supereact.createElement */
-import Supereact from '../Supereact';
+
 
 const dotStyle = {
   animation: 'blink 1s infinite',

@@ -1,5 +1,4 @@
-/** @jsx Supereact.createElement */
-import Supereact from '../Supereact/index.js';
+import { useState } from 'ft_react';
 import { addFriend, getFriendList, searchUser } from '../api/userApi.js';
 import AlertCanvas from '../component/AlertCanvas.jsx';
 import AlertCookie from '../component/AlertCookie';
@@ -143,13 +142,13 @@ const nameStyle = {
 };
 
 const FriendChat = (props) => {
-  const [searchQuery, setSearchQuery] = Supereact.useState('');
-  const [searchResult, setSearchResult] = Supereact.useState();
-  const [friendList, setFriendList] = Supereact.useState([]);
-  const [selectedChat, setSelectedChat] = Supereact.useState(null);
-  const [showSearchResults, setShowSearchResults] = Supereact.useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResult, setSearchResult] = useState();
+  const [friendList, setFriendList] = useState([]);
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [showSearchResults, setShowSearchResults] = useState(false);
 
-  const [showAlert, setShowAlert] = Supereact.useState(false);
+  const [showAlert, setShowAlert] = useState(false);
 
   const handleSearch = async () => {
     try {

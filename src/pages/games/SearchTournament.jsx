@@ -1,5 +1,4 @@
-/** @jsx Supereact.createElement */
-import Supereact from '../../Supereact/index.js';
+import { useState, useEffect } from 'ft_react';
 import TextBanner from '../../component/TextBanner.jsx';
 import { getTournamentList } from '../../api/gameApi.js';
 
@@ -41,8 +40,8 @@ const blankBox = {
 };
 
 const SearchTournament = (props) => {
-  const [tournamentList, setTournamentList] = Supereact.useState(null);
-  const [currentPage, setCurrentPage] = Supereact.useState(1);
+  const [tournamentList, setTournamentList] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const fetchTournamentList = async (page) => {
     try {
@@ -53,7 +52,7 @@ const SearchTournament = (props) => {
     }
   };
 
-  Supereact.useEffect(() => {
+  useEffect(() => {
     console.log('SearchGame mounted');
     fetchTournamentList(1);
   }, []);

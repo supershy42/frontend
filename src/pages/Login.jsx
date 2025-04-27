@@ -1,5 +1,4 @@
-/** @jsx Supereact.createElement */
-import Supereact from '../Supereact/index.js';
+import { useState } from 'ft_react';
 import { getFriendRequests, loginUser } from '../api/userApi.js';
 import Bunnies from '../component/Bunnies.jsx';
 import HomeTextButton from '../component/HomeTextButton.jsx';
@@ -91,11 +90,11 @@ const messageStyle = {
 };
 
 function Login(props) {
-  const [loginStatus, setLoginStatus] = Supereact.useState({
+  const [loginStatus, setLoginStatus] = useState({
     message: '',
     error: false,
   });
-  const [state, setState] = Supereact.useState({
+  const [state, setState] = useState({
     email: '',
     password: '',
   });
