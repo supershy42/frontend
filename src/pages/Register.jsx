@@ -125,6 +125,9 @@ function Register(props) {
   });
 
   const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [isNicknameChecking, setIsNicknameChecking] = useState(false);
+  const [isNicknameAvailable, setIsNicknameAvailable] = useState(true);
+  const [nicknameError, setNicknameError] = useState('');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -135,25 +138,28 @@ function Register(props) {
     }));
   };
 
-  const checkNicknameHandler = async (e) => {
-    const nickname = e.target.value;
-    if (!nickname) return;
+  const checkNicknameHandler = async () => {
+    const nickname = state.nickname;
+    if (!nickname) {
+      setNicknameError('닉네임을 입력해주세요.');
+      return;
+    }
 
     try {
-      await checkNickname(nickname);
-      setState((prev) => ({
-        ...prev,
-        nicknameMessage: '',
-      }));
+      setIsNicknameChecking(true);
+      const response = await checkNickname(nickname);
+      setIsNicknameAvailable(true);
+      setNicknameError('');
     } catch (error) {
-      const errmessage =
-        error.status === 409
-          ? 'Nickname is already in use.'
-          : 'Failed to check nickname';
-      setState((prev) => ({
-        ...prev,
-        nicknameMessage: errmessage,
-      }));
+      console.error('Nickname check error:', error);
+      setIsNicknameAvailable(false);
+      if (error.status === 400) {
+        setNicknameError('이미 사용 중인 닉네임입니다.');
+      } else {
+        setNicknameError('닉네임 확인 중 오류가 발생했습니다.');
+      }
+    } finally {
+      setIsNicknameChecking(false);
     }
   };
 
@@ -199,29 +205,50 @@ function Register(props) {
     }
   };
 
-  const handleRegister = async () => {
-    // console.log({
-    //   nickname: state.nickname,
-    //   password: state.password,
-    //   confirmPassword: state.confirmPassword,
-    //   email: state.email,
-    //   verificationCode: state.verificationCode,
-    // });
-    // 모든 필수 필드 검사
-    const errors = {};
-    if (!state.nickname) errors.nicknameMessage = '필수 입력 항목입니다';
-    if (!state.password) errors.passwordMessage = '필수 입력 항목입니다';
-    if (!state.confirmPassword) errors.passwordMessage = '필수 입력 항목입니다';
-    if (!state.email) errors.emailMessage = '필수 입력 항목입니다';
-    if (!state.verificationCode) {
-      errors.verificationCodeMessage = '필수 입력 항목입니다';
-    }
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    console.log('Starting registration process');
 
-    if (Object.keys(errors).length > 0) {
-      setState((prev) => ({ ...prev, ...errors }));
+    // Reset error messages
+    setState((prev) => ({
+      ...prev,
+      nicknameMessage: '',
+      emailMessage: '',
+      passwordMessage: '',
+      verificationCodeMessage: '',
+    }));
+
+    // Validate all required fields
+    if (!state.nickname) {
+      setState((prev) => ({
+        ...prev,
+        nicknameMessage: '닉네임을 입력해주세요',
+      }));
+      return;
+    }
+    if (!state.password) {
+      setState((prev) => ({
+        ...prev,
+        passwordMessage: '비밀번호를 입력해주세요',
+      }));
+      return;
+    }
+    if (!state.email) {
+      setState((prev) => ({
+        ...prev,
+        emailMessage: '이메일을 입력해주세요',
+      }));
+      return;
+    }
+    if (!state.verificationCode) {
+      setState((prev) => ({
+        ...prev,
+        verificationCodeMessage: '인증코드를 입력해주세요',
+      }));
       return;
     }
 
+    // Check if passwords match
     if (state.password !== state.confirmPassword) {
       setState((prev) => ({
         ...prev,
@@ -231,25 +258,51 @@ function Register(props) {
     }
 
     try {
-      const formData = {
+      console.log('Attempting to register with data:', {
         nickname: state.nickname,
-        password: state.password,
         email: state.email,
-        code: state.verificationCode,
-      };
+        password: state.password,
+        verificationCode: state.verificationCode,
+      });
 
-      await registerUser(formData);
+      const response = await registerUser({
+        nickname: state.nickname,
+        email: state.email,
+        password: state.password,
+        verificationCode: state.verificationCode,
+      });
+
+      console.log('Registration successful:', response);
       setState((prev) => ({
         ...prev,
         verificationCodeMessage:
-          'Registration successful. Redirecting to login page...',
+          '회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.',
       }));
-      setTimeout(() => props.route('/login'), 2000);
+
+      // Redirect to login page after successful registration
+      setTimeout(() => {
+        props.route('/login');
+      }, 2000);
     } catch (error) {
-      setState((prev) => ({
-        ...prev,
-        verificationCodeMessage: error.message,
-      }));
+      console.error('Registration error:', error);
+      if (error.status === 400) {
+        setState((prev) => ({
+          ...prev,
+          verificationCodeMessage:
+            '입력하신 정보가 올바르지 않습니다. 다시 확인해주세요.',
+        }));
+      } else if (error.status === 409) {
+        setState((prev) => ({
+          ...prev,
+          verificationCodeMessage: '이미 사용 중인 닉네임이거나 이메일입니다.',
+        }));
+      } else {
+        setState((prev) => ({
+          ...prev,
+          verificationCodeMessage:
+            '회원가입 중 오류가 발생했습니다. 다시 시도해주세요.',
+        }));
+      }
     }
   };
 
@@ -303,9 +356,19 @@ function Register(props) {
                   name="password"
                   value={state.password}
                   onChange={handleInputChange}
-                  style={inputStyle}
+                  placeholder="비밀번호"
                 />
+                <div
+                  className="password-requirements"
+                  style={{ fontSize: '0.8em', color: '#666', marginTop: '5px' }}
+                >
+                  비밀번호는 다음 조건을 만족해야 합니다: • 최소 8자 이상 • 영문
+                  대/소문자, 숫자 포함 • 특수문자 포함 권장
+                </div>
               </div>
+              {state.passwordMessage && (
+                <div style={errorMessageStyle}>{state.passwordMessage}</div>
+              )}
             </div>
           </div>
 

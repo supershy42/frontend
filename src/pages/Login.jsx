@@ -111,9 +111,14 @@ function Login(props) {
   };
 
   const handleLogin = async () => {
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const email = emailInput ? emailInput.value : state.email;
+    const password = passwordInput ? passwordInput.value : state.password;
+
     const formData = {
-      email: state.email,
-      password: state.password,
+      email,
+      password,
     };
 
     try {

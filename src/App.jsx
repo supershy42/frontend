@@ -24,19 +24,23 @@ const USER_WS_URL = process.env.USER_WS_URL;
 function App() {
   const [route] = useRouter();
   const [isConnected, setIsConnected] = useState(false);
+  const [ws, setWs] = useState(null);
 
-  useEffect(() => {
-    setRouterInstance(route);
-    const ws = new WebSocket(
-      `${USER_WS_URL}/notifications/?token=${localStorage.getItem('access')}`
+  // WebSocket 연결 함수
+  const connectWebSocket = () => {
+    const token = localStorage.getItem('access');
+    if (!token) return;
+
+    const newWs = new WebSocket(
+      `${USER_WS_URL}/ws/notifications/?token=${token}`
     );
 
-    ws.onopen = () => {
+    newWs.onopen = () => {
       console.log('WebSocket Connected');
       setIsConnected(true);
     };
 
-    ws.onmessage = (event) => {
+    newWs.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
       if (data.type === 'friend.request') {
@@ -50,14 +54,53 @@ function App() {
       }
     };
 
-    ws.onclose = () => {
+    newWs.onclose = () => {
       console.log('WebSocket Disconnected');
+      setIsConnected(false);
+      // 연결이 끊어지면 5초 후 재연결 시도
+      setTimeout(() => {
+        if (localStorage.getItem('access')) {
+          connectWebSocket();
+        }
+      }, 5000);
     };
 
-    return () => {
-      ws.close();
+    setWs(newWs);
+  };
+
+  // 로그인 상태 변경 감지
+  useEffect(() => {
+    const checkAuthAndConnect = () => {
+      const token = localStorage.getItem('access');
+      if (token && !isConnected) {
+        connectWebSocket();
+      }
     };
-  }, []);
+
+    // 초기 연결 시도
+    checkAuthAndConnect();
+
+    // localStorage 변경 감지
+    const handleStorageChange = (e) => {
+      if (e.key === 'access') {
+        if (e.newValue) {
+          connectWebSocket();
+        } else {
+          ws?.close();
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      ws?.close();
+    };
+  }, [isConnected]);
+
+  useEffect(() => {
+    setRouterInstance(route);
+  }, [route]);
 
   return (
     <div style={{ width: '100%', height: '100vh' }}>
