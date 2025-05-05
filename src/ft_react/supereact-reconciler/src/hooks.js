@@ -87,6 +87,12 @@ export function useState(initial) {
   return [hook.state, setState];
 }
 
+/**
+ * useEffect Hook
+ *
+ * @param {*} callback
+ * @param {*} deps
+ */
 export function useEffect(callback, deps) {
   const fiber = currentlyRenderingFiber;
   const oldHook = fiber.alternate?.hooks?.[hookIndex];
@@ -115,4 +121,46 @@ export function useEffect(callback, deps) {
 
   fiber.hooks[hookIndex] = hook;
   hookIndex++;
+}
+
+/**
+ * useMemo Hook
+ *
+ */
+export function useMemo(factory, deps) {
+  const fiber = currentlyRenderingFiber;
+  const oldHook = fiber.alternate?.hooks?.[hookIndex];
+
+  const hook = {
+    tag: 'memo',
+    memoizedValue: oldHook?.memoizedValue,
+    deps,
+    factory,
+  };
+
+  const depsChanged =
+    !oldHook ||
+    !hook.deps ||
+    !oldHook.deps ||
+    hook.deps.length !== oldHook.deps.length ||
+    hook.deps.some((dep, i) => dep !== oldHook.deps[i]);
+
+  if (depsChanged) {
+    hook.memoizedValue = factory();
+  } else {
+    hook.memoizedValue = oldHook.memoizedValue;
+  }
+
+  fiber.hooks[hookIndex] = hook;
+  hookIndex++;
+
+  return hook.memoizedValue;
+}
+
+/**
+ * useCallback Hook
+ *
+ */
+export function useCallback(callback, deps) {
+  return useMemo(() => callback, deps);
 }

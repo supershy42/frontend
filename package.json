@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "webpack serve --mode development",
-    "build": "webpack --mode production",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "webpack --mode production"
   },
   "keywords": [],
   "author": "",
@@ -16,9 +15,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
-    "@babel/plugin-transform-react-jsx": "^7.25.9",
     "@babel/preset-env": "^7.26.0",
-    "@babel/preset-react": "^7.26.3",
     "babel-loader": "^9.2.1",
     "css-loader": "^7.1.2",
     "dotenv-webpack": "^8.1.0",
