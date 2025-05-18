@@ -164,3 +164,26 @@ export function useMemo(factory, deps) {
 export function useCallback(callback, deps) {
   return useMemo(() => callback, deps);
 }
+
+/**
+ * useRef Hook
+ * DOM 요소나 컴포넌트의 인스턴스에 대한 참조를 유지
+ *
+ * @param {any} initialValue 초기값
+ * @returns {Object} current 속성을 가진 ref 객체
+ */
+export function useRef(initialValue) {
+  const fiber = currentlyRenderingFiber;
+  const oldHook = fiber.alternate?.hooks?.[hookIndex];
+
+  const hook = {
+    tag: 'ref',
+    current: oldHook?.current ?? initialValue,
+  };
+
+  fiber.hooks = fiber.hooks || [];
+  fiber.hooks[hookIndex] = hook;
+  hookIndex++;
+
+  return hook;
+}
