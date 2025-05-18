@@ -74,7 +74,7 @@ function App() {
         <Route path="/search-tournament" element={<SearchTournament />} />
         <Route path="/tournament/{id}" element={<SearchGame />} />
         <Route path="/player-option" element={<PlayerOption />} />
-        <Route path="/arena" element={<Arena />} />
+        <Route path="/arena/{id}" element={<Arena />} />
       </Router>
     </div>
   );
