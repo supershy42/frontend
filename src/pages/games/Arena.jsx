@@ -65,6 +65,14 @@ const myTeamIndicatorStyle = {
   opacity: 0.7,
 };
 
+const ballStyle = {
+  position: 'absolute',
+  width: '20px',
+  height: '20px',
+  backgroundColor: '#004FC6',
+  borderRadius: '50%',
+};
+
 const Arena = (props) => {
   // 초기 state 설정
   const [socket, setSocket] = useState(null);
@@ -77,6 +85,8 @@ const Arena = (props) => {
   const [rightScore, setRightScore] = useState(0);
   const [leftPaddleY, setLeftPaddleY] = useState(250);
   const [rightPaddleY, setRightPaddleY] = useState(250);
+  const [ballX, setBallX] = useState(390);
+  const [ballY, setBallY] = useState(290);
 
   useEffect(() => {
     const arenaId = history.state?.id;
@@ -97,12 +107,14 @@ const Arena = (props) => {
           setTeam(data.message);
           break;
         case 'state':
-          const { left_score, right_score, left_paddle_y, right_paddle_y } =
+          const { left_score, right_score, left_paddle_y, right_paddle_y, ball_x, ball_y } =
             data.message;
           setLeftScore(left_score);
           setRightScore(right_score);
           setLeftPaddleY(left_paddle_y);
           setRightPaddleY(right_paddle_y);
+          if (ball_x !== undefined) setBallX(ball_x);
+          if (ball_y !== undefined) setBallY(ball_y);
           break;
         case 'arena.end':
           // 게임 종료 처리
@@ -197,6 +209,15 @@ const Arena = (props) => {
             top: `${rightPaddleY}px`,
             backgroundColor:
               team === 'right' ? '#004FC6' : 'rgba(0, 79, 198, 0.6)',
+          }}
+        />
+
+        {/* Ball */}
+        <div
+          style={{
+            ...ballStyle,
+            left: `${ballX}px`,
+            top: `${ballY}px`,
           }}
         />
       </div>

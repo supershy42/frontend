@@ -113,15 +113,17 @@ function CreateTournament(props) {
 
     const formData = {
       name,
+      max_participants: 4,
     };
 
     try {
-      const response = await createReception(formData);
+      const response = await createTournament(formData);
       console.log(response);
       const tournamentId = response.id;
       props.route(`/tournament/${tournamentId}`);
     } catch (error) {
       console.error(error);
+      setErrorMessage('Failed to create tournament');
     }
   };
 
@@ -175,7 +177,7 @@ function CreateTournament(props) {
               4명의 플레이어가 모여 2라운드의 토너먼트를 진행합니다
             </div>
           </div>
-          <span className="message" style={errorMessageStyle}></span>
+          {errorMessage && <span className="message" style={errorMessageStyle}>{errorMessage}</span>}
           <HomeTextButton text="Create" type="submit" />
         </form>
       </div>
