@@ -1,6 +1,7 @@
-import { useState } from 'ft_react';
+import { useState, useEffect } from 'ft_react';
 import TextBanner from '../component/TextBanner.jsx';
 import { modifyProfile } from '../api/userApi.js';
+import { getMatchHistory } from '../api/gameApi.js';
 
 const IMG_URL = process.env.IMG_URL;
 
@@ -78,9 +79,47 @@ const rightPanelStyle = {
   backgroundColor: 'rgba(255, 255, 255, 0.8)',
   display: 'flex',
   flexDirection: 'column',
+  alignItems: 'center',
+  gap: '20px',
+  overflowY: 'auto',
+};
+
+const matchListStyle = {
+  width: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '10px',
+};
+
+const matchCardStyle = {
+  display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  gap: '40px',
+  padding: '15px 20px',
+  backgroundColor: 'rgba(0, 79, 198, 0.05)',
+  borderRadius: '10px',
+  border: '1px solid rgba(0, 79, 198, 0.2)',
+};
+
+const matchResultStyle = (isWin) => ({
+  padding: '5px 15px',
+  borderRadius: '5px',
+  backgroundColor: isWin ? '#4CAF50' : '#f44336',
+  color: 'white',
+  fontWeight: 'bold',
+});
+
+const matchScoreStyle = {
+  fontSize: '18px',
+  fontWeight: 'bold',
+  color: '#004FC6',
+};
+
+const sectionTitleStyle = {
+  fontSize: '24px',
+  fontWeight: 'bold',
+  color: '#004FC6',
+  marginBottom: '20px',
 };
 
 const PlayerOption = (props) => {
@@ -92,6 +131,25 @@ const PlayerOption = (props) => {
   );
   const [selectedAvatar, setSelectedAvatar] = useState(null);
   const [isModified, setIsModified] = useState(false);
+  const [matches, setMatches] = useState([]);
+  const [loadingMatches, setLoadingMatches] = useState(true);
+
+  useEffect(() => {
+    const fetchMatches = async () => {
+      try {
+        const userId = localStorage.getItem('user_id');
+        if (userId) {
+          const data = await getMatchHistory(userId);
+          setMatches(data.data || data || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch match history:', error);
+      } finally {
+        setLoadingMatches(false);
+      }
+    };
+    fetchMatches();
+  }, []);
 
   const handleAvatarSelect = (avatar) => {
     setSelectedAvatar(avatar);
@@ -188,7 +246,35 @@ const PlayerOption = (props) => {
           Update Profile
         </button>
       </div>
-      <div style={rightPanelStyle}></div>
+      <div style={rightPanelStyle}>
+        <div style={sectionTitleStyle}>Match History</div>
+        {loadingMatches ? (
+          <div>Loading...</div>
+        ) : matches.length === 0 ? (
+          <div style={{ color: '#666' }}>No matches played yet</div>
+        ) : (
+          <div style={matchListStyle}>
+            {matches.map((match, index) => {
+              const userId = parseInt(localStorage.getItem('user_id'));
+              const isWin = match.winner === userId;
+              const isLeftPlayer = match.left_player?.id === userId;
+              const opponent = isLeftPlayer ? match.right_player : match.left_player;
+              const myScore = isLeftPlayer ? match.left_player_score : match.right_player_score;
+              const opponentScore = isLeftPlayer ? match.right_player_score : match.left_player_score;
+
+              return (
+                <div key={index} style={matchCardStyle}>
+                  <div>
+                    <div style={{ fontWeight: 'bold' }}>vs {opponent?.nickname || 'Unknown'}</div>
+                  </div>
+                  <div style={matchScoreStyle}>{myScore} - {opponentScore}</div>
+                  <div style={matchResultStyle(isWin)}>{isWin ? 'WIN' : 'LOSE'}</div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

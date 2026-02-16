@@ -117,3 +117,22 @@ export const getTournamentList = async (page) => {
 export const getTournamentInfo = async (tournamentId) => {};
 
 export const joinTournament = async (joinData) => {};
+
+export const getMatchHistory = async (userId) => {
+  try {
+    const data = await autoFetch(
+      `${GAME_API_URL}/arena/matches/${userId}/`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    return data;
+  } catch (error) {
+    console.error('Get match history error:', error);
+    throw error;
+  }
+};
