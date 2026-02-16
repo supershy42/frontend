@@ -4,6 +4,26 @@ const USER_API_URL = process.env.USER_API_URL;
 const FRIEND_API_URL = process.env.FRIEND_API_URL;
 const CHAT_API_URL = process.env.CHAT_API_URL;
 
+// Helper to extract error message from API response
+const extractErrorMessage = (data, fallback = 'An error occurred') => {
+  if (typeof data.message === 'string') {
+    return data.message;
+  }
+  if (typeof data.message === 'object' && data.message !== null) {
+    // Extract first error from validation errors object
+    const firstKey = Object.keys(data.message)[0];
+    const errors = data.message[firstKey];
+    if (Array.isArray(errors) && errors.length > 0) {
+      return `${firstKey}: ${errors[0]}`;
+    }
+    return JSON.stringify(data.message);
+  }
+  if (data.error) {
+    return typeof data.error === 'string' ? data.error : JSON.stringify(data.error);
+  }
+  return fallback;
+};
+
 export const checkNickname = async (nickname) => {
   const response = await fetch(`${USER_API_URL}/register/nickname-check/`, {
     method: 'POST',
@@ -15,7 +35,9 @@ export const checkNickname = async (nickname) => {
 
   const data = await response.json();
   if (!response.ok) {
-    throw new Error(data.message);
+    const error = new Error(extractErrorMessage(data, 'Failed to check nickname'));
+    error.status = response.status;
+    throw error;
   }
 
   return data;
@@ -32,7 +54,7 @@ export const registerUser = async (userData) => {
 
   const data = await response.json();
   if (!response.ok) {
-    throw new Error(data.message || 'Failed to register user');
+    throw new Error(extractErrorMessage(data, 'Failed to register user'));
   }
 
   return data;
@@ -49,7 +71,9 @@ export const verifyEmail = async (userData) => {
 
   const data = await response.json();
   if (!response.ok) {
-    throw new Error(data.message || 'Failed to verify email');
+    const error = new Error(extractErrorMessage(data, 'Failed to verify email'));
+    error.status = response.status;
+    throw error;
   }
 
   return data;
