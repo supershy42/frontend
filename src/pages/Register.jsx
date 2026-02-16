@@ -246,9 +246,27 @@ function Register(props) {
       }));
       setTimeout(() => props.route('/login'), 2000);
     } catch (error) {
+      // Parse field-specific errors from error message
+      const errorMsg = error.message || '';
+      const fieldErrors = {};
+
+      // Check which field the error belongs to
+      if (errorMsg.toLowerCase().includes('password')) {
+        fieldErrors.passwordMessage = errorMsg;
+      } else if (errorMsg.toLowerCase().includes('nickname')) {
+        fieldErrors.nicknameMessage = errorMsg;
+      } else if (errorMsg.toLowerCase().includes('email')) {
+        fieldErrors.emailMessage = errorMsg;
+      } else if (errorMsg.toLowerCase().includes('code')) {
+        fieldErrors.verificationCodeMessage = errorMsg;
+      } else {
+        // Default to verification code field for unknown errors
+        fieldErrors.verificationCodeMessage = errorMsg;
+      }
+
       setState((prev) => ({
         ...prev,
-        verificationCodeMessage: error.message,
+        ...fieldErrors,
       }));
     }
   };

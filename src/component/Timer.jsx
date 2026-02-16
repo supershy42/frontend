@@ -1,23 +1,28 @@
-import { useState, useEffect } from 'ft_react';
+import { useState, useEffect, useRef } from 'ft_react';
 
 function Timer() {
   const [time, setTime] = useState(300);
+  const timerRef = useRef(null);
 
   useEffect(() => {
-    if (time <= 0) return;
-
-    const timer = setInterval(() => {
+    // Create interval only once on mount
+    timerRef.current = setInterval(() => {
       setTime((prev) => {
         if (prev <= 1) {
-          clearInterval(timer);
+          clearInterval(timerRef.current);
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
 
-    return () => clearInterval(timer);
-  }, [time]);
+    // Cleanup on unmount
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, []); // Empty dependency array - only run on mount
 
   const formatTime = (seconds) => {
     const mins = Math.floor(Math.max(0, seconds) / 60);
