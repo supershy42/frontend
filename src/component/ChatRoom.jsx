@@ -1,6 +1,6 @@
 
 import { getChattingRoom } from '../api/userApi.js';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 
 const CHAT_WS_URL = process.env.CHAT_WS_URL;
@@ -10,7 +10,7 @@ const ChatRoom = ({ chatRoomId }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [socket, setSocket] = useState(null);
-  const messagesEndRef = null; // 실제 DOM 참조를 위한 ref가 있다면 사용
+  const messagesEndRef = useRef(null);
 
   const chatContainerStyle = {
     display: 'flex',
@@ -56,14 +56,8 @@ const ChatRoom = ({ chatRoomId }) => {
   // 웹소켓 연결 설정
   const setupWebSocket = () => {
     const ws = new WebSocket(
-      `${CHAT_WS_URL}/chat/${chatRoomId}/?token=${localStorage.getItem(
-        'access'
-      )}`
+      `${CHAT_WS_URL}/chat/${chatRoomId}/?token=${sessionStorage.getItem('access')}`
     );
-
-    ws.onopen = () => {
-      console.log('WebSocket Connected');
-    };
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -73,17 +67,13 @@ const ChatRoom = ({ chatRoomId }) => {
       scrollToBottom();
     };
 
-    ws.onclose = () => {
-      console.log('WebSocket Disconnected');
-    };
-
     setSocket(ws);
     return ws;
   };
 
   const scrollToBottom = () => {
-    if (messagesEndRef) {
-      messagesEndRef.scrollIntoView({ behavior: 'smooth' });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -149,7 +139,11 @@ const ChatRoom = ({ chatRoomId }) => {
       <div style={containerStyle}>
         {!isMine && (
           <img
-            src={`${IMG_URL}${avatar}`}
+            src={
+              message.avatar || message.sender_avatar
+                ? `${IMG_URL}${message.avatar || message.sender_avatar}`
+                : '/public/images/Spark_profile.png'
+            }
             alt={message.sender}
             style={avatarStyle}
           />
@@ -184,9 +178,10 @@ const ChatRoom = ({ chatRoomId }) => {
           <MessageBubble
             key={message.timestamp}
             message={message}
-            isMine={message.sender === localStorage.getItem('nickname')}
+            isMine={message.sender === sessionStorage.getItem('nickname')}
           />
         ))}
+        <div ref={messagesEndRef} />
       </div>
       <form style={inputContainerStyle} onSubmit={handleSendMessage}>
         <input

@@ -183,11 +183,11 @@ const FriendChat = () => {
             Chat Room
           </h1>
           <h3 style={{ color: 'rgba(0, 79, 198, 0.50)', fontSize: '24px', fontWeight: '400', lineHeight: 0, margin: 0 }}>
-            {selectedChat ? selectedChat.user_name : ''}
+            {selectedChat ? selectedChat.nickname : ''}
           </h3>
         </div>
         {selectedChat ? (
-          <ChatRoom chatRoomId={selectedChat} />
+          <ChatRoom chatRoomId={selectedChat.chatroom_id} />
         ) : (
           <div style={skeletonStyle}>
             <i className="fas fa-comments" style={{ fontSize: '64px', marginBottom: '20px' }} />
@@ -199,7 +199,7 @@ const FriendChat = () => {
       <div style={chatListStyle}>
         <div style={userProfileStyle}>
           <h2 style={{ display: 'flex', width: '190px', lineHeight: '82px', fontSize: '40px' }}>
-            {localStorage.getItem('nickname')}
+            {sessionStorage.getItem('nickname')}
           </h2>
           <AlertCookie onClick={() => setShowAlert(true)} />
         </div>
@@ -256,9 +256,13 @@ const FriendChat = () => {
                 padding: '20px',
                 borderBottom: '1px solid #eee',
                 cursor: 'pointer',
-                backgroundColor: selectedChat === friend.chatroom_id ? 'rgba(0, 79, 198, 0.10)' : 'transparent',
+                backgroundColor: selectedChat?.chatroom_id === friend.chatroom_id ? 'rgba(0, 79, 198, 0.10)' : 'transparent',
               }}
-              onClick={() => setSelectedChat(selectedChat === friend.chatroom_id ? null : friend.chatroom_id)}
+              onClick={() =>
+                setSelectedChat(
+                  selectedChat?.chatroom_id === friend.chatroom_id ? null : friend
+                )
+              }
             >
               <div style={friendItemStyle}>
                 <div style={avatarContainerStyle}>
