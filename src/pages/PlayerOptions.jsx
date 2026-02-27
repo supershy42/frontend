@@ -85,8 +85,12 @@ const matchScoreStyle = { fontSize: '18px', fontWeight: 'bold', color: '#004FC6'
 const sectionTitleStyle = { fontSize: '24px', fontWeight: 'bold', color: '#004FC6', marginBottom: '20px' };
 
 const PlayerOption = () => {
-  const [nickname] = useState(localStorage.getItem('nickname'));
-  const [currentAvatar, setCurrentAvatar] = useState(`${IMG_URL}${localStorage.getItem('avatar')}`);
+  const [nickname] = useState(sessionStorage.getItem('nickname'));
+  const [currentAvatar, setCurrentAvatar] = useState(
+    sessionStorage.getItem('avatar')
+      ? `${IMG_URL}${sessionStorage.getItem('avatar')}`
+      : '/public/images/Spark_profile.png'
+  );
   const [selectedAvatar, setSelectedAvatar] = useState(null);
   const [isModified, setIsModified] = useState(false);
   const [matches, setMatches] = useState([]);
@@ -95,7 +99,7 @@ const PlayerOption = () => {
   useEffect(() => {
     const fetchMatches = async () => {
       try {
-        const userId = localStorage.getItem('user_id');
+        const userId = sessionStorage.getItem('user_id');
         if (userId) {
           const data = await getMatchHistory(userId);
           setMatches(data.data || data || []);
@@ -139,7 +143,7 @@ const PlayerOption = () => {
       const data = await modifyProfile(formData);
       let avatar = data.avatar.split('/').slice(3).join('/');
       avatar = '/' + avatar;
-      localStorage.setItem('avatar', avatar);
+      sessionStorage.setItem('avatar', avatar);
       setIsModified(false);
     } catch (error) {
       console.error('Failed to update profile:', error);
@@ -190,8 +194,9 @@ const PlayerOption = () => {
         ) : (
           <div style={matchListStyle}>
             {matches.map((match, index) => {
-              const userId = parseInt(localStorage.getItem('user_id'));
-              const isWin = match.winner === userId;
+              const userId = parseInt(sessionStorage.getItem('user_id'));
+              const winnerId = match.winner?.id ?? match.winner;
+              const isWin = Number(winnerId) === userId;
               const isLeftPlayer = match.left_player?.id === userId;
               const opponent = isLeftPlayer ? match.right_player : match.left_player;
               const myScore = isLeftPlayer ? match.left_player_score : match.right_player_score;

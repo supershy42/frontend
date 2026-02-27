@@ -46,6 +46,7 @@ const SearchGame = () => {
   const [gameList, setGameList] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedGame, setSelectedGame] = useState(null);
+  const [joinError, setJoinError] = useState(null);
 
   const fetchGameList = async (page) => {
     try {
@@ -67,6 +68,7 @@ const SearchGame = () => {
 
   const handleJoinGame = async (password) => {
     if (!selectedGame) return;
+    setJoinError(null);
     try {
       const joinData = { receptionId: selectedGame.id };
       if (password) joinData.password = password;
@@ -74,7 +76,7 @@ const SearchGame = () => {
       setSelectedGame(null);
       navigate(`/reception/${selectedGame.id}`);
     } catch (error) {
-      alert('Failed to join game:', error);
+      setJoinError(error?.message || '참가에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
@@ -121,7 +123,10 @@ const SearchGame = () => {
                 key={game.id}
                 className="card"
                 style={{ cursor: 'pointer' }}
-                onClick={() => setSelectedGame(game)}
+                onClick={() => {
+                  setJoinError(null);
+                  setSelectedGame(game);
+                }}
               >
                 <div className="card-body d-flex justify-content-between align-items-center">
                   <h5 className="card-title mb-0">{game.name}</h5>
@@ -167,8 +172,9 @@ const SearchGame = () => {
       {selectedGame && (
         <JoinGameModal
           game={selectedGame}
-          onClose={() => setSelectedGame(null)}
+          onClose={() => { setSelectedGame(null); setJoinError(null); }}
           onJoin={handleJoinGame}
+          error={joinError}
         />
       )}
     </div>
