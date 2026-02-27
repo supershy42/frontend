@@ -12,7 +12,6 @@ export const createReception = async (gameData) => {
       body: JSON.stringify(gameData),
     });
 
-    console.log('data', data);
     return data;
   } catch (error) {
     console.error('Create reception error:', error);

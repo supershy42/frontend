@@ -104,13 +104,10 @@ const Arena = () => {
       switch (data.type) {
         case 'team':
           setTeam(data.message);
+          setPhase('waiting');
           break;
         case 'waiting':
           setPhase('waiting');
-          break;
-        case 'team':
-          setPhase('waiting');
-          setTeam(data.message);
           break;
         case 'start':
           setPhase('starting');
@@ -142,12 +139,9 @@ const Arena = () => {
       }
     };
 
-    ws.onopen = () => console.log('Arena WebSocket Connected');
-
     ws.onerror = () => setPhase('error');
 
     ws.onclose = (e) => {
-      console.log('Arena WebSocket Disconnected', e.code, e.reason);
       if (phase === 'connecting') setPhase('error');
     };
 
@@ -171,6 +165,20 @@ const Arena = () => {
   }, [arenaId]);
 
   const renderOverlay = () => {
+    if (phase === 'connecting') {
+      return (
+        <div style={overlayStyle}>
+          <span style={overlaySubTextStyle}>Connecting...</span>
+        </div>
+      );
+    }
+    if (phase === 'error') {
+      return (
+        <div style={overlayStyle}>
+          <span style={overlaySubTextStyle}>Connection failed. Game server is not running.</span>
+        </div>
+      );
+    }
     if (phase === 'waiting') {
       return (
         <div style={overlayStyle}>
