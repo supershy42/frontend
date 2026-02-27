@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home.jsx';
 import Register from './pages/Register.jsx';
@@ -12,6 +12,7 @@ import SearchTournament from './pages/games/SearchTournament.jsx';
 import PlayerOption from './pages/PlayerOptions.jsx';
 import CreateTournament from './pages/games/CreateTournament.jsx';
 import Arena from './pages/games/Arena.jsx';
+import GameResult from './pages/games/GameResult.jsx';
 import {
   addFriendRequest,
   addGameInvites,
@@ -22,14 +23,14 @@ import {
 const USER_WS_URL = process.env.USER_WS_URL;
 
 function AppContent() {
-  const [isConnected, setIsConnected] = useState(false);
+  const token = sessionStorage.getItem('access');
 
   useEffect(() => {
-    const ws = new WebSocket(
-      `${USER_WS_URL}/notifications/?token=${localStorage.getItem('access')}`
-    );
+    if (!token) return;
 
-    ws.onopen = () => setIsConnected(true);
+    const ws = new WebSocket(
+      `${USER_WS_URL}/notifications/?token=${token}`
+    );
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -44,10 +45,8 @@ function AppContent() {
       }
     };
 
-    ws.onclose = () => setIsConnected(false);
-
     return () => ws.close();
-  }, []);
+  }, [token]);
 
   return (
     <div style={{ width: '100%', height: '100vh' }}>
@@ -65,6 +64,7 @@ function AppContent() {
         <Route path="/tournament/:id" element={<SearchTournament />} />
         <Route path="/player-option" element={<PlayerOption />} />
         <Route path="/arena/:id" element={<Arena />} />
+        <Route path="/game-result" element={<GameResult />} />
       </Routes>
     </div>
   );

@@ -28,7 +28,7 @@ const bingkyContainerStyle = {
 
 function Home() {
   const navigate = useNavigate();
-  const [isLogin, setIsLogin] = useState(!!localStorage.getItem('access'));
+  const [isLogin, setIsLogin] = useState(!!sessionStorage.getItem('access'));
 
   const handleClick = (action) => {
     if (action === 'Register') {
@@ -46,7 +46,18 @@ function Home() {
     } else if (action === 'PlayerOption') {
       navigate('/player-option');
     } else if (action === 'Logout') {
-      localStorage.removeItem('access');
+      [
+        'access',
+        'refresh',
+        'user_id',
+        'nickname',
+        'email',
+        'avatar',
+        'friendRequests',
+        'gameInvites',
+        'roundStartAlert',
+        'tournamentEndAlert',
+      ].forEach((key) => sessionStorage.removeItem(key));
       document.cookie =
         'refresh=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
       setIsLogin(false);

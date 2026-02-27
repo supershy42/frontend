@@ -49,13 +49,13 @@ function Login() {
   const [state, setState] = useState({ email: '', password: '' });
 
   const processLoginSuccess = async (data) => {
-    document.cookie = `refresh=${data.refresh}; path=/; secure: HttpOnly`;
-    localStorage.setItem('access', data.access);
-    localStorage.setItem('refresh', data.refresh);
-    localStorage.setItem('user_id', data.id);
-    localStorage.setItem('nickname', data.nickname);
-    localStorage.setItem('email', data.email);
-    localStorage.setItem('avatar', data.avatar);
+    document.cookie = `refresh=${data.refresh}; path=/;`;
+    sessionStorage.setItem('access', data.access);
+    sessionStorage.setItem('refresh', data.refresh);
+    sessionStorage.setItem('user_id', data.id);
+    sessionStorage.setItem('nickname', data.nickname);
+    sessionStorage.setItem('email', data.email);
+    sessionStorage.setItem('avatar', data.avatar);
     initNotification();
   };
 

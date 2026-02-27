@@ -19,15 +19,22 @@ const processQueue = (error, token = null) => {
 
 const autoFetch = async (url, options = {}) => {
   try {
-    const token = localStorage.getItem('access');
+    const token = sessionStorage.getItem('access');
+    const withHeaders = {
+      ...options,
+      headers: {
+        ...(options.headers || {}),
+      },
+    };
+
     if (token) {
-      options.headers = {
-        ...options.headers,
+      withHeaders.headers = {
+        ...withHeaders.headers,
         Authorization: `Bearer ${token}`,
       };
     }
 
-    const response = await fetch(url, options);
+    const response = await fetch(url, withHeaders);
 
     if ((response.status === 401)) {
       // 이미 토큰 갱신 중이면 현재 요청을 대기열에 추가
@@ -36,8 +43,8 @@ const autoFetch = async (url, options = {}) => {
           failedQueue.push({ resolve, reject });
         }).then((token) => {
           // 갱신된 토큰으로 다시 요청
-          options.headers['Authorization'] = `Bearer ${token}`;
-          return autoFetch(url, options);
+          withHeaders.headers['Authorization'] = `Bearer ${token}`;
+          return autoFetch(url, withHeaders);
         });
       }
       isRefreshing = true;
@@ -53,19 +60,30 @@ const autoFetch = async (url, options = {}) => {
         }
 
         const newToken = await refreshResponse.json();
-        localStorage.setItem('access', newToken.access);
+        sessionStorage.setItem('access', newToken.access);
 
         // 갱신된 토큰으로 실패한 요청들 재처리
         processQueue(null, newToken.access);
 
         // 현재 요청 재시도
-        options.headers['Authorization'] = `Bearer ${newToken.access}`;
-        return autoFetch(url, options);
+        withHeaders.headers['Authorization'] = `Bearer ${newToken.access}`;
+        return autoFetch(url, withHeaders);
       } catch (error) {
         processQueue(error, null);
 
         // 토큰 갱신 실패, 리프레시 토큰도 만료된 경우
-        localStorage.removeItem('access');
+        [
+          'access',
+          'refresh',
+          'user_id',
+          'nickname',
+          'email',
+          'avatar',
+          'friendRequests',
+          'gameInvites',
+          'roundStartAlert',
+          'tournamentEndAlert',
+        ].forEach((key) => sessionStorage.removeItem(key));
         document.cookie =
           'refresh=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         window.location.href = '/login';
