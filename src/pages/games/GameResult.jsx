@@ -139,6 +139,7 @@ const buttonRowStyle = {
   display: 'flex',
   gap: '48px',
   alignItems: 'center',
+  justifyContent: 'center',
 };
 
 const GameResult = () => {
@@ -152,7 +153,12 @@ const GameResult = () => {
   useEffect(() => {
     if (!myId) return;
     getMatchHistory(myId)
-      .then((data) => setHistory(Array.isArray(data) ? data : []))
+      .then((data) => {
+        const normalized = Array.isArray(data)
+          ? data
+          : (Array.isArray(data?.data) ? data.data : []);
+        setHistory(normalized);
+      })
       .catch(() => {});
   }, [myId]);
 
@@ -170,7 +176,8 @@ const GameResult = () => {
     );
   }
 
-  const isWin = String(result.winner) === String(myId);
+  const resultWinnerId = result.winner?.id ?? result.winner;
+  const isWin = String(resultWinnerId) === String(myId);
   const myTeam = String(result.left_player) === String(myId) ? 'left' : 'right';
   const myScore = myTeam === 'left' ? result.left_player_score : result.right_player_score;
   const oppScore = myTeam === 'left' ? result.right_player_score : result.left_player_score;
@@ -261,7 +268,8 @@ const GameResult = () => {
                   const opp = isLeft ? match.right_player : match.left_player;
                   const mSc = isLeft ? match.left_player_score : match.right_player_score;
                   const oSc = isLeft ? match.right_player_score : match.left_player_score;
-                  const won = String(match.winner?.id) === String(myId);
+                  const winnerId = match.winner?.id ?? match.winner;
+                  const won = String(winnerId) === String(myId);
                   const isCurrent = recentMatch && match.id === recentMatch.id;
                   return (
                     <tr key={match.id}>
@@ -283,10 +291,6 @@ const GameResult = () => {
             </table>
           </>
         )}
-
-        {/* 구분선 */}
-        <div style={dividerStyle} />
-
         {/* 버튼 */}
         <div style={buttonRowStyle}>
           {reception_id && (

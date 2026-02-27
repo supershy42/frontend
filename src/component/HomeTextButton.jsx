@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 
-function HomeTextButton({ text, onClick, type = 'button'}) {
+function HomeTextButton({ text, onClick, type = 'button' }) {
   const [isHover, setIsHover] = useState(false);
 
   const handleMouseEnter = () => {
@@ -55,7 +55,7 @@ function HomeTextButton({ text, onClick, type = 'button'}) {
         height: 'clamp(30px, 4vw, 50px)',
         justifyContent: 'center',
         alignItems: 'center',
-        gap: 'clamp(40px, 6vw, 90px)',
+        gap: 'clamp(12px, 1.2vw, 16px)',
       }}
     >
       <div>
@@ -63,7 +63,7 @@ function HomeTextButton({ text, onClick, type = 'button'}) {
           <img
             src="/public/images/left_arrow.png"
             alt="left_arrow"
-            style={{ width: 'clamp(22px, 3vw, 45px)', height: 'clamp(24px, 3.5vw, 48px)' }}
+            style={{ width: 'clamp(16px, 3vw, 45px)', height: 'clamp(24px, 3.5vw, 48px)' }}
           />
         )}
       </div>
