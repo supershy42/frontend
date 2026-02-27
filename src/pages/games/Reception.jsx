@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import HomeTextButton from '../../component/HomeTextButton';
 import LoadingDots from '../../component/LoadingDots.jsx';
@@ -120,20 +120,19 @@ const Reception = () => {
 
   const [myself, setMyself] = useState(null);
   const [player, setPlayer] = useState(null);
-  const [isConnected, setIsConnected] = useState(false);
   const [readyToStart, setReadyToStart] = useState(false);
-  const [socket, setSocket] = useState(null);
   const [showInvite, setShowInvite] = useState(false);
+  const socketRef = useRef(null);
+  const moveTimerRef = useRef(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('access');
+    const token = sessionStorage.getItem('access');
     if (!token) return;
 
     const ws = new WebSocket(`${GAME_WS_URL}/reception/${receptionId}/?token=${token}`);
 
     ws.onopen = () => {
-      setIsConnected(true);
-      setSocket(ws);
+      socketRef.current = ws;
     };
 
     ws.onmessage = (event) => {
@@ -141,25 +140,32 @@ const Reception = () => {
 
       if (data.type === 'participants') {
         const participants = data.message;
-        const myId = localStorage.getItem('user_id');
+        const myId = sessionStorage.getItem('user_id');
         const me = participants.find((p) => String(p.user_id) === String(myId));
         const other = participants.find((p) => String(p.user_id) !== String(myId));
         setMyself(me);
         setPlayer(other);
       } else if (data.type === 'move.arena') {
         setReadyToStart(true);
-        setTimeout(() => navigate(`/arena/${data.arena_id}`), 2000);
+        moveTimerRef.current = setTimeout(() => navigate(`/arena/${data.arena_id}`), 2000);
       }
     };
 
-    ws.onclose = () => setIsConnected(false);
+    ws.onclose = () => {
+      socketRef.current = null;
+    };
 
-    return () => ws.close();
-  }, [receptionId]);
+    return () => {
+      if (moveTimerRef.current) {
+        clearTimeout(moveTimerRef.current);
+      }
+      ws.close();
+    };
+  }, [receptionId, navigate]);
 
   const handleReadyClick = () => {
-    if (socket && socket.readyState === WebSocket.OPEN && myself) {
-      socket.send(JSON.stringify({ type: 'ready', is_ready: !myself.is_ready }));
+    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN && myself) {
+      socketRef.current.send(JSON.stringify({ type: 'ready', is_ready: !myself.is_ready }));
     }
   };
 

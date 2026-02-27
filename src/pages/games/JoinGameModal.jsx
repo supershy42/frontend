@@ -1,16 +1,24 @@
 import { useState } from 'react';
 
 
-const JoinGameModal = ({ game, onClose, onJoin }) => {
+const JoinGameModal = ({ game, onClose, onJoin, error }) => {
   const [password, setPassword] = useState('');
+  const [validationError, setValidationError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
     if (!game || (game.has_password && !password)) {
-      alert('Please enter the password');
+      setValidationError('Please enter the password');
       return;
     }
-    await onJoin(password);
-    setPassword('');
+    setValidationError('');
+    setIsSubmitting(true);
+    try {
+      await onJoin(password);
+      setPassword('');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -36,7 +44,10 @@ const JoinGameModal = ({ game, onClose, onJoin }) => {
                   type="password"
                   className="form-control"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (validationError) setValidationError('');
+                  }}
                 />
               </div>
             ) : (
@@ -47,6 +58,16 @@ const JoinGameModal = ({ game, onClose, onJoin }) => {
               </p>
             )}
           </div>
+          {validationError && (
+            <div className="alert alert-warning py-2 mx-3 mb-0" role="alert">
+              {validationError}
+            </div>
+          )}
+          {error && (
+            <div className="alert alert-danger py-2 mx-3 mb-0" role="alert">
+              {error}
+            </div>
+          )}
           <div className="modal-footer">
             <button
               type="button"
@@ -59,8 +80,9 @@ const JoinGameModal = ({ game, onClose, onJoin }) => {
               type="button"
               className="btn btn-primary"
               onClick={handleSubmit}
+              disabled={isSubmitting}
             >
-              Join Game
+              {isSubmitting ? 'Joining...' : 'Join Game'}
             </button>
           </div>
         </div>

@@ -96,8 +96,18 @@ const Arena = () => {
   const [phase, setPhase] = useState('connecting'); // connecting | waiting | starting | countdown | playing | round_over | ended | error
 
   useEffect(() => {
-    const token = localStorage.getItem('access');
+    const token = sessionStorage.getItem('access');
+    if (!token) {
+      setPhase('error');
+      return undefined;
+    }
+
     const ws = new WebSocket(`${GAME_WS_URL}/arena/${arenaId}/?token=${token}`);
+
+    // stale closure 방지: 게임 정상 종료 여부를 로컬 변수로 추적
+    let gameEnded = false;
+    let isUnmounting = false;
+    let resultRedirectTimer = null;
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -131,18 +141,27 @@ const Arena = () => {
           setPhase('round_over');
           break;
         case 'arena.end':
+          gameEnded = true;
           setPhase('ended');
-          setTimeout(() => navigate(`/reception/${data.reception_id}`), 2000);
+          resultRedirectTimer = setTimeout(
+            () =>
+              navigate('/game-result', {
+                state: { result: data.result, reception_id: data.reception_id },
+              }),
+            2000
+          );
           break;
         default:
           break;
       }
     };
 
-    ws.onerror = () => setPhase('error');
+    ws.onerror = () => {
+      if (!gameEnded) setPhase('error');
+    };
 
-    ws.onclose = (e) => {
-      if (phase === 'connecting') setPhase('error');
+    ws.onclose = () => {
+      if (!gameEnded && !isUnmounting) setPhase('error');
     };
 
     const handleKeyDown = (e) => {
@@ -159,10 +178,12 @@ const Arena = () => {
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
+      isUnmounting = true;
       window.removeEventListener('keydown', handleKeyDown);
+      if (resultRedirectTimer) clearTimeout(resultRedirectTimer);
       ws.close();
     };
-  }, [arenaId]);
+  }, [arenaId, navigate]);
 
   const renderOverlay = () => {
     if (phase === 'connecting') {
