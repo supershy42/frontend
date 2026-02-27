@@ -1,5 +1,7 @@
 import { navigate } from '../router.jsx';
 
+const USER_API_URL = process.env.USER_API_URL;
+
 let isRefreshing = false;
 let failedQueue = [];
 

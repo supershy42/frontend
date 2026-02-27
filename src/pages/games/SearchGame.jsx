@@ -48,6 +48,8 @@ const SearchGame = (props) => {
   const fetchGameList = async (page) => {
     try {
       const response = await getReceptionList(page);
+      console.log('API Response:', response);
+      console.log('Results:', response?.results);
       setGameList(response);
     } catch (error) {
       console.error('Failed to fetch game list:', error);

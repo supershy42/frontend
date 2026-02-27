@@ -45,7 +45,7 @@ export const joinReception = async (joinData) => {
 export const getReceptionList = async (page) => {
   try {
     const data = await autoFetch(
-      `${GAME_API_URL}/reception/list?page=${page}`,
+      `${GAME_API_URL}/reception/list/?page=${page}`,
       {
         method: 'GET',
         headers: {
