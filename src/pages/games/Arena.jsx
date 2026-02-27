@@ -53,11 +53,37 @@ const ballStyle = {
   borderRadius: '50%',
 };
 
+const overlayStyle = {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  width: '100%',
+  height: '100%',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  zIndex: 10,
+};
+
+const overlayTextStyle = {
+  fontFamily: 'Jersey 10',
+  color: '#FFF',
+  fontSize: '80px',
+  textShadow: `-3px -3px 0 #004FC6, 3px -3px 0 #004FC6, -3px 3px 0 #004FC6, 3px 3px 0 #004FC6`,
+};
+
+const overlaySubTextStyle = {
+  fontFamily: 'Jersey 10',
+  color: '#FFF',
+  fontSize: '32px',
+  textShadow: `-2px -2px 0 #004FC6, 2px -2px 0 #004FC6, -2px 2px 0 #004FC6, 2px 2px 0 #004FC6`,
+};
+
 const Arena = () => {
   const navigate = useNavigate();
   const { id: arenaId } = useParams();
 
-  const [socket, setSocket] = useState(null);
   const [team, setTeam] = useState('left');
   const [players] = useState({ left: 'Player 1', right: 'Player 2' });
   const [leftScore, setLeftScore] = useState(0);
@@ -66,15 +92,12 @@ const Arena = () => {
   const [rightPaddleY, setRightPaddleY] = useState(250);
   const [ballX, setBallX] = useState(390);
   const [ballY, setBallY] = useState(290);
+  const [countdown, setCountdown] = useState(null);
+  const [phase, setPhase] = useState('connecting'); // connecting | waiting | starting | countdown | playing | round_over | ended | error
 
   useEffect(() => {
     const token = localStorage.getItem('access');
     const ws = new WebSocket(`${GAME_WS_URL}/arena/${arenaId}/?token=${token}`);
-
-    ws.onopen = () => {
-      console.log('Arena WebSocket Connected');
-      setSocket(ws);
-    };
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -82,7 +105,22 @@ const Arena = () => {
         case 'team':
           setTeam(data.message);
           break;
+        case 'waiting':
+          setPhase('waiting');
+          break;
+        case 'team':
+          setPhase('waiting');
+          setTeam(data.message);
+          break;
+        case 'start':
+          setPhase('starting');
+          break;
+        case 'countdown':
+          setPhase('countdown');
+          setCountdown(data.message);
+          break;
         case 'state': {
+          setPhase('playing');
           const { left_score, right_score, left_paddle_y, right_paddle_y, ball_x, ball_y } = data.message;
           setLeftScore(left_score);
           setRightScore(right_score);
@@ -92,21 +130,34 @@ const Arena = () => {
           if (ball_y !== undefined) setBallY(ball_y);
           break;
         }
+        case 'round.over':
+          setPhase('round_over');
+          break;
         case 'arena.end':
-          setTimeout(() => navigate(`/reception/${data.message.url}`), 2000);
+          setPhase('ended');
+          setTimeout(() => navigate(`/reception/${data.reception_id}`), 2000);
           break;
         default:
           break;
       }
     };
 
-    ws.onclose = () => console.log('Arena WebSocket Disconnected');
+    ws.onopen = () => console.log('Arena WebSocket Connected');
+
+    ws.onerror = () => setPhase('error');
+
+    ws.onclose = (e) => {
+      console.log('Arena WebSocket Disconnected', e.code, e.reason);
+      if (phase === 'connecting') setPhase('error');
+    };
 
     const handleKeyDown = (e) => {
       if (!ws || ws.readyState !== WebSocket.OPEN) return;
       if (e.key === 'ArrowUp') {
+        e.preventDefault();
         ws.send(JSON.stringify({ type: 'move', direction: 'up' }));
       } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
         ws.send(JSON.stringify({ type: 'move', direction: 'down' }));
       }
     };
@@ -118,6 +169,45 @@ const Arena = () => {
       ws.close();
     };
   }, [arenaId]);
+
+  const renderOverlay = () => {
+    if (phase === 'waiting') {
+      return (
+        <div style={overlayStyle}>
+          <span style={overlaySubTextStyle}>Waiting for opponent...</span>
+        </div>
+      );
+    }
+    if (phase === 'starting') {
+      return (
+        <div style={overlayStyle}>
+          <span style={overlaySubTextStyle}>Game Starting!</span>
+        </div>
+      );
+    }
+    if (phase === 'countdown') {
+      return (
+        <div style={overlayStyle}>
+          <span style={overlayTextStyle}>{countdown}</span>
+        </div>
+      );
+    }
+    if (phase === 'round_over') {
+      return (
+        <div style={overlayStyle}>
+          <span style={overlaySubTextStyle}>Round Over</span>
+        </div>
+      );
+    }
+    if (phase === 'ended') {
+      return (
+        <div style={overlayStyle}>
+          <span style={overlaySubTextStyle}>Game Over</span>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <div style={arenaContainerStyle}>
@@ -135,6 +225,7 @@ const Arena = () => {
         <div style={{ ...paddleStyle, left: '50px', top: `${leftPaddleY}px`, backgroundColor: team === 'left' ? '#004FC6' : 'rgba(0, 79, 198, 0.6)' }} />
         <div style={{ ...paddleStyle, right: '50px', top: `${rightPaddleY}px`, backgroundColor: team === 'right' ? '#004FC6' : 'rgba(0, 79, 198, 0.6)' }} />
         <div style={{ ...ballStyle, left: `${ballX}px`, top: `${ballY}px` }} />
+        {renderOverlay()}
       </div>
     </div>
   );
