@@ -28,11 +28,10 @@ const mainContainerStyle = {
 };
 
 const playerContainerStyle = {
-  width: '300px',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  gap: '20px',
+  gap: '16px',
 };
 
 const blinkingText = {
@@ -47,10 +46,12 @@ const blinkingText = {
 };
 
 const profileContainerStyle = {
-  width: '200px',
-  height: '200px',
+  width: '120px',
+  height: '120px',
   position: 'relative',
   borderRadius: '50%',
+  overflow: 'hidden',
+  flexShrink: 0,
 };
 
 const readyProfileStyle = {
@@ -58,9 +59,16 @@ const readyProfileStyle = {
   animation: 'glowing 1s infinite',
 };
 
+const profileImgStyle = {
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
+  display: 'block',
+};
+
 const speechBubbleStyle = {
   position: 'absolute',
-  top: '-40px',
+  top: '-44px',
   left: '50%',
   transform: 'translateX(-50%)',
   backgroundColor: '#FFF',
@@ -133,13 +141,14 @@ const Reception = () => {
 
       if (data.type === 'participants') {
         const participants = data.message;
-        const me = participants.find((p) => p.user_id === localStorage.getItem('user_id'));
-        const other = participants.find((p) => p.user_id !== localStorage.getItem('user_id'));
+        const myId = localStorage.getItem('user_id');
+        const me = participants.find((p) => String(p.user_id) === String(myId));
+        const other = participants.find((p) => String(p.user_id) !== String(myId));
         setMyself(me);
         setPlayer(other);
-      } else if (data.type === 'move') {
+      } else if (data.type === 'move.arena') {
         setReadyToStart(true);
-        setTimeout(() => navigate(`/arena/${receptionId}`), 2000);
+        setTimeout(() => navigate(`/arena/${data.arena_id}`), 2000);
       }
     };
 
@@ -168,11 +177,10 @@ const Reception = () => {
               <img
                 src={myself.avatar ? `${IMG_URL}${myself.avatar}` : '/public/images/Spark_Profile.png'}
                 alt="profile_img"
-                width="200px"
-                height="200px"
+                style={profileImgStyle}
               />
             </div>
-            <h2>{myself.user_name}</h2>
+            <h2>{myself.nickname}</h2>
           </div>
         )}
         {player && (
@@ -185,10 +193,10 @@ const Reception = () => {
               <img
                 src={player.avatar ? `${IMG_URL}${player.avatar}` : '/public/images/Spark_Profile.png'}
                 alt="profile_img"
-                width="200px"
+                style={profileImgStyle}
               />
             </div>
-            <h2>{player.user_name}</h2>
+            <h2>{player.nickname}</h2>
           </div>
         )}
       </div>
