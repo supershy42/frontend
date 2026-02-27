@@ -1,7 +1,9 @@
-import { useState } from 'ft_react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { checkNickname, registerUser, verifyEmail } from '../api/userApi.js';
 import Bunnies from '../component/Bunnies.jsx';
 import HomeTextButton from '../component/HomeTextButton.jsx';
+import InputField from '../component/InputField.jsx';
 import Timer from '../component/Timer.jsx';
 
 const registerPageStyle = {
@@ -14,14 +16,15 @@ const registerPageStyle = {
 
 const centerBlockStyle = {
   display: 'flex',
-  width: '700px',
-  padding: '80px 62.5px',
+  width: 'min(700px, 90vw)',
+  padding: 'clamp(36px, 5vw, 60px) clamp(10px, 2vw, 28px) clamp(16px, 2.5vw, 30px)',
   flexDirection: 'column',
   justifyContent: 'space-between',
   alignItems: 'center',
-  border: '3px solid #004FC6',
-  background: 'rgba(255, 255, 255, 0.80)',
-  gap: '45px',
+  border: '4px solid #004FC6',
+  background: 'rgba(235, 243, 255, 0.92)',
+  boxShadow: '6px 6px 0px rgba(0, 79, 198, 0.35)',
+  gap: 'clamp(20px, 3vw, 36px)',
 };
 
 const formStyle = {
@@ -30,88 +33,28 @@ const formStyle = {
   flexDirection: 'column',
   justifyContent: 'space-between',
   alignItems: 'center',
-  gap: '40px',
+  gap: 'clamp(18px, 2.8vw, 36px)',
   flexShrink: '0',
-};
-
-const fieldStyle = {
-  width: '100%',
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-};
-
-const labelStyle = {
-  fontFamily: 'Jersey 10',
-  color: '#004FC6',
-  fontSize: '32px',
-  fontWeight: '400',
-  lineHeight: 'normal',
-};
-
-const inputFieldContainerStyle = {
-  position: 'relative',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '8px',
-  width: '318px',
-};
-
-const textFieldsStyle = {
-  position: 'relative',
-  height: '58px',
-  width: '100%',
-  borderRadius: '18px',
-  background: '#F8F8F8',
-  boxShadow: '0px 4px 10px 3px rgba(0, 79, 198, 0.32) inset',
-  padding: '20px 25px',
-};
-
-const errorTextFieldsStyle = {
-  boxShadow: '0px 4px 10px 3px rgba(198, 0, 3, 0.32) inset',
-};
-
-const inputStyle = {
-  position: 'relative',
-  width: '100%',
-  height: '100%',
-  fontSize: '15px',
-  fontFamily: 'Pretendard',
-  fontWeight: 500,
-  color: '#004FC6',
-  zIndex: 2,
-  background: 'transparent',
-  lineHeight: 'normal',
-  padding: '0',
-  border: 'none',
-  outline: 'none',
-};
-
-const errorMessageStyle = {
-  position: 'absolute',
-  top: 'calc(100% + 4px)',
-  left: '12px',
-  fontSize: '13px',
-  fontFamily: 'Pretendard',
-  color: 'rgba(0, 102, 198, 0.32)',
-  marginTop: '4px',
 };
 
 const verificationButtonStyle = {
   position: 'absolute',
-  right: '20px',
+  right: 'clamp(8px, 1.2vw, 16px)',
   top: '50%',
   transform: 'translateY(-50%)',
   color: '#004FC6',
   border: 'none',
   cursor: 'pointer',
   fontFamily: 'Pretendard',
-  fontSize: '12px',
+  fontSize: 'clamp(10px, 1vw, 12px)',
   fontWeight: '700',
   zIndex: 3,
+  padding: '6px 4px',
+  borderRadius: '4px',
 };
 
-function Register(props) {
+function Register() {
+  const navigate = useNavigate();
   const [state, setState] = useState({
     nickname: '',
     password: '',
@@ -131,7 +74,7 @@ function Register(props) {
     setState((prev) => ({
       ...prev,
       [name]: value,
-      [`${name}Message`]: '', // 입력 변경 시 해당 필드의 에러메시지 초기화
+      [`${name}Message`]: '',
     }));
   };
 
@@ -141,19 +84,13 @@ function Register(props) {
 
     try {
       await checkNickname(nickname);
-      setState((prev) => ({
-        ...prev,
-        nicknameMessage: '',
-      }));
+      setState((prev) => ({ ...prev, nicknameMessage: '' }));
     } catch (error) {
       const errmessage =
         error.status === 409
           ? 'Nickname is already in use.'
           : 'Failed to check nickname';
-      setState((prev) => ({
-        ...prev,
-        nicknameMessage: errmessage,
-      }));
+      setState((prev) => ({ ...prev, nicknameMessage: errmessage }));
     }
   };
 
@@ -172,10 +109,7 @@ function Register(props) {
 
   const sendVerificationCode = async () => {
     if (!state.email) {
-      setState((prev) => ({
-        ...prev,
-        emailMessage: '이메일을 입력해주세요',
-      }));
+      setState((prev) => ({ ...prev, emailMessage: '이메일을 입력해주세요' }));
       return;
     }
 
@@ -185,37 +119,20 @@ function Register(props) {
       setTimeout(() => setIsTimerRunning(true), 0);
     } catch (error) {
       if (error.status === 409) {
-        setState((prev) => ({
-          ...prev,
-          emailMessage: '이미 가입된 이메일입니다',
-        }));
-        return;
+        setState((prev) => ({ ...prev, emailMessage: '이미 가입된 이메일입니다' }));
       } else {
-        setState((prev) => ({
-          ...prev,
-          emailMessage: '인증 코드 전송에 실패했습니다',
-        }));
+        setState((prev) => ({ ...prev, emailMessage: '인증 코드 전송에 실패했습니다' }));
       }
     }
   };
 
   const handleRegister = async () => {
-    // console.log({
-    //   nickname: state.nickname,
-    //   password: state.password,
-    //   confirmPassword: state.confirmPassword,
-    //   email: state.email,
-    //   verificationCode: state.verificationCode,
-    // });
-    // 모든 필수 필드 검사
     const errors = {};
     if (!state.nickname) errors.nicknameMessage = '필수 입력 항목입니다';
     if (!state.password) errors.passwordMessage = '필수 입력 항목입니다';
     if (!state.confirmPassword) errors.passwordMessage = '필수 입력 항목입니다';
     if (!state.email) errors.emailMessage = '필수 입력 항목입니다';
-    if (!state.verificationCode) {
-      errors.verificationCodeMessage = '필수 입력 항목입니다';
-    }
+    if (!state.verificationCode) errors.verificationCodeMessage = '필수 입력 항목입니다';
 
     if (Object.keys(errors).length > 0) {
       setState((prev) => ({ ...prev, ...errors }));
@@ -223,34 +140,26 @@ function Register(props) {
     }
 
     if (state.password !== state.confirmPassword) {
-      setState((prev) => ({
-        ...prev,
-        passwordMessage: '비밀번호가 일치하지 않습니다',
-      }));
+      setState((prev) => ({ ...prev, passwordMessage: '비밀번호가 일치하지 않습니다' }));
       return;
     }
 
     try {
-      const formData = {
+      await registerUser({
         nickname: state.nickname,
         password: state.password,
         email: state.email,
         code: state.verificationCode,
-      };
-
-      await registerUser(formData);
+      });
       setState((prev) => ({
         ...prev,
-        verificationCodeMessage:
-          'Registration successful. Redirecting to login page...',
+        verificationCodeMessage: 'Registration successful. Redirecting to login page...',
       }));
-      setTimeout(() => props.route('/login'), 2000);
+      setTimeout(() => navigate('/login'), 2000);
     } catch (error) {
-      // Parse field-specific errors from error message
       const errorMsg = error.message || '';
       const fieldErrors = {};
 
-      // Check which field the error belongs to
       if (errorMsg.toLowerCase().includes('password')) {
         fieldErrors.passwordMessage = errorMsg;
       } else if (errorMsg.toLowerCase().includes('nickname')) {
@@ -260,172 +169,107 @@ function Register(props) {
       } else if (errorMsg.toLowerCase().includes('code')) {
         fieldErrors.verificationCodeMessage = errorMsg;
       } else {
-        // Default to verification code field for unknown errors
         fieldErrors.verificationCodeMessage = errorMsg;
       }
 
-      setState((prev) => ({
-        ...prev,
-        ...fieldErrors,
-      }));
+      setState((prev) => ({ ...prev, ...fieldErrors }));
     }
   };
 
   return (
     <div className="register_page" style={registerPageStyle}>
       <div style={centerBlockStyle}>
+        <div style={{ width: '100%', display: 'flex', alignItems: 'center' }}>
+          <button
+            onClick={() => navigate('/login')}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '4px',
+              opacity: 0.7,
+              transition: 'opacity 0.15s',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+            onMouseEnter={e => e.currentTarget.style.opacity = 1}
+            onMouseLeave={e => e.currentTarget.style.opacity = 0.7}
+          >
+            <img
+              src="/public/images/right_arrow.png"
+              alt="back"
+              style={{ width: 'clamp(22px, 3vw, 45px)', height: 'clamp(24px, 3.5vw, 48px)' }}
+            />
+          </button>
+        </div>
         <Bunnies />
         <form id="register-form" style={formStyle}>
-          <div style={fieldStyle}>
-            <label htmlFor="nickname" style={labelStyle}>
-              nickname
-            </label>
-            <div style={inputFieldContainerStyle}>
-              <div
-                style={{
-                  ...textFieldsStyle,
-                  ...(state.nicknameMessage ? errorTextFieldsStyle : {}),
-                }}
-              >
-                <input
-                  type="text"
-                  id="nickname"
-                  name="nickname"
-                  value={state.nickname}
-                  onChange={handleInputChange}
-                  onBlur={checkNicknameHandler}
-                  style={inputStyle}
-                  maxLength={30}
-                />
-              </div>
-              <div style={errorMessageStyle}>
-                {state.nicknameMessage ? state.nicknameMessage : ''}
-              </div>
-            </div>
-          </div>
-
-          <div style={fieldStyle}>
-            <label htmlFor="password" style={labelStyle}>
-              password
-            </label>
-            <div style={inputFieldContainerStyle}>
-              <div
-                style={{
-                  ...textFieldsStyle,
-                  ...(state.passwordMessage ? errorTextFieldsStyle : {}),
-                }}
-              >
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={state.password}
-                  onChange={handleInputChange}
-                  style={inputStyle}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div style={fieldStyle}>
-            <label htmlFor="confirm-password" style={labelStyle}>
-              Confirm
-              <br />
-              password
-            </label>
-            <div style={inputFieldContainerStyle}>
-              <div
-                style={{
-                  ...textFieldsStyle,
-                  ...(state.passwordMessage ? errorTextFieldsStyle : {}),
-                }}
-              >
-                <input
-                  type="password"
-                  id="confirm-password"
-                  name="confirmPassword"
-                  value={state.confirmPassword}
-                  onChange={handleInputChange}
-                  onBlur={checkPasswordMatch}
-                  style={inputStyle}
-                />
-              </div>
-              {state.passwordMessage && (
-                <div style={errorMessageStyle}>{state.passwordMessage}</div>
-              )}
-            </div>
-          </div>
-
-          <div style={fieldStyle}>
-            <label htmlFor="email" style={labelStyle}>
-              e-mail
-            </label>
-            <div style={inputFieldContainerStyle}>
-              <div
-                style={{
-                  ...textFieldsStyle,
-                  ...(state.emailMessage ? errorTextFieldsStyle : {}),
-                }}
-              >
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={state.email}
-                  onChange={handleInputChange}
-                  style={inputStyle}
-                />
-                <button
-                  type="button"
-                  onClick={sendVerificationCode}
-                  style={verificationButtonStyle}
-                >
-                  {isTimerRunning ? '인증 재요청' : '인증 요청'}
-                </button>
-              </div>
-
-              {state.emailMessage && (
-                <div style={errorMessageStyle}>{state.emailMessage}</div>
-              )}
-            </div>
-          </div>
-
-          <div style={fieldStyle}>
-            <label htmlFor="verification-code" style={labelStyle}>
-              Verification
-              <br />
-              Code
-            </label>
-            <div style={inputFieldContainerStyle}>
-              <div
-                style={{
-                  ...textFieldsStyle,
-                  ...(state.verificationCodeMessage
-                    ? errorTextFieldsStyle
-                    : {}),
-                }}
-              >
-                <input
-                  type="text"
-                  id="verification-code"
-                  name="verificationCode"
-                  value={state.verificationCode}
-                  onChange={handleInputChange}
-                  style={inputStyle}
-                  maxLength={6}
-                />
-              </div>
-              {isTimerRunning && <Timer />}
-              {state.verificationCodeMessage && (
-                <div style={errorMessageStyle}>
-                  {state.verificationCodeMessage}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <HomeTextButton text="SIGN UP" onClick={handleRegister} />
+          <InputField
+            id="nickname"
+            label="nickname"
+            type="text"
+            name="nickname"
+            value={state.nickname}
+            onChange={handleInputChange}
+            onBlur={checkNicknameHandler}
+            placeholder="최대 30자"
+            error={state.nicknameMessage}
+            maxLength={30}
+          />
+          <InputField
+            id="password"
+            label="password"
+            type="password"
+            name="password"
+            value={state.password}
+            onChange={handleInputChange}
+            placeholder="8자 이상 입력"
+          />
+          <InputField
+            id="confirm-password"
+            label={<span>Confirm<br />password</span>}
+            type="password"
+            name="confirmPassword"
+            value={state.confirmPassword}
+            onChange={handleInputChange}
+            onBlur={checkPasswordMatch}
+            placeholder="비밀번호 재입력"
+            error={state.passwordMessage}
+          />
+          <InputField
+            id="email"
+            label="e-mail"
+            type="email"
+            name="email"
+            value={state.email}
+            onChange={handleInputChange}
+            placeholder="example@email.com"
+            error={state.emailMessage}
+          >
+            <button
+              type="button"
+              onClick={sendVerificationCode}
+              style={verificationButtonStyle}
+            >
+              {isTimerRunning ? '인증 재요청' : '인증 요청'}
+            </button>
+          </InputField>
+          <InputField
+            id="verification-code"
+            label={<span>Verification<br />Code</span>}
+            type="text"
+            name="verificationCode"
+            value={state.verificationCode}
+            onChange={handleInputChange}
+            placeholder="6자리 코드"
+            error={state.verificationCodeMessage}
+            maxLength={6}
+            extra={isTimerRunning && <Timer />}
+          />
         </form>
+        <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+          <HomeTextButton text="SIGN UP" onClick={handleRegister} />
+        </div>
       </div>
     </div>
   );

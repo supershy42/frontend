@@ -1,4 +1,5 @@
-import { useState } from 'ft_react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { createReception, joinReception } from '../../api/gameApi';
 import Bunnies from '../../component/Bunnies';
 import HomeTextButton from '../../component/HomeTextButton';
@@ -82,78 +83,42 @@ const errorMessageStyle = {
   marginTop: '4px',
 };
 
-function CreateGame(props) {
+function CreateGame() {
+  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-
-  const handleNameChange = (e) => {
-    setName(e.target.value);
-  };
-
-  const handlePasswordChange = (e) => {
-    setPassword(e.target.value);
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name) return;
 
-    const formData = {
-      name,
-    };
-    if (password) {
-      formData.password = password;
-    }
+    const formData = { name };
+    if (password) formData.password = password;
 
     try {
       const response = await createReception(formData);
-      console.log(response);
       const receptionId = response.id;
 
-      const joinData = {
-        receptionId,
-      };
-      if (password) {
-        joinData.password = password;
-      }
-      const joinResponse = await joinReception(joinData);
-      console.log(joinResponse);
+      const joinData = { receptionId };
+      if (password) joinData.password = password;
+      await joinReception(joinData);
 
-      props.route(`/reception/${receptionId}`);
+      navigate(`/reception/${receptionId}`);
     } catch (error) {
       console.error(error);
     }
   };
 
   return (
-    <div
-      style={{
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
-    >
+    <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
       <div style={centerBlockStyle}>
         <button
-            type="button"
-            class="btn-close"
-            aria-label="Close"
-            style={{
-              position: 'absolute',
-              top: '35px',
-              right: '32px',
-            }}
-            onClick={() => {
-              if (history.state?.from?.path) {
-                props.route(history.state.from.path);
-              } else {
-                props.route('/');
-              }
-            }}
-          ></button>
+          type="button"
+          className="btn-close"
+          aria-label="Close"
+          style={{ position: 'absolute', top: '35px', right: '32px' }}
+          onClick={() => navigate(-1)}
+        />
         <Bunnies />
         <form style={formStyle} onSubmit={handleSubmit}>
           <div style={fieldStyle}>
@@ -164,7 +129,7 @@ function CreateGame(props) {
                   type="text"
                   style={inputStyle}
                   value={name}
-                  onChange={handleNameChange}
+                  onChange={(e) => setName(e.target.value)}
                   maxLength={20}
                   required
                 />
@@ -179,14 +144,14 @@ function CreateGame(props) {
                   type="password"
                   style={inputStyle}
                   value={password}
-                  onChange={handlePasswordChange}
+                  onChange={(e) => setPassword(e.target.value)}
                   maxLength={20}
                   placeholder="비밀번호는 선택사항입니다"
                 />
               </div>
             </div>
           </div>
-          <span className="message" style={errorMessageStyle}></span>
+          <span className="message" style={errorMessageStyle} />
           <HomeTextButton text="Create" type="submit" />
         </form>
       </div>

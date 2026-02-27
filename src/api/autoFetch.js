@@ -1,4 +1,3 @@
-import { navigate } from '../router.jsx';
 
 const USER_API_URL = process.env.USER_API_URL;
 
@@ -69,7 +68,7 @@ const autoFetch = async (url, options = {}) => {
         localStorage.removeItem('access');
         document.cookie =
           'refresh=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        navigate('/login');
+        window.location.href = '/login';
         throw error;
       } finally {
         isRefreshing = false;

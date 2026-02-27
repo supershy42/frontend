@@ -1,6 +1,6 @@
 
 import { getChattingRoom } from '../api/userApi.js';
-import { useState, useEffect } from 'ft_react';
+import { useState, useEffect } from 'react';
 
 
 const CHAT_WS_URL = process.env.CHAT_WS_URL;

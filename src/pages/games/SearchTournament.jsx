@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'ft_react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import TextBanner from '../../component/TextBanner.jsx';
 import { getTournamentList } from '../../api/gameApi.js';
 
 const centerBlockStyle = {
-    position: 'relative',
+  position: 'relative',
   display: 'flex',
   width: '700px',
   padding: '80px 62.5px',
@@ -39,7 +40,8 @@ const blankBox = {
   fontSize: '24px',
 };
 
-const SearchTournament = (props) => {
+const SearchTournament = () => {
+  const navigate = useNavigate();
   const [tournamentList, setTournamentList] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -53,7 +55,6 @@ const SearchTournament = (props) => {
   };
 
   useEffect(() => {
-    console.log('SearchGame mounted');
     fetchTournamentList(1);
   }, []);
 
@@ -63,19 +64,10 @@ const SearchTournament = (props) => {
   };
 
   return (
-    <div
-      style={{
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
-    >
+    <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
       <div style={centerBlockStyle}>
-      <button
+        <button
           type="button"
-          class="btn"
           style={{
             position: 'absolute',
             top: '35px',
@@ -85,11 +77,9 @@ const SearchTournament = (props) => {
             color: '#004FC6',
             fontSize: '24px',
           }}
-          onClick={() => {
-            props.route('/');
-          }}
+          onClick={() => navigate('/')}
         >
-          <i className="fas fa-home"></i>
+          <i className="fas fa-home" />
         </button>
         <TextBanner text="Search Tournament" width={370} />
         <div style={listContainerStyle}>
@@ -97,31 +87,26 @@ const SearchTournament = (props) => {
             <button
               className="btn btn-transparent me-2"
               style={{ fontSize: '20px', color: '#004FC6' }}
-              onClick={() => props.route('/create-tournament')}
+              onClick={() => navigate('/create-tournament')}
             >
               Create Tournament
             </button>
             <button
               className="btn btn-transparent"
               onClick={() => fetchTournamentList(currentPage)}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#004FC6',
-              }}
+              style={{ background: 'transparent', border: 'none', color: '#004FC6' }}
             >
-              <i className="fas fa-sync-alt"></i>
+              <i className="fas fa-sync-alt" />
             </button>
           </div>
 
-          {/* 토너먼트 리스트 */}
-          {tournamentList?.results ? (
+          {tournamentList?.results?.length > 0 ? (
             tournamentList.results.map((tournament) => (
               <div
                 key={tournament.id}
                 className="card"
                 style={{ cursor: 'pointer' }}
-                onClick={() => props.route(`/tournament/${tournament.id}`)}
+                onClick={() => navigate(`/tournament/${tournament.id}`)}
               >
                 <div className="card-body d-flex justify-content-between align-items-center">
                   <h5 className="card-title mb-0">{tournament.name}</h5>
@@ -133,12 +118,9 @@ const SearchTournament = (props) => {
             <div style={blankBox}>No tournament found.</div>
           )}
 
-          {/* 페이지네이션 */}
           <nav aria-label="Game list pagination">
             <ul className="pagination justify-content-center">
-              <li
-                className={`page-item ${!tournamentList?.previous ? 'disabled' : ''}`}
-              >
+              <li className={`page-item ${!tournamentList?.previous ? 'disabled' : ''}`}>
                 <button
                   className="page-link"
                   onClick={() => handlePageChange(currentPage - 1)}

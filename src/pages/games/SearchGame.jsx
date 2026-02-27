@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'ft_react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import TextBanner from '../../component/TextBanner.jsx';
 import JoinGameModal from './JoinGameModal.jsx';
 import { getReceptionList, joinReception } from '../../api/gameApi.js';
@@ -40,16 +41,15 @@ const blankBox = {
   fontSize: '24px',
 };
 
-const SearchGame = (props) => {
-  const [gameList, setGameList] = useState([]);
+const SearchGame = () => {
+  const navigate = useNavigate();
+  const [gameList, setGameList] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedGame, setSelectedGame] = useState(null);
 
   const fetchGameList = async (page) => {
     try {
       const response = await getReceptionList(page);
-      console.log('API Response:', response);
-      console.log('Results:', response?.results);
       setGameList(response);
     } catch (error) {
       console.error('Failed to fetch game list:', error);
@@ -65,47 +65,24 @@ const SearchGame = (props) => {
     fetchGameList(newPage);
   };
 
-  const handleCardClick = (game) => {
-    setSelectedGame(game);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedGame(null);
-  };
-
   const handleJoinGame = async (password) => {
     if (!selectedGame) return;
     try {
-      const joinData = {
-        receptionId: selectedGame.id,
-      };
-
-      if (password) {
-        joinData.password = password;
-      }
-
-      const response = await joinReception(joinData);
+      const joinData = { receptionId: selectedGame.id };
+      if (password) joinData.password = password;
+      await joinReception(joinData);
       setSelectedGame(null);
-      props.route(`/reception/${selectedGame.id}`);
+      navigate(`/reception/${selectedGame.id}`);
     } catch (error) {
       alert('Failed to join game:', error);
     }
   };
 
   return (
-    <div
-      style={{
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
-    >
+    <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
       <div style={centerBlockStyle}>
         <button
           type="button"
-          class="btn"
           style={{
             position: 'absolute',
             top: '35px',
@@ -115,11 +92,9 @@ const SearchGame = (props) => {
             color: '#004FC6',
             fontSize: '24px',
           }}
-          onClick={() => {
-            props.route('/');
-          }}
+          onClick={() => navigate('/')}
         >
-          <i className="fas fa-home"></i>
+          <i className="fas fa-home" />
         </button>
         <TextBanner text="Search Game" width={370} />
         <div style={listContainerStyle}>
@@ -127,31 +102,26 @@ const SearchGame = (props) => {
             <button
               className="btn btn-transparent me-2"
               style={{ fontSize: '20px', color: '#004FC6' }}
-              onClick={() => props.route('/create-game')}
+              onClick={() => navigate('/create-game')}
             >
               Create Game
             </button>
             <button
               className="btn btn-transparent"
               onClick={() => fetchGameList(currentPage)}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#004FC6',
-              }}
+              style={{ background: 'transparent', border: 'none', color: '#004FC6' }}
             >
-              <i className="fas fa-sync-alt"></i>
+              <i className="fas fa-sync-alt" />
             </button>
           </div>
 
-          {/* 게임 리스트 */}
-          {gameList?.results ? (
+          {gameList?.results?.length > 0 ? (
             gameList.results.map((game) => (
               <div
                 key={game.id}
                 className="card"
                 style={{ cursor: 'pointer' }}
-                onClick={() => handleCardClick(game)}
+                onClick={() => setSelectedGame(game)}
               >
                 <div className="card-body d-flex justify-content-between align-items-center">
                   <h5 className="card-title mb-0">{game.name}</h5>
@@ -167,12 +137,9 @@ const SearchGame = (props) => {
             <div style={blankBox}>No game found.</div>
           )}
 
-          {/* 페이지네이션 */}
           <nav aria-label="Game list pagination">
             <ul className="pagination justify-content-center">
-              <li
-                className={`page-item ${!gameList?.previous ? 'disabled' : ''}`}
-              >
+              <li className={`page-item ${!gameList?.previous ? 'disabled' : ''}`}>
                 <button
                   className="page-link"
                   onClick={() => handlePageChange(currentPage - 1)}
@@ -200,7 +167,7 @@ const SearchGame = (props) => {
       {selectedGame && (
         <JoinGameModal
           game={selectedGame}
-          onClose={handleCloseModal}
+          onClose={() => setSelectedGame(null)}
           onJoin={handleJoinGame}
         />
       )}

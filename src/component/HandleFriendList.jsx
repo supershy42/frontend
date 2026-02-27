@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'ft_react';
+import { useState, useEffect } from 'react';
 
 const HandleFriendList = ({ fetchFriendList }) => {
   const [dep, setDep] = useState(0);

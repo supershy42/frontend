@@ -1,4 +1,4 @@
-import { useState } from 'ft_react';
+import { useState } from 'react';
 
 
 const JoinGameModal = ({ game, onClose, onJoin }) => {

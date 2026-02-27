@@ -1,5 +1,6 @@
-import { useState } from 'ft_react';
-import { createReception, createTournament, joinReception } from '../../api/gameApi';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { createTournament } from '../../api/gameApi';
 import Bunnies from '../../component/Bunnies';
 import HomeTextButton from '../../component/HomeTextButton';
 
@@ -83,44 +84,32 @@ const errorMessageStyle = {
 };
 
 const descriptionStyle = {
-    fontFamily: 'Pretendard',
-    fontSize: '14px',
-    color: 'rgba(0, 79, 198, 0.60)',
-    marginTop: '8px',
-    textAlign: 'right',
+  fontFamily: 'Pretendard',
+  fontSize: '14px',
+  color: 'rgba(0, 79, 198, 0.60)',
+  marginTop: '8px',
+  textAlign: 'right',
 };
-  
-  // fieldStyle을 수정해서 설명을 포함할 수 있도록
-  const fieldContainerStyle = {
-    width: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-  };
 
-function CreateTournament(props) {
+const fieldContainerStyle = {
+  width: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '16px',
+};
+
+function CreateTournament() {
+  const navigate = useNavigate();
   const [name, setName] = useState('');
-  const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-
-  const handleNameChange = (e) => {
-    setName(e.target.value);
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name) return;
 
-    const formData = {
-      name,
-      max_participants: 4,
-    };
-
     try {
-      const response = await createTournament(formData);
-      console.log(response);
-      const tournamentId = response.id;
-      props.route(`/tournament/${tournamentId}`);
+      const response = await createTournament({ name, max_participants: 4 });
+      navigate(`/tournament/${response.id}`);
     } catch (error) {
       console.error(error);
       setErrorMessage('Failed to create tournament');
@@ -128,33 +117,15 @@ function CreateTournament(props) {
   };
 
   return (
-    <div
-      style={{
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
-    >
+    <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
       <div style={centerBlockStyle}>
         <button
           type="button"
-          class="btn-close"
+          className="btn-close"
           aria-label="Close"
-          style={{
-            position: 'absolute',
-            top: '35px',
-            right: '32px',
-          }}
-          onClick={() => {
-            if (history.state?.from?.path) {
-              props.route(history.state.from.path);
-            } else {
-              props.route('/');
-            }
-          }}
-        ></button>
+          style={{ position: 'absolute', top: '35px', right: '32px' }}
+          onClick={() => navigate(-1)}
+        />
         <Bunnies />
         <form style={formStyle} onSubmit={handleSubmit}>
           <div style={fieldContainerStyle}>
@@ -166,7 +137,7 @@ function CreateTournament(props) {
                     type="text"
                     style={inputStyle}
                     value={name}
-                    onChange={handleNameChange}
+                    onChange={(e) => setName(e.target.value)}
                     maxLength={20}
                     required
                   />

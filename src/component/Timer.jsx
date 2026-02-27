@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'ft_react';
+import { useState, useEffect, useRef } from 'react';
 
 function Timer() {
   const [time, setTime] = useState(300);

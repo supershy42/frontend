@@ -1,7 +1,7 @@
 
 import { inviteFriend } from '../api/gameApi.js';
 import { getFriendList } from '../api/userApi';
-import { useState, useEffect } from 'ft_react';
+import { useState, useEffect } from 'react';
 
 const FriendInviteDropup = ({ show, onClose }) => {
   const dropupStyle = {

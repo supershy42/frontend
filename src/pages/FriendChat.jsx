@@ -1,4 +1,5 @@
-import { useState } from 'ft_react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { addFriend, getFriendList, searchUser } from '../api/userApi.js';
 import AlertCanvas from '../component/AlertCanvas.jsx';
 import AlertCookie from '../component/AlertCookie';
@@ -7,11 +8,7 @@ import HandleFriendList from '../component/HandleFriendList.jsx';
 
 const IMG_URL = process.env.IMG_URL;
 
-const pageStyle = {
-  width: '100%',
-  height: '100%',
-  display: 'flex',
-};
+const pageStyle = { width: '100%', height: '100%', display: 'flex' };
 
 const chatListStyle = {
   width: '460px',
@@ -35,16 +32,9 @@ const userProfileStyle = {
   lineHeight: '82px',
 };
 
-const searchContainerStyle = {
-  padding: '20px',
-  position: 'relative',
-};
+const searchContainerStyle = { padding: '20px', position: 'relative' };
 
-const searchBoxStyle = {
-  position: 'relative',
-  display: 'flex',
-  alignItems: 'center',
-};
+const searchBoxStyle = { position: 'relative', display: 'flex', alignItems: 'center' };
 
 const searchInputStyle = {
   width: '100%',
@@ -84,10 +74,7 @@ const messageListHeaderStyle = {
   borderTop: '1px solid rgba(0, 79, 198, 0.20)',
 };
 
-const messageListStyle = {
-  flex: 1,
-  overflowY: 'auto',
-};
+const messageListStyle = { flex: 1, overflowY: 'auto' };
 
 const chatRoomStyle = {
   flex: 1,
@@ -110,21 +97,11 @@ const friendItemStyle = {
   alignItems: 'center',
   gap: '15px',
   padding: '5px 10px',
-  transition: 'background-color 0.2s ease',
 };
 
-const avatarContainerStyle = {
-  position: 'relative',
-  width: '50px',
-  height: '50px',
-};
+const avatarContainerStyle = { position: 'relative', width: '50px', height: '50px' };
 
-const avatarStyle = {
-  width: '100%',
-  height: '100%',
-  borderRadius: '50%',
-  objectFit: 'cover',
-};
+const avatarStyle = { width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' };
 
 const statusIndicatorStyle = {
   position: 'absolute',
@@ -136,18 +113,15 @@ const statusIndicatorStyle = {
   border: '2px solid white',
 };
 
-const nameStyle = {
-  fontSize: '24px',
-  color: '#004FC6',
-};
+const nameStyle = { fontSize: '24px', color: '#004FC6' };
 
-const FriendChat = (props) => {
+const FriendChat = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResult, setSearchResult] = useState();
   const [friendList, setFriendList] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
   const [showSearchResults, setShowSearchResults] = useState(false);
-
   const [showAlert, setShowAlert] = useState(false);
 
   const handleSearch = async () => {
@@ -158,15 +132,11 @@ const FriendChat = (props) => {
         setShowSearchResults(true);
       }
     } catch (error) {
-      setSearchResult({
-        nickname: 'User not found',
-        avatar: 'public/avatars/Spark_profile.png',
-      });
+      setSearchResult({ nickname: 'User not found', avatar: 'public/avatars/Spark_profile.png' });
       console.error('Failed to search user:', error);
     }
   };
 
-  // 친구리스트 조회
   const fetchFriendList = async () => {
     try {
       const data = await getFriendList();
@@ -178,10 +148,8 @@ const FriendChat = (props) => {
 
   const handleSendFriendRequest = async (nickname) => {
     try {
-      const data = await addFriend(nickname);
-
+      await addFriend(nickname);
       alert('Friend request sent!');
-
       setSearchResult(null);
       setSearchQuery('');
     } catch (error) {
@@ -206,52 +174,23 @@ const FriendChat = (props) => {
         >
           <button
             type="button"
-            class="btn-close"
+            className="btn-close"
             aria-label="Close"
-            style={{
-              position: 'absolute',
-              top: '35px',
-              left: '32px',
-            }}
-            onClick={() => {
-              if (history.state?.from?.path) {
-                props.route(history.state.from.path);
-              } else {
-                props.route('/');
-              }
-            }}
-          ></button>
-          <h1
-            style={{
-              color: '#004FC6',
-              fontFamily: 'Jersey 10',
-              lineHeight: 0,
-              margin: 0,
-            }}
-          >
+            style={{ position: 'absolute', top: '35px', left: '32px' }}
+            onClick={() => navigate(-1)}
+          />
+          <h1 style={{ color: '#004FC6', fontFamily: 'Jersey 10', lineHeight: 0, margin: 0 }}>
             Chat Room
           </h1>
-          <h3
-            style={{
-              color: 'rgba(0, 79, 198, 0.50)',
-              fontSize: '24px',
-              fontWeight: '400',
-              lineHeight: 0,
-              margin: 0,
-            }}
-          >
+          <h3 style={{ color: 'rgba(0, 79, 198, 0.50)', fontSize: '24px', fontWeight: '400', lineHeight: 0, margin: 0 }}>
             {selectedChat ? selectedChat.user_name : ''}
           </h3>
         </div>
         {selectedChat ? (
           <ChatRoom chatRoomId={selectedChat} />
         ) : (
-          // 스켈레톤 UI
           <div style={skeletonStyle}>
-            <i
-              className="fas fa-comments"
-              style={{ fontSize: '64px', marginBottom: '20px' }}
-            ></i>
+            <i className="fas fa-comments" style={{ fontSize: '64px', marginBottom: '20px' }} />
             <p>Select a chat to start messaging</p>
           </div>
         )}
@@ -259,21 +198,10 @@ const FriendChat = (props) => {
 
       <div style={chatListStyle}>
         <div style={userProfileStyle}>
-          <h2
-            style={{
-              display: 'flex',
-              width: '190px',
-              lineHeight: '82px',
-              fontSize: '40px',
-            }}
-          >
+          <h2 style={{ display: 'flex', width: '190px', lineHeight: '82px', fontSize: '40px' }}>
             {localStorage.getItem('nickname')}
           </h2>
-          <AlertCookie
-            onClick={() => {
-              setShowAlert(true);
-            }}
-          />
+          <AlertCookie onClick={() => setShowAlert(true)} />
         </div>
 
         <div style={searchContainerStyle}>
@@ -285,77 +213,39 @@ const FriendChat = (props) => {
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
-                if (showSearchResults) {
-                  setShowSearchResults(false);
-                }
+                if (showSearchResults) setShowSearchResults(false);
               }}
             />
-            <button style={searchButtonStyle} onClick={() => handleSearch()}>
-              <i className="fas fa-search"></i>
+            <button style={searchButtonStyle} onClick={handleSearch}>
+              <i className="fas fa-search" />
             </button>
           </div>
-
-          {showSearchResults && (
+          {showSearchResults && searchResult && (
             <div style={searchResultsStyle}>
-              {searchResult && (
-                <div
-                  style={{
-                    display: 'flex',
-                    padding: '10px',
-                    borderBottom: '1px solid #eee',
-                    fontSize: '24px',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      padding: '0px 10px',
-                      gap: '12px',
-                    }}
-                  >
-                    <img
-                      src={`${IMG_URL}${searchResult.avatar}`}
-                      alt="user_avatar"
-                      style={{ width: '40px', height: '40px' }}
-                    />
-                    {searchResult.nickname}
-                  </div>
-                  <button
-                    className="btn btn-transparent"
-                    style={{
-                      float: 'right',
-                      color: '#004FC6',
-                      fontSize: '24px',
-                    }}
-                    onClick={() =>
-                      handleSendFriendRequest(searchResult.nickname)
-                    }
-                  >
-                    Add Friend
-                  </button>
+              <div style={{ display: 'flex', padding: '10px', borderBottom: '1px solid #eee', fontSize: '24px', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', padding: '0px 10px', gap: '12px' }}>
+                  <img src={`${IMG_URL}${searchResult.avatar}`} alt="user_avatar" style={{ width: '40px', height: '40px' }} />
+                  {searchResult.nickname}
                 </div>
-              )}
+                <button
+                  className="btn btn-transparent"
+                  style={{ float: 'right', color: '#004FC6', fontSize: '24px' }}
+                  onClick={() => handleSendFriendRequest(searchResult.nickname)}
+                >
+                  Add Friend
+                </button>
+              </div>
             </div>
           )}
         </div>
 
         <div style={messageListHeaderStyle}>
-          <h3
-            style={{
-              display: 'flex',
-              fontSize: '32px',
-              margin: 0,
-              color: '#004FC6',
-            }}
-          >
+          <h3 style={{ display: 'flex', fontSize: '32px', margin: 0, color: '#004FC6' }}>
             Friend List
           </h3>
         </div>
 
         <div style={messageListStyle}>
-          {/* 채팅방 목록 */}
           {friendList.map((friend) => (
             <div
               key={friend.friend_id}
@@ -366,48 +256,26 @@ const FriendChat = (props) => {
                 padding: '20px',
                 borderBottom: '1px solid #eee',
                 cursor: 'pointer',
-                backgroundColor:
-                  selectedChat === friend.chatroom_id
-                    ? 'rgba(0, 79, 198, 0.10)'
-                    : 'transparent',
+                backgroundColor: selectedChat === friend.chatroom_id ? 'rgba(0, 79, 198, 0.10)' : 'transparent',
               }}
-              onClick={() => {
-                if (selectedChat === friend.chatroom_id) {
-                  setSelectedChat(null);
-                } else {
-                  setSelectedChat(friend.chatroom_id);
-                }
-              }}
+              onClick={() => setSelectedChat(selectedChat === friend.chatroom_id ? null : friend.chatroom_id)}
             >
               <div style={friendItemStyle}>
                 <div style={avatarContainerStyle}>
-                  <img
-                    src={`${IMG_URL}${friend.avatar}`}
-                    alt={friend.nickname}
-                    style={avatarStyle}
-                  />
-                  <div
-                    style={{
-                      ...statusIndicatorStyle,
-                      backgroundColor: friend.is_online ? '#004FC6' : 'gray',
-                    }}
-                  />
+                  <img src={`${IMG_URL}${friend.avatar}`} alt={friend.nickname} style={avatarStyle} />
+                  <div style={{ ...statusIndicatorStyle, backgroundColor: friend.is_online ? '#004FC6' : 'gray' }} />
                 </div>
                 <span style={nameStyle}>{friend.nickname}</span>
               </div>
-              <i
-                class="fa-solid fa-message"
-                style={{ color: '#004FC6', fontSize: '20px' }}
-              ></i>
+              <i className="fa-solid fa-message" style={{ color: '#004FC6', fontSize: '20px' }} />
             </div>
           ))}
         </div>
       </div>
       <AlertCanvas
-        props={props}
         show={showAlert}
         onClose={() => setShowAlert(false)}
-        refreshList={() => fetchFriendList}
+        refreshList={fetchFriendList}
       />
     </div>
   );

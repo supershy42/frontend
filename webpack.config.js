@@ -23,7 +23,10 @@ export default {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env'],
+            presets: [
+              '@babel/preset-env',
+              ['@babel/preset-react', { runtime: 'automatic' }],
+            ],
           },
         },
       },
@@ -47,8 +50,6 @@ export default {
     alias: {
       '@': path.resolve(__dirname, 'src/'),
       '@images': path.resolve(__dirname, 'public/images'),
-      'ft_react': path.resolve(__dirname, 'src/ft_react/supereact'),
-      'ft_react-dom': path.resolve(__dirname, 'src/ft_react/supereact-dom'),
     },
   },
   plugins: [

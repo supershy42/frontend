@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'ft_react';
+import { useState, useEffect } from 'react';
 
 
 const GAME_WS_URL = process.env.GAME_WS_URL;

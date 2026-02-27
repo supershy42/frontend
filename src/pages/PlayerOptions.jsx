@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'ft_react';
+import { useState, useEffect } from 'react';
 import TextBanner from '../component/TextBanner.jsx';
 import { modifyProfile } from '../api/userApi.js';
 import { getMatchHistory } from '../api/gameApi.js';
@@ -13,11 +13,7 @@ const defaultAvatars = [
   '/public/images/Yeolee_profile.png',
 ];
 
-const pageContainerStyle = {
-  width: '100%',
-  height: '100%',
-  display: 'flex',
-};
+const pageContainerStyle = { width: '100%', height: '100%', display: 'flex' };
 
 const leftPanelStyle = {
   width: '518px',
@@ -32,33 +28,13 @@ const leftPanelStyle = {
   gap: '40px',
 };
 
-const profileImageStyle = {
-  width: '200px',
-  height: '200px',
-  borderRadius: '50%',
-  objectFit: 'cover',
-  margin: '0 auto',
-};
+const profileImageStyle = { width: '200px', height: '200px', borderRadius: '50%', objectFit: 'cover', margin: '0 auto' };
 
-const avatarGridStyle = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(3, 1fr)',
-  gap: '20px',
-  marginTop: '40px',
-};
+const avatarGridStyle = { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginTop: '40px' };
 
-const avatarOptionStyle = {
-  width: '100px',
-  height: '100px',
-  borderRadius: '50%',
-  cursor: 'pointer',
-  border: '2px solid transparent',
-};
+const avatarOptionStyle = { width: '100px', height: '100px', borderRadius: '50%', cursor: 'pointer', border: '2px solid transparent' };
 
-const selectedAvatarStyle = {
-  ...avatarOptionStyle,
-  border: '2px solid #004FC6',
-};
+const selectedAvatarStyle = { ...avatarOptionStyle, border: '2px solid #004FC6' };
 
 const uploadButtonStyle = {
   width: '100px',
@@ -84,12 +60,7 @@ const rightPanelStyle = {
   overflowY: 'auto',
 };
 
-const matchListStyle = {
-  width: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '10px',
-};
+const matchListStyle = { width: '100%', display: 'flex', flexDirection: 'column', gap: '10px' };
 
 const matchCardStyle = {
   display: 'flex',
@@ -109,26 +80,13 @@ const matchResultStyle = (isWin) => ({
   fontWeight: 'bold',
 });
 
-const matchScoreStyle = {
-  fontSize: '18px',
-  fontWeight: 'bold',
-  color: '#004FC6',
-};
+const matchScoreStyle = { fontSize: '18px', fontWeight: 'bold', color: '#004FC6' };
 
-const sectionTitleStyle = {
-  fontSize: '24px',
-  fontWeight: 'bold',
-  color: '#004FC6',
-  marginBottom: '20px',
-};
+const sectionTitleStyle = { fontSize: '24px', fontWeight: 'bold', color: '#004FC6', marginBottom: '20px' };
 
-const PlayerOption = (props) => {
-  const [nickname, setNickname] = useState(
-    localStorage.getItem('nickname')
-  );
-  const [currentAvatar, setCurrentAvatar] = useState(
-    `${IMG_URL}${localStorage.getItem('avatar')}`
-  );
+const PlayerOption = () => {
+  const [nickname] = useState(localStorage.getItem('nickname'));
+  const [currentAvatar, setCurrentAvatar] = useState(`${IMG_URL}${localStorage.getItem('avatar')}`);
   const [selectedAvatar, setSelectedAvatar] = useState(null);
   const [isModified, setIsModified] = useState(false);
   const [matches, setMatches] = useState([]);
@@ -173,17 +131,9 @@ const PlayerOption = (props) => {
   const handleSubmit = async () => {
     try {
       const formData = new FormData();
-      // 선택된 이미지가 base64 문자열이라면 파일로 변환
-      if (selectedAvatar.startsWith('data:')) {
-        const response = await fetch(selectedAvatar);
-        const blob = await response.blob();
-        formData.append('avatar', blob, 'avatar.png');
-      } else {
-        // 기본 이미지를 파일로 변환
-        const response = await fetch(selectedAvatar);
-        const blob = await response.blob();
-        formData.append('avatar', blob, 'avatar.png');
-      }
+      const response = await fetch(selectedAvatar);
+      const blob = await response.blob();
+      formData.append('avatar', blob, 'avatar.png');
       formData.append('nickname', nickname);
 
       const data = await modifyProfile(formData);
@@ -200,40 +150,25 @@ const PlayerOption = (props) => {
     <div style={pageContainerStyle}>
       <div style={leftPanelStyle}>
         <TextBanner text={nickname} width={370} />
-        <img
-          src={`${currentAvatar}`}
-          alt="Current Profile"
-          style={profileImageStyle}
-        />
-
+        <img src={currentAvatar} alt="Current Profile" style={profileImageStyle} />
         <div style={avatarGridStyle}>
           {defaultAvatars.map((avatar, index) => (
             <img
               key={index}
               src={avatar}
               alt={`Avatar option ${index + 1}`}
-              style={
-                selectedAvatar === avatar
-                  ? selectedAvatarStyle
-                  : avatarOptionStyle
-              }
+              style={selectedAvatar === avatar ? selectedAvatarStyle : avatarOptionStyle}
               onClick={() => handleAvatarSelect(avatar)}
             />
           ))}
           <label style={uploadButtonStyle}>
-            <input
-              type="file"
-              accept="image/*"
-              style={{ display: 'none' }}
-              onChange={handleFileUpload}
-            />
-            <i className="fas fa-plus"></i>
+            <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileUpload} />
+            <i className="fas fa-plus" />
           </label>
         </div>
-
         <button
           type="button"
-          onClick={() => handleSubmit()}
+          onClick={handleSubmit}
           style={{
             padding: '10px 20px',
             backgroundColor: isModified ? '#004FC6' : 'rgba(0, 79, 198, 0.5)',
@@ -261,7 +196,6 @@ const PlayerOption = (props) => {
               const opponent = isLeftPlayer ? match.right_player : match.left_player;
               const myScore = isLeftPlayer ? match.left_player_score : match.right_player_score;
               const opponentScore = isLeftPlayer ? match.right_player_score : match.left_player_score;
-
               return (
                 <div key={index} style={matchCardStyle}>
                   <div>

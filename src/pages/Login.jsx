@@ -1,7 +1,9 @@
-import { useState } from 'ft_react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getFriendRequests, loginUser } from '../api/userApi.js';
 import Bunnies from '../component/Bunnies.jsx';
 import HomeTextButton from '../component/HomeTextButton.jsx';
+import InputField from '../component/InputField.jsx';
 import { addFriendRequest, initNotification } from '../utils/store.js';
 
 const loginPageStyle = {
@@ -14,14 +16,15 @@ const loginPageStyle = {
 
 const centerBlockStyle = {
   display: 'flex',
-  width: '700px',
-  padding: '80px 62.5px',
+  width: 'min(700px, 90vw)',
+  padding: 'clamp(36px, 5vw, 60px) clamp(10px, 2vw, 28px) clamp(16px, 2.5vw, 30px)',
   flexDirection: 'column',
   justifyContent: 'space-between',
   alignItems: 'center',
-  border: '3px solid #004FC6',
-  background: 'rgba(255, 255, 255, 0.80)',
-  gap: '52px',
+  border: '4px solid #004FC6',
+  background: 'rgba(235, 243, 255, 0.92)',
+  boxShadow: '6px 6px 0px rgba(0, 79, 198, 0.35)',
+  gap: 'clamp(20px, 3vw, 36px)',
 };
 
 const formStyle = {
@@ -30,57 +33,8 @@ const formStyle = {
   flexDirection: 'column',
   justifyContent: 'space-between',
   alignItems: 'center',
-  gap: '40px',
+  gap: 'clamp(18px, 2.8vw, 36px)',
   flexShrink: '0',
-};
-
-const fieldStyle = {
-  width: '100%',
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-};
-
-const inputFieldContainerStyle = {
-  position: 'relative',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '8px',
-  width: '318px',
-};
-
-const labelStyle = {
-  fontFamily: 'Jersey 10',
-  color: '#004FC6',
-  fontSize: '32px',
-  fontWeight: '400',
-  lineHeight: 'normal',
-};
-
-const textFieldsStyle = {
-  position: 'relative',
-  height: '58px',
-  width: '100%',
-  borderRadius: '18px',
-  background: '#F8F8F8',
-  boxShadow: '0px 4px 10px 3px rgba(0, 79, 198, 0.32) inset',
-  padding: '20px 25px',
-};
-
-const inputStyle = {
-  position: 'relative',
-  width: '100%',
-  height: '100%',
-  fontSize: '15px',
-  fontFamily: 'Pretendard',
-  fontWeight: 500,
-  color: '#004FC6',
-  zIndex: 2,
-  background: 'transparent',
-  lineHeight: 'normal',
-  padding: '0',
-  border: 'none',
-  outline: 'none',
 };
 
 const messageStyle = {
@@ -89,15 +43,10 @@ const messageStyle = {
   marginTop: '4px',
 };
 
-function Login(props) {
-  const [loginStatus, setLoginStatus] = useState({
-    message: '',
-    error: false,
-  });
-  const [state, setState] = useState({
-    email: '',
-    password: '',
-  });
+function Login() {
+  const navigate = useNavigate();
+  const [loginStatus, setLoginStatus] = useState({ message: '', error: false });
+  const [state, setState] = useState({ email: '', password: '' });
 
   const processLoginSuccess = async (data) => {
     document.cookie = `refresh=${data.refresh}; path=/; secure: HttpOnly`;
@@ -111,26 +60,16 @@ function Login(props) {
   };
 
   const handleLogin = async () => {
-    const formData = {
-      email: state.email,
-      password: state.password,
-    };
-
     try {
-      const data = await loginUser(formData);
+      const data = await loginUser({ email: state.email, password: state.password });
       await processLoginSuccess(data);
-      setLoginStatus({
-        message: 'Login successful. Redirecting to home page...',
-        error: false,
-      });
+      setLoginStatus({ message: 'Login successful. Redirecting to home page...', error: false });
 
       const friendRequests = await getFriendRequests();
       if (friendRequests.message?.length > 0) {
-        friendRequests.message.forEach((request) => {
-          addFriendRequest(request);
-        });
+        friendRequests.message.forEach((request) => addFriendRequest(request));
       }
-      setTimeout(() => props.route('/'), 2000);
+      setTimeout(() => navigate('/'), 2000);
     } catch (error) {
       setLoginStatus({
         message: 'Login failed. Please check your email and password.',
@@ -142,60 +81,63 @@ function Login(props) {
   return (
     <div style={loginPageStyle}>
       <div style={centerBlockStyle}>
+        <div style={{ width: '100%', display: 'flex', alignItems: 'center' }}>
+          <button
+            onClick={() => navigate('/')}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '4px',
+              opacity: 0.7,
+              transition: 'opacity 0.15s',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+            onMouseEnter={e => e.currentTarget.style.opacity = 1}
+            onMouseLeave={e => e.currentTarget.style.opacity = 0.7}
+          >
+            <img
+              src="/public/images/right_arrow.png"
+              alt="back"
+              style={{ width: 'clamp(22px, 3vw, 45px)', height: 'clamp(24px, 3.5vw, 48px)' }}
+            />
+          </button>
+        </div>
         <Bunnies />
         <form id="login-form" style={formStyle}>
-          <div style={fieldStyle}>
-            <label htmlFor="email" style={labelStyle}>
-              Email
-            </label>
-            <div style={inputFieldContainerStyle}>
-              <div style={textFieldsStyle}>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  required
-                  value={state.email}
-                  onChange={(e) =>
-                    setState({ ...state, email: e.target.value })
-                  }
-                  style={inputStyle}
-                />
-              </div>
-            </div>
-          </div>
-          <div style={fieldStyle}>
-            <label htmlFor="password" style={labelStyle}>
-              Password
-            </label>
-            <div style={inputFieldContainerStyle}>
-              <div style={textFieldsStyle}>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  required
-                  value={state.password}
-                  onChange={(e) =>
-                    setState({ ...state, password: e.target.value })
-                  }
-                  style={inputStyle}
-                />
-              </div>
-            </div>
-          </div>
+          <InputField
+            id="email"
+            label="Email"
+            type="email"
+            name="email"
+            value={state.email}
+            onChange={(e) => setState({ ...state, email: e.target.value })}
+            placeholder="example@email.com"
+          />
+          <InputField
+            id="password"
+            label="Password"
+            type="password"
+            name="password"
+            value={state.password}
+            onChange={(e) => setState({ ...state, password: e.target.value })}
+            placeholder="8자 이상 입력"
+          />
           <span
             className="message"
             style={
               loginStatus.error
                 ? { ...messageStyle, color: 'rgba(198, 0, 3, 0.64)' }
-                : { ...loginStatus, color: 'rgba(0, 102, 198, 0.32)' }
+                : { ...messageStyle, color: 'rgba(0, 102, 198, 0.32)' }
             }
           >
             {loginStatus.message}
           </span>
-          <HomeTextButton text="LOGIN" onClick={handleLogin} />
         </form>
+        <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+          <HomeTextButton text="LOGIN" onClick={handleLogin} />
+        </div>
       </div>
     </div>
   );

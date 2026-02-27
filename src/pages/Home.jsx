@@ -1,4 +1,5 @@
-import { jsx, useState, useEffect } from 'ft_react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Binky from '../component/Binky.jsx';
 import HomeTextButton from '../component/HomeTextButton.jsx';
 
@@ -9,13 +10,14 @@ const centerStyle = {
   flexDirection: 'column',
   justifyContent: 'center',
   alignItems: 'center',
-  gap: '65px',
+  gap: '40px',
 };
 
 const buttonContainerStyle = {
   display: 'flex',
   flexDirection: 'column',
-  gap: '25px',
+  gap: '16px',
+  alignItems: 'center',
 };
 
 const bingkyContainerStyle = {
@@ -24,32 +26,31 @@ const bingkyContainerStyle = {
   right: '10vh',
 };
 
-function Home(props) {
+function Home() {
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(!!localStorage.getItem('access'));
-
-  useEffect(() => {}, []);
 
   const handleClick = (action) => {
     if (action === 'Register') {
-      props.route('/register');
+      navigate('/register');
     } else if (action === 'Login') {
-      props.route('/login');
+      navigate('/login');
     } else if (action === 'CreateGame') {
-      props.route('/create-game');
+      navigate('/create-game');
     } else if (action === 'SearchGame') {
-      props.route('/search-game');
+      navigate('/search-game');
     } else if (action === 'CreateTournament') {
-      props.route('/create-tournament');
+      navigate('/create-tournament');
     } else if (action === 'SearchTournament') {
-      props.route('/search-tournament');
+      navigate('/search-tournament');
     } else if (action === 'PlayerOption') {
-      props.route('/player-option');
+      navigate('/player-option');
     } else if (action === 'Logout') {
       localStorage.removeItem('access');
       document.cookie =
         'refresh=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
       setIsLogin(false);
-      props.route('/');
+      navigate('/');
     }
   };
 
@@ -59,7 +60,7 @@ function Home(props) {
         <img
           src="/public/images/Title.png"
           alt="supershy_title"
-          style={{ width: '750px' }}
+          style={{ width: 'clamp(200px, 45vw, 500px)' }}
         />
         <div>
           {isLogin ? (
@@ -108,7 +109,7 @@ function Home(props) {
       </div>
       <div style={bingkyContainerStyle}>
         {isLogin && (
-          <Binky isOn={false} onClick={() => props.route('/chatting')} />
+          <Binky isOn={false} onClick={() => navigate('/chatting')} />
         )}
       </div>
     </div>

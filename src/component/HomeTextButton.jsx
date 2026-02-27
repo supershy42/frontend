@@ -1,4 +1,4 @@
-import { useState } from 'ft_react';
+import { useState } from 'react';
 
 
 function HomeTextButton({ text, onClick, type = 'button'}) {
@@ -26,7 +26,7 @@ function HomeTextButton({ text, onClick, type = 'button'}) {
     -1px 1px 0 #FFF,
     1px 1px 0 #FFF
   `,
-    fontSize: '48px',
+    fontSize: 'clamp(24px, 3.5vw, 48px)',
     fontWeight: '400',
   };
 
@@ -44,7 +44,7 @@ function HomeTextButton({ text, onClick, type = 'button'}) {
     -1px 1px 0 #004FC6,
     1px 1px 0 #004FC6
   `,
-    fontSize: '48px',
+    fontSize: 'clamp(24px, 3.5vw, 48px)',
     fontWeight: '400',
   };
 
@@ -52,10 +52,10 @@ function HomeTextButton({ text, onClick, type = 'button'}) {
     <div
       style={{
         display: 'flex',
-        height: '50px',
+        height: 'clamp(30px, 4vw, 50px)',
         justifyContent: 'center',
         alignItems: 'center',
-        gap: '90px',
+        gap: 'clamp(40px, 6vw, 90px)',
       }}
     >
       <div>
@@ -63,8 +63,7 @@ function HomeTextButton({ text, onClick, type = 'button'}) {
           <img
             src="/public/images/left_arrow.png"
             alt="left_arrow"
-            width={45}
-            height={48}
+            style={{ width: 'clamp(22px, 3vw, 45px)', height: 'clamp(24px, 3.5vw, 48px)' }}
           />
         )}
       </div>
@@ -82,8 +81,7 @@ function HomeTextButton({ text, onClick, type = 'button'}) {
           <img
             src="/public/images/right_arrow.png"
             alt="right_arrow"
-            width={45}
-            height={48}
+            style={{ width: 'clamp(22px, 3vw, 45px)', height: 'clamp(24px, 3.5vw, 48px)' }}
           />
         )}
       </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'ft_react';
+import { useState, useEffect } from 'react';
 import { store } from './store.js';
 
 export const useStore = () => {

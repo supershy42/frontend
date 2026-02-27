@@ -1,5 +1,4 @@
-import { jsx } from 'ft_react';
-import { createRoot } from 'ft_react-dom';
+import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
 import './global.css';
 

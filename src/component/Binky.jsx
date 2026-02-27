@@ -14,7 +14,7 @@ const Binky = ({ onClick }) => {
       <img
         src={isOn ? '/public/images/binky_on.png' : '/public/images/binky.png'}
         alt="bingky"
-        style={{ width: '65px' }}
+        style={{ width: 'clamp(40px, 4.5vw, 65px)' }}
       />
     </button>
   );
