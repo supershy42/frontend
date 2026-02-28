@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { FONT_SIZE } from '../theme.js';
 import TextBanner from '../component/TextBanner.jsx';
 import { modifyProfile } from '../api/userApi.js';
 import { getMatchHistory } from '../api/gameApi.js';
@@ -80,9 +81,9 @@ const matchResultStyle = (isWin) => ({
   fontWeight: 'bold',
 });
 
-const matchScoreStyle = { fontSize: '18px', fontWeight: 'bold', color: '#004FC6' };
+const matchScoreStyle = { fontSize: FONT_SIZE.xl, fontWeight: 'bold', color: '#004FC6' };
 
-const sectionTitleStyle = { fontSize: '24px', fontWeight: 'bold', color: '#004FC6', marginBottom: '20px' };
+const sectionTitleStyle = { fontSize: FONT_SIZE['3xl'], fontWeight: 'bold', color: '#004FC6', marginBottom: '20px' };
 
 const PlayerOption = () => {
   const [nickname] = useState(sessionStorage.getItem('nickname'));

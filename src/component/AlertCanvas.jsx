@@ -1,15 +1,18 @@
 import { useNavigate } from 'react-router-dom';
+import { FONT_SIZE } from '../theme.js';
 import { joinReception } from '../api/gameApi.js';
 import { acceptFriend } from '../api/userApi.js';
 import { removeFriendRequest, removeGameInvites } from '../utils/store.js';
 import { useStore } from '../utils/useStore.js';
 import TextBanner from './TextBanner.jsx';
 
+const SPACING = 16;
 const containerStyle = {
   position: 'fixed',
   top: 0,
   right: 0,
-  width: '460px',
+  width: '340px',
+  minWidth: '280px',
   height: '100vh',
   backgroundColor: '#fff',
   borderLeft: '3px solid rgba(0, 79, 198, 0.20)',
@@ -18,13 +21,13 @@ const containerStyle = {
   flexDirection: 'column',
 };
 
-const headerStyle = { padding: '30px 0', display: 'flex', justifyContent: 'center', alignItems: 'center' };
+const headerStyle = { padding: `${SPACING}px 0`, display: 'flex', justifyContent: 'center', alignItems: 'center' };
 
-const bodyStyle = { height: 'calc(100vh - 90px)', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'scroll' };
+const bodyStyle = { height: 'calc(100vh - 70px)', display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto' };
 
 const overlayStyle = { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 1040 };
 
-const blankResult = { padding: '20px', fontSize: '24px', color: 'rgba(0, 0, 0, 0.5)' };
+const blankResult = { padding: SPACING, fontSize: FONT_SIZE.md, fontFamily: 'Pretendard', color: 'rgba(0, 0, 0, 0.5)' };
 
 const bannerContainer = {
   width: '100%',
@@ -39,30 +42,30 @@ const alertBox = {
   width: '100%',
   justifyContent: 'space-between',
   alignItems: 'center',
-  padding: '20px 30px',
+  padding: `${SPACING * 0.75}px ${SPACING}px`,
   backgroundColor: 'rgba(0, 79, 198, 0.10)',
   borderTop: '1.5px solid rgba(256, 256, 256, 0.90)',
   borderBottom: '1.5px solid rgba(256, 256, 256, 0.90)',
 };
 
-const textContainer = { display: 'flex', flexDirection: 'column', gap: '8px', padding: '10px 0px' };
+const textContainer = { display: 'flex', flexDirection: 'column', gap: SPACING * 0.5, padding: 0 };
 
-const fromStyle = { fontSize: '24px', fontWeight: '400', margin: 0 };
+const fromStyle = { fontFamily: 'Pretendard', fontSize: FONT_SIZE.lg, fontWeight: 600, margin: 0, color: '#004FC6' };
 
-const contentText = { fontFamily: 'Pretendard', fontSize: '14px', fontWeight: '400', margin: 0 };
+const contentText = { fontFamily: 'Pretendard', fontSize: FONT_SIZE.md, fontWeight: 500, margin: 0 };
 
-const buttonGroup = { display: 'flex', gap: '25px' };
+const buttonGroup = { display: 'flex', gap: SPACING * 0.75 };
 
 const buttonStyle = {
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  fontSize: '24px',
+  fontSize: FONT_SIZE.md,
   color: '#004FC6',
-  padding: '5px 10px',
-  border: '2px solid #004FC6',
-  borderRadius: '0px',
-  minWidth: '44px',
+  padding: '6px 12px',
+  border: '1px solid #004FC6',
+  borderRadius: '6px',
+  minWidth: '36px',
 };
 
 const AlertCanvas = ({ show, onClose, refreshList }) => {
@@ -90,9 +93,11 @@ const AlertCanvas = ({ show, onClose, refreshList }) => {
     try {
       await acceptFriend(request.id, true);
       removeFriendRequest(request);
-      refreshList();
+      refreshList?.();
       alert('Friend request accepted');
     } catch (error) {
+      const msg = error?.message || 'Failed to accept friend request.';
+      alert(msg);
       console.error('Failed to accept friend request:', error);
     }
   };
@@ -115,18 +120,18 @@ const AlertCanvas = ({ show, onClose, refreshList }) => {
       <div style={overlayStyle} onClick={onClose} />
       <div style={containerStyle}>
         <div style={headerStyle}>
-          <img src="/public/images/Cookies.png" alt="cookies_banner" style={{ width: '100%', height: '30px' }} />
+          <img src="/public/images/Cookies.png" alt="cookies_banner" style={{ width: 'auto', maxWidth: '200px', height: '18px', objectFit: 'contain' }} />
         </div>
         <div style={bodyStyle}>
           <div style={bannerContainer}>
-            <TextBanner text="Game Invites" width={400} />
+            <TextBanner text="Game Invites" width={280} fontSize={FONT_SIZE['2xl']} />
           </div>
           {gameInvites.length > 0 ? (
             gameInvites.map((invite) => (
               <div key={`${invite.inviter}_${invite.game_name}`} style={alertBox}>
                 <div style={textContainer}>
                   <p style={fromStyle}>{invite.inviter}</p>
-                  <p style={contentText}>게임에 초대되었습니다!</p>
+                  <p style={contentText}>You have been invited to a game!</p>
                 </div>
                 <div>
                   <button className="btn btn-transparent" style={buttonStyle} onClick={() => handleEnterGame(invite)}>
@@ -140,7 +145,7 @@ const AlertCanvas = ({ show, onClose, refreshList }) => {
           )}
 
           <div style={bannerContainer}>
-            <TextBanner text="Tournament" width={400} />
+            <TextBanner text="Tournament" width={280} fontSize={FONT_SIZE['2xl']} />
           </div>
           {!tournamentEndAlert.length && !roundStartAlert.length && (
             <p style={blankResult}>No tournament alerts</p>
@@ -148,11 +153,10 @@ const AlertCanvas = ({ show, onClose, refreshList }) => {
           {tournamentEndAlert.map((alert) => (
             <div key={`${alert.tournament_id}_end`} style={alertBox}>
               <div style={textContainer}>
-                <p style={contentText}>{alert.name}토너먼트가 종료되었습니다.</p>
+                <p style={contentText}>{alert.name} tournament has ended.</p>
                 <div>
-                  <span style={contentText}>최종</span>
-                  <span style={fromStyle}> {alert.winner} </span>
-                  <span style={contentText}>우승!!</span>
+                  <span style={contentText}>Winner: </span>
+                  <span style={fromStyle}>{alert.winner}</span>
                 </div>
               </div>
               <button className="btn btn-transparent" style={buttonStyle}>Go</button>
@@ -162,7 +166,7 @@ const AlertCanvas = ({ show, onClose, refreshList }) => {
             <div key={`${alert.tournament_id}_${alert.round}`} style={alertBox}>
               <div style={textContainer}>
                 <p style={{ ...contentText, fontWeight: '600' }}>
-                  {alert.name}토너먼트의 {alert.round}라운드가 시작되었습니다.
+                  {alert.name} tournament round {alert.round} has started.
                 </p>
               </div>
               <button
@@ -176,7 +180,7 @@ const AlertCanvas = ({ show, onClose, refreshList }) => {
           ))}
 
           <div style={bannerContainer}>
-            <TextBanner text="Friend Requests" width={400} />
+            <TextBanner text="Friend Requests" width={280} fontSize={FONT_SIZE['2xl']} />
           </div>
           {friendRequests.length > 0 ? (
             friendRequests.map((request) => (
@@ -184,7 +188,7 @@ const AlertCanvas = ({ show, onClose, refreshList }) => {
                 <div style={textContainer}>
                   <p style={fromStyle}>
                     {request.from_user}
-                    <span style={{ fontFamily: 'Pretendard', fontSize: '14px' }}>의 친구요청을 수락하시겠습니까?</span>
+                    <span style={{ fontFamily: 'Pretendard', fontSize: FONT_SIZE.md }}> wants to be your friend. Accept?</span>
                   </p>
                 </div>
                 <div style={buttonGroup}>

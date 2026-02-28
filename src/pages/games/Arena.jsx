@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { FONT_SIZE, FONT_RESPONSIVE } from '../../theme.js';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const GAME_WS_URL = process.env.GAME_WS_URL;
@@ -41,9 +42,9 @@ const scoreboardStyle = {
 
 const playerInfoStyle = { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' };
 
-const scoreStyle = { fontSize: '48px', fontFamily: 'Jersey 10', color: '#004FC6' };
+const scoreStyle = { fontSize: FONT_SIZE['5xl'], fontFamily: 'Pixelify Sans', color: '#004FC6' };
 
-const playerNameStyle = { fontSize: '24px', fontFamily: 'Pretendard', color: '#004FC6' };
+const playerNameStyle = { fontSize: FONT_SIZE['3xl'], fontFamily: 'Pretendard', color: '#004FC6' };
 
 const ballStyle = {
   position: 'absolute',
@@ -67,16 +68,16 @@ const overlayStyle = {
 };
 
 const overlayTextStyle = {
-  fontFamily: 'Jersey 10',
+  fontFamily: 'Pixelify Sans',
   color: '#FFF',
-  fontSize: '80px',
+  fontSize: FONT_SIZE['7xl'],
   textShadow: `-3px -3px 0 #004FC6, 3px -3px 0 #004FC6, -3px 3px 0 #004FC6, 3px 3px 0 #004FC6`,
 };
 
 const overlaySubTextStyle = {
-  fontFamily: 'Jersey 10',
+  fontFamily: 'Pixelify Sans',
   color: '#FFF',
-  fontSize: '32px',
+  fontSize: FONT_SIZE['4xl'],
   textShadow: `-2px -2px 0 #004FC6, 2px -2px 0 #004FC6, -2px 2px 0 #004FC6, 2px 2px 0 #004FC6`,
 };
 

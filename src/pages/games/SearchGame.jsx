@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { FONT_SIZE } from '../../theme.js';
 import { useNavigate } from 'react-router-dom';
 import TextBanner from '../../component/TextBanner.jsx';
 import JoinGameModal from './JoinGameModal.jsx';
@@ -38,7 +39,7 @@ const blankBox = {
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  fontSize: '24px',
+  fontSize: FONT_SIZE['3xl'],
 };
 
 const SearchGame = () => {
@@ -76,7 +77,7 @@ const SearchGame = () => {
       setSelectedGame(null);
       navigate(`/reception/${selectedGame.id}`);
     } catch (error) {
-      setJoinError(error?.message || '참가에 실패했습니다. 다시 시도해주세요.');
+      setJoinError(error?.message || 'Unable to join game. Please try again.');
     }
   };
 
@@ -92,7 +93,7 @@ const SearchGame = () => {
             background: 'transparent',
             border: 'none',
             color: '#004FC6',
-            fontSize: '24px',
+            fontSize: FONT_SIZE['3xl'],
           }}
           onClick={() => navigate('/')}
         >
@@ -103,7 +104,7 @@ const SearchGame = () => {
           <div style={buttonContainerStyle}>
             <button
               className="btn btn-transparent me-2"
-              style={{ fontSize: '20px', color: '#004FC6' }}
+              style={{ fontSize: FONT_SIZE['2xl'], color: '#004FC6' }}
               onClick={() => navigate('/create-game')}
             >
               Create Game

@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { FONT_SIZE } from '../../theme.js';
 import { useNavigate } from 'react-router-dom';
 import { createReception, joinReception } from '../../api/gameApi';
 import Bunnies from '../../component/Bunnies';
 import HomeTextButton from '../../component/HomeTextButton';
+import { pageCentered } from '../../sharedStyles.js';
 
 const centerBlockStyle = {
   position: 'relative',
@@ -35,9 +37,9 @@ const fieldStyle = {
 };
 
 const labelStyle = {
-  fontFamily: 'Jersey 10',
+  fontFamily: 'Pixelify Sans',
   color: '#004FC6',
-  fontSize: '32px',
+  fontSize: FONT_SIZE['4xl'],
   fontWeight: '400',
   lineHeight: 'normal',
 };
@@ -64,20 +66,17 @@ const inputStyle = {
   position: 'relative',
   width: '100%',
   height: '100%',
-  fontSize: '15px',
+  fontSize: FONT_SIZE.lg,
   fontFamily: 'Pretendard',
   fontWeight: 500,
   color: '#004FC6',
   zIndex: 2,
   background: 'transparent',
   lineHeight: 'normal',
-  padding: '0',
-  border: 'none',
-  outline: 'none',
 };
 
 const errorMessageStyle = {
-  fontSize: '13px',
+  fontSize: FONT_SIZE.sm,
   fontFamily: 'Pretendard',
   color: 'rgba(198, 0, 3, 0.64)',
   marginTop: '4px',
@@ -110,7 +109,7 @@ function CreateGame() {
   };
 
   return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+    <div style={pageCentered}>
       <div style={centerBlockStyle}>
         <button
           type="button"
@@ -146,7 +145,7 @@ function CreateGame() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   maxLength={20}
-                  placeholder="비밀번호는 선택사항입니다"
+                  placeholder="Password (optional)"
                 />
               </div>
             </div>

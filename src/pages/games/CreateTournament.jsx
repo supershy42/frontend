@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { FONT_SIZE } from '../../theme.js';
 import { useNavigate } from 'react-router-dom';
 import { createTournament } from '../../api/gameApi';
 import Bunnies from '../../component/Bunnies';
 import HomeTextButton from '../../component/HomeTextButton';
+import { pageCentered } from '../../sharedStyles.js';
 
 const centerBlockStyle = {
   position: 'relative',
@@ -35,9 +37,9 @@ const fieldStyle = {
 };
 
 const labelStyle = {
-  fontFamily: 'Jersey 10',
+  fontFamily: 'Pixelify Sans',
   color: '#004FC6',
-  fontSize: '32px',
+  fontSize: FONT_SIZE['4xl'],
   fontWeight: '400',
   lineHeight: 'normal',
 };
@@ -64,20 +66,17 @@ const inputStyle = {
   position: 'relative',
   width: '100%',
   height: '100%',
-  fontSize: '15px',
+  fontSize: FONT_SIZE.lg,
   fontFamily: 'Pretendard',
   fontWeight: 500,
   color: '#004FC6',
   zIndex: 2,
   background: 'transparent',
   lineHeight: 'normal',
-  padding: '0',
-  border: 'none',
-  outline: 'none',
 };
 
 const errorMessageStyle = {
-  fontSize: '13px',
+  fontSize: FONT_SIZE.sm,
   fontFamily: 'Pretendard',
   color: 'rgba(198, 0, 3, 0.64)',
   marginTop: '4px',
@@ -85,8 +84,8 @@ const errorMessageStyle = {
 
 const descriptionStyle = {
   fontFamily: 'Pretendard',
-  fontSize: '14px',
-  color: 'rgba(0, 79, 198, 0.60)',
+  fontSize: FONT_SIZE.md,
+  color: 'rgba(0, 79, 198, 0.6)',
   marginTop: '8px',
   textAlign: 'right',
 };
@@ -112,12 +111,12 @@ function CreateTournament() {
       navigate(`/tournament/${response.id}`);
     } catch (error) {
       console.error(error);
-      setErrorMessage('Failed to create tournament');
+      setErrorMessage('Unable to create tournament. Please try again.');
     }
   };
 
   return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+    <div style={pageCentered}>
       <div style={centerBlockStyle}>
         <button
           type="button"
@@ -145,7 +144,7 @@ function CreateTournament() {
               </div>
             </div>
             <div style={descriptionStyle}>
-              4명의 플레이어가 모여 2라운드의 토너먼트를 진행합니다
+              4 players compete in a 2-round tournament
             </div>
           </div>
           {errorMessage && <span className="message" style={errorMessageStyle}>{errorMessage}</span>}

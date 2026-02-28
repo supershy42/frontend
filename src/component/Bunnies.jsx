@@ -6,7 +6,9 @@ const Bunnies = (props) => {
         display: 'flex',
         height: 'clamp(28px, 3.5vw, 46.5px)',
         alignItems: 'flex-start',
-        gap: 'clamp(30px, 5.5vw, 80px)',
+        gap: '50px',
+        marginTop: 0,
+        marginBottom: 0,
       }}
     >
       <img

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { FONT_SIZE } from '../../theme.js';
 import { useNavigate } from 'react-router-dom';
 import TextBanner from '../../component/TextBanner.jsx';
 import { getTournamentList } from '../../api/gameApi.js';
@@ -37,7 +38,7 @@ const blankBox = {
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  fontSize: '24px',
+  fontSize: FONT_SIZE['3xl'],
 };
 
 const SearchTournament = () => {
@@ -75,7 +76,7 @@ const SearchTournament = () => {
             background: 'transparent',
             border: 'none',
             color: '#004FC6',
-            fontSize: '24px',
+            fontSize: FONT_SIZE['3xl'],
           }}
           onClick={() => navigate('/')}
         >
@@ -86,7 +87,7 @@ const SearchTournament = () => {
           <div style={buttonContainerStyle}>
             <button
               className="btn btn-transparent me-2"
-              style={{ fontSize: '20px', color: '#004FC6' }}
+              style={{ fontSize: FONT_SIZE['2xl'], color: '#004FC6' }}
               onClick={() => navigate('/create-tournament')}
             >
               Create Tournament

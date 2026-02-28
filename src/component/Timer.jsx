@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { FONT_SIZE } from '../theme.js';
 
 function Timer() {
   const [time, setTime] = useState(300);
@@ -38,7 +39,7 @@ function Timer() {
         top: '50%',
         transform: 'translateY(-50%)',
         color: time <= 0 ? '#C60003' : '#004FC6',
-        fontSize: '14px',
+        fontSize: FONT_SIZE.md,
         fontWeight: '500',
         zIndex: 3,
       }}

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { FONT_SIZE } from '../../theme.js';
 import { useNavigate, useParams } from 'react-router-dom';
 import HomeTextButton from '../../component/HomeTextButton';
 import LoadingDots from '../../component/LoadingDots.jsx';
@@ -35,12 +36,12 @@ const playerContainerStyle = {
 };
 
 const blinkingText = {
-  fontFamily: 'Jersey 10',
+  fontFamily: 'Pixelify Sans',
   color: '#FFF',
   textAlign: 'center',
   textShadow: `-2px -2px 0 #004FC6, 2px -2px 0 #004FC6, -2px 2px 0 #004FC6, 2px 2px 0 #004FC6,
     -1px -1px 0 #004FC6, 1px -1px 0 #004FC6, -1px 1px 0 #004FC6, 1px 1px 0 #004FC6`,
-  fontSize: '32px',
+  fontSize: FONT_SIZE['4xl'],
   fontWeight: '400',
   animation: 'blinking 1s infinite',
 };
@@ -75,14 +76,13 @@ const speechBubbleStyle = {
   padding: '8px 15px',
   borderRadius: '15px',
   boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-  fontSize: '20px',
+  fontSize: FONT_SIZE['2xl'],
   whiteSpace: 'nowrap',
   zIndex: '1',
   animation: 'blinking 1s infinite',
 };
 
 const speechBubbleAfter = {
-  content: "''",
   position: 'absolute',
   bottom: '-10px',
   left: '50%',
@@ -94,10 +94,7 @@ const speechBubbleAfter = {
 
 const gameBannerContainerStyle = {
   position: 'fixed',
-  top: 0,
-  left: 0,
-  width: '100%',
-  height: '100%',
+  inset: 0,
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
@@ -107,9 +104,9 @@ const gameBannerContainerStyle = {
 };
 
 const gameBannerStyle = {
-  fontFamily: 'Jersey 10',
+  fontFamily: 'Pixelify Sans',
   color: '#FFF',
-  fontSize: '64px',
+  fontSize: FONT_SIZE['6xl'],
   textShadow: `-3px -3px 0 #004FC6, 3px -3px 0 #004FC6, -3px 3px 0 #004FC6, 3px 3px 0 #004FC6`,
   animation: 'slideIn 2s forwards',
 };

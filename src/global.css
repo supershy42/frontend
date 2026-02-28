@@ -9,14 +9,8 @@
 html,
 body,
 #root {
-  font-family: 'Jersey 10', 'Pretendard', -apple-system, BlinkMacSystemFont,
-    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
-}
-
-:root {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
+  font-family: 'Pixelify Sans', 'Pretendard', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 html {
@@ -24,22 +18,17 @@ html {
   height: 100%;
   font-size: 16px;
   line-height: 1.5;
-  -webkit-text-size-adjust: 100%;
 }
 
 body {
   width: 100%;
   height: 100%;
-  overflow-x: hidden;
   background-color: #fff;
-  margin: 0;
 }
 
 button {
   background: none;
   border: none;
-  padding: 0;
-  margin: 0;
   cursor: pointer;
   font-size: inherit;
   font-family: inherit;
@@ -50,8 +39,6 @@ textarea {
   font-family: inherit;
   font-size: inherit;
   line-height: inherit;
-  margin: 0;
-  padding: 0;
   border: none;
   outline: none;
 }
@@ -143,5 +130,85 @@ img {
 }
 
 *::placeholder {
-  color: rgba(0, 79, 198, 0.50)
+  color: rgba(0, 79, 198, 0.50);
+  opacity: 1;
+}
+
+.btn-close {
+  filter: invert(24%) sepia(98%) saturate(5000%) hue-rotate(210deg);
+  opacity: 0.85;
+  padding: 16px;
+}
+.btn-close:hover {
+  opacity: 1;
+}
+
+@keyframes retroCloudFloat {
+  from {
+    background-position: 0 top;
+  }
+  to {
+    background-position: -120vh top;
+  }
+}
+
+@keyframes retroCloudBob {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(6px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+  75% {
+    transform: translateY(8px);
+  }
+}
+
+@keyframes retroSparkleTwinkle {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.82;
+  }
+}
+
+/* Retro game background effects (밝고 귀여운 톤에 맞게 완화) */
+.retro-scanlines {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.012) 2px,
+    rgba(0, 0, 0, 0.012) 4px
+  );
+}
+
+.retro-vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9997;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    transparent 70%,
+    rgba(0, 0, 0, 0.04) 100%
+  );
+}
+
+.retro-noise {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9996;
+  opacity: 0.015;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }

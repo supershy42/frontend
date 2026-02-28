@@ -1,16 +1,22 @@
+import { FONT_SIZE, FONT_RESPONSIVE } from '../theme.js';
+
 const fieldStyle = {
   width: '100%',
+  maxWidth: 'min(420px, 85%)',
   display: 'flex',
-  justifyContent: 'center',
+  justifyContent: 'flex-start',
   alignItems: 'center',
-  gap: 'clamp(12px, 2vw, 24px)',
+  gap: 'clamp(14px, 2vw, 28px)',
+  padding: '0 clamp(8px, 1.5vw, 16px)',
 };
 
 const labelStyle = {
-  fontFamily: 'Jersey 10',
+  display: 'flex',
+  flexWrap: 'wrap',
+  fontFamily: 'Pixelify Sans',
   color: '#004FC6',
-  fontSize: 'clamp(16px, 2.2vw, 32px)',
-  fontWeight: '400',
+  fontSize: FONT_RESPONSIVE.label,
+  fontWeight: '100',
   lineHeight: 'normal',
   width: 'clamp(80px, 12vw, 140px)',
   flexShrink: 0,
@@ -21,47 +27,51 @@ const inputFieldContainerStyle = {
   display: 'flex',
   flexDirection: 'column',
   gap: '8px',
-  width: 'min(318px, 55%)',
+  flex: 1,
+  minWidth: 0,
+  maxWidth: 'min(300px, 72%)',
 };
 
 const textFieldsStyle = {
   position: 'relative',
-  height: 'clamp(40px, 5vh, 58px)',
+  minHeight: '42px',
+  height: 'clamp(42px, 4.8vh, 54px)',
   width: '100%',
-  borderRadius: '18px',
+  borderRadius: '12px',
   background: '#F8F8F8',
-  boxShadow: '0px 4px 10px 3px rgba(0, 79, 198, 0.32) inset',
-  padding: 'clamp(10px, 1.5vw, 20px) clamp(12px, 2vw, 25px)',
+  border: '1px solid #004FC6',
+  padding: 'clamp(8px, 1vw, 12px) clamp(14px, 2vw, 24px)',
+  display: 'flex',
+  alignItems: 'center',
 };
 
 const errorTextFieldsStyle = {
-  boxShadow: '0px 4px 10px 3px rgba(198, 0, 3, 0.32) inset',
+  border: '1px solid rgba(198, 0, 3, 0.64)',
 };
 
 const inputStyle = {
+  flex: 1,
+  minWidth: 0,
   position: 'relative',
   width: '100%',
   height: '100%',
-  fontSize: 'clamp(13px, 1.4vw, 18px)',
+  fontSize: FONT_RESPONSIVE.input,
   fontFamily: 'Pretendard',
-  fontWeight: 500,
+  fontWeight: 600,
   color: '#004FC6',
   zIndex: 2,
   background: 'transparent',
-  lineHeight: 'normal',
-  padding: '0',
-  border: 'none',
-  outline: 'none',
+  lineHeight: 1.5,
 };
 
 const errorMessageStyle = {
   position: 'absolute',
-  top: 'calc(100% + 4px)',
+  top: 'calc(100%)',
   left: '12px',
-  fontSize: 'clamp(10px, 1vw, 13px)',
+  fontSize: FONT_SIZE.sm,
   fontFamily: 'Pretendard',
   color: 'rgba(198, 0, 3, 0.64)',
-  marginTop: '4px',
+  marginTop: '2px',
 };
 
 /**

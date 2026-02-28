@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { FONT_SIZE } from '../../theme.js';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getMatchHistory } from '../../api/gameApi';
 import TextBanner from '../../component/TextBanner.jsx';
@@ -29,8 +30,8 @@ const centerBlockStyle = {
 };
 
 const outcomeStyle = (isWin) => ({
-  fontFamily: 'Jersey 10',
-  fontSize: '80px',
+  fontFamily: 'Pixelify Sans',
+  fontSize: FONT_SIZE['7xl'],
   fontWeight: '400',
   color: '#FFF',
   textShadow: isWin
@@ -68,19 +69,19 @@ const avatarPlaceholderStyle = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  fontSize: '32px',
+  fontSize: FONT_SIZE['4xl'],
 };
 
 const nicknameStyle = {
-  fontFamily: 'Jersey 10',
-  fontSize: '20px',
+  fontFamily: 'Pixelify Sans',
+  fontSize: FONT_SIZE['2xl'],
   fontWeight: '400',
   color: '#004FC6',
 };
 
 const bigScoreStyle = {
-  fontFamily: 'Jersey 10',
-  fontSize: '56px',
+  fontFamily: 'Pixelify Sans',
+  fontSize: FONT_SIZE['5xl'],
   fontWeight: '400',
   color: '#004FC6',
   textShadow: `-2px -2px 0 #FFF, 2px -2px 0 #FFF, -2px 2px 0 #FFF, 2px 2px 0 #FFF`,
@@ -88,8 +89,8 @@ const bigScoreStyle = {
 };
 
 const vsStyle = {
-  fontFamily: 'Jersey 10',
-  fontSize: '36px',
+  fontFamily: 'Pixelify Sans',
+  fontSize: FONT_SIZE['4xl'],
   color: '#004FC6',
   opacity: 0.35,
   lineHeight: 1,
@@ -102,8 +103,8 @@ const dividerStyle = {
 };
 
 const sectionTitleStyle = {
-  fontFamily: 'Jersey 10',
-  fontSize: '32px',
+  fontFamily: 'Pixelify Sans',
+  fontSize: FONT_SIZE['4xl'],
   fontWeight: '400',
   color: '#004FC6',
   textShadow: `-2px -2px 0 #FFF, 2px -2px 0 #FFF, -2px 2px 0 #FFF, 2px 2px 0 #FFF`,
@@ -116,8 +117,8 @@ const tableStyle = {
 };
 
 const thStyle = {
-  fontFamily: 'Jersey 10',
-  fontSize: '20px',
+  fontFamily: 'Pixelify Sans',
+  fontSize: FONT_SIZE['2xl'],
   fontWeight: '400',
   color: '#004FC6',
   textAlign: 'center',
@@ -126,8 +127,8 @@ const thStyle = {
 };
 
 const tdBaseStyle = {
-  fontFamily: 'Jersey 10',
-  fontSize: '18px',
+  fontFamily: 'Pixelify Sans',
+  fontSize: FONT_SIZE.xl,
   fontWeight: '400',
   color: '#004FC6',
   textAlign: 'center',
@@ -167,7 +168,7 @@ const GameResult = () => {
       <div style={pageStyle}>
         <div style={centerBlockStyle}>
           <TextBanner text="Game Result" width={430} />
-          <p style={{ fontFamily: 'Jersey 10', color: '#004FC6', fontSize: '24px' }}>
+          <p style={{ fontFamily: 'Pixelify Sans', color: '#004FC6', fontSize: FONT_SIZE['3xl'] }}>
             No result data.
           </p>
           <HomeTextButton text="Home" onClick={() => navigate('/')} />
@@ -209,7 +210,7 @@ const GameResult = () => {
             background: 'transparent',
             border: 'none',
             color: '#004FC6',
-            fontSize: '24px',
+            fontSize: FONT_SIZE['3xl'],
             cursor: 'pointer',
           }}
           onClick={() => navigate('/')}

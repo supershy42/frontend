@@ -1,19 +1,17 @@
 import { useState } from 'react';
+import { FONT_RESPONSIVE } from '../theme.js';
 
-
-function HomeTextButton({ text, onClick, type = 'button' }) {
+function HomeTextButton({ text, onClick, type = 'button', defaultActive = false, onHover, keyboardSuppressesHover = false }) {
   const [isHover, setIsHover] = useState(false);
-
+  const showHover = keyboardSuppressesHover ? defaultActive : (isHover || defaultActive);
   const handleMouseEnter = () => {
     setIsHover(true);
+    onHover?.();
   };
-
-  const handleMouseLeave = () => {
-    setIsHover(false);
-  };
+  const handleMouseLeave = () => setIsHover(false);
 
   const defaultStyle = {
-    fontFamily: 'Jersey 10',
+    fontFamily: 'Pixelify Sans',
     color: '#004FC6',
     textAlign: 'center',
     textShadow: `
@@ -26,12 +24,12 @@ function HomeTextButton({ text, onClick, type = 'button' }) {
     -1px 1px 0 #FFF,
     1px 1px 0 #FFF
   `,
-    fontSize: 'clamp(24px, 3.5vw, 48px)',
+    fontSize: FONT_RESPONSIVE.button,
     fontWeight: '400',
   };
 
   const hoverStyle = {
-    fontFamily: 'Jersey 10',
+    fontFamily: 'Pixelify Sans',
     color: '#FFF',
     textAlign: 'center',
     textShadow: `
@@ -44,7 +42,7 @@ function HomeTextButton({ text, onClick, type = 'button' }) {
     -1px 1px 0 #004FC6,
     1px 1px 0 #004FC6
   `,
-    fontSize: 'clamp(24px, 3.5vw, 48px)',
+    fontSize: FONT_RESPONSIVE.button,
     fontWeight: '400',
   };
 
@@ -57,9 +55,11 @@ function HomeTextButton({ text, onClick, type = 'button' }) {
         alignItems: 'center',
         gap: 'clamp(12px, 1.2vw, 16px)',
       }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <div>
-        {isHover && (
+        {showHover && (
           <img
             src="/public/images/left_arrow.png"
             alt="left_arrow"
@@ -68,16 +68,14 @@ function HomeTextButton({ text, onClick, type = 'button' }) {
         )}
       </div>
       <button
-        style={isHover ? hoverStyle : defaultStyle}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
+        style={showHover ? hoverStyle : defaultStyle}
         onClick={onClick}
         type={type}
       >
         {text}
       </button>
       <div>
-        {isHover && (
+        {showHover && (
           <img
             src="/public/images/right_arrow.png"
             alt="right_arrow"

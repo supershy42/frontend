@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FONT_SIZE } from '../../theme.js';
 
 
 const JoinGameModal = ({ game, onClose, onJoin, error }) => {
@@ -8,7 +9,7 @@ const JoinGameModal = ({ game, onClose, onJoin, error }) => {
 
   const handleSubmit = async () => {
     if (!game || (game.has_password && !password)) {
-      setValidationError('Please enter the password');
+      setValidationError('Please enter the game password.');
       return;
     }
     setValidationError('');
@@ -52,7 +53,7 @@ const JoinGameModal = ({ game, onClose, onJoin, error }) => {
               </div>
             ) : (
               <p
-                style={{ width: '100%', textAlign: 'center', fontSize: '20px' }}
+                style={{ width: '100%', textAlign: 'center', fontSize: FONT_SIZE['2xl'] }}
               >
                 Would you like to join this game?
               </p>
