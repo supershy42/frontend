@@ -1,16 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+
+const POLL_INTERVAL_MS = 10000;
 
 const HandleFriendList = ({ fetchFriendList }) => {
-  const [dep, setDep] = useState(0);
   useEffect(() => {
-    try {
-      fetchFriendList();
-    } catch (error) {
-      console.error('Failed to fetch friend list:', error);
-    }
-  }, [dep]);
+    fetchFriendList();
+    const interval = setInterval(fetchFriendList, POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [fetchFriendList]);
 
-  return <div></div>;
+  return null;
 };
 
 export default HandleFriendList;
