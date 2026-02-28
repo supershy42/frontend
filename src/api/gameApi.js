@@ -113,9 +113,13 @@ export const getTournamentList = async (page) => {
   }
 };
 
-export const getTournamentInfo = async (tournamentId) => {};
+export const getTournamentInfo = async (tournamentId) => {
+  throw new Error('getTournamentInfo: Not implemented');
+};
 
-export const joinTournament = async (joinData) => {};
+export const joinTournament = async (joinData) => {
+  throw new Error('joinTournament: Not implemented');
+};
 
 export const getMatchHistory = async (userId) => {
   try {
