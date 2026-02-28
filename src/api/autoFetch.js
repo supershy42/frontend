@@ -1,3 +1,4 @@
+import { SESSION_KEYS } from '../utils/store.js';
 
 const USER_API_URL = process.env.USER_API_URL;
 
@@ -72,18 +73,7 @@ const autoFetch = async (url, options = {}) => {
         processQueue(error, null);
 
         // 토큰 갱신 실패, 리프레시 토큰도 만료된 경우
-        [
-          'access',
-          'refresh',
-          'user_id',
-          'nickname',
-          'email',
-          'avatar',
-          'friendRequests',
-          'gameInvites',
-          'roundStartAlert',
-          'tournamentEndAlert',
-        ].forEach((key) => sessionStorage.removeItem(key));
+        SESSION_KEYS.forEach((key) => sessionStorage.removeItem(key));
         document.cookie =
           'refresh=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         window.location.href = '/login';

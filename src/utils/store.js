@@ -1,4 +1,17 @@
 // store.js
+export const SESSION_KEYS = [
+  'access',
+  'refresh',
+  'user_id',
+  'nickname',
+  'email',
+  'avatar',
+  'friendRequests',
+  'gameInvites',
+  'roundStartAlert',
+  'tournamentEndAlert',
+];
+
 const createStore = (initialState = {}) => {
   let state = initialState;
   const listeners = new Set();
@@ -96,19 +109,16 @@ export const addRoundStartAlert = (alert) => {
 export const addTournamentEndAlert = (alert) => {
   const currentState = store.getState();
   const newTournamentEndAlert = [...currentState.tournamentEndAlert, alert];
+  const newRoundStartAlert = currentState.roundStartAlert.filter(
+    (roundAlert) => roundAlert.tournament_id !== alert.tournament_id
+  );
   sessionStorage.setItem(
     'tournamentEndAlert',
     JSON.stringify(newTournamentEndAlert)
   );
-  store.setState({
-    tournamentEndAlert: newTournamentEndAlert,
-  });
-  //같은 토너먼트 아이디의 라운드 시작 알림 삭제
-  const newRoundStartAlert = currentState.roundStartAlert.filter(
-    (roundAlert) => roundAlert.tournament_id !== alert.tournament_id
-  );
   sessionStorage.setItem('roundStartAlert', JSON.stringify(newRoundStartAlert));
   store.setState({
+    tournamentEndAlert: newTournamentEndAlert,
     roundStartAlert: newRoundStartAlert,
   });
 };
