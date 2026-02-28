@@ -7,7 +7,7 @@ import BackButton from '../component/BackButton.jsx';
 import HomeTextButton from '../component/HomeTextButton.jsx';
 import InputField from '../component/InputField.jsx';
 import { addFriendRequest, initNotification } from '../utils/store.js';
-import { pageCentered, authCenterBlock, authFormStyle, rowCentered } from '../sharedStyles.js';
+import { pageCentered, authCenterBlock, authFormStyle, authBackButtonRow, authButtonRow } from '../sharedStyles.js';
 
 const messageStyle = {
   fontSize: FONT_SIZE.sm,
@@ -53,7 +53,7 @@ function Login() {
   return (
     <div style={pageCentered}>
       <div style={authCenterBlock}>
-        <div style={{ ...rowCentered, alignItems: 'center' }}>
+        <div style={authBackButtonRow}>
           <BackButton onClick={() => navigate('/')} />
         </div>
         <Bunnies />
@@ -87,7 +87,7 @@ function Login() {
             {loginStatus.message}
           </span>
         </form>
-        <div style={rowCentered}>
+        <div style={authButtonRow}>
           <HomeTextButton text="LOGIN" onClick={handleLogin} />
         </div>
       </div>

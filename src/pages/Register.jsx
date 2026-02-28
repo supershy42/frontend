@@ -7,7 +7,7 @@ import BackButton from '../component/BackButton.jsx';
 import HomeTextButton from '../component/HomeTextButton.jsx';
 import InputField from '../component/InputField.jsx';
 import Timer from '../component/Timer.jsx';
-import { pageCentered, authCenterBlock, authFormStyle, rowCentered } from '../sharedStyles.js';
+import { pageCentered, authCenterBlock, authFormStyle, authBackButtonRow, authButtonRow } from '../sharedStyles.js';
 
 const registerFormStyle = {
   ...authFormStyle,
@@ -157,8 +157,8 @@ function Register() {
 
   return (
     <div className="register_page" style={pageCentered}>
-      <div style={{ ...authCenterBlock, justifyContent: 'center' }}>
-        <div style={{ ...rowCentered, alignItems: 'center' }}>
+      <div style={authCenterBlock}>
+        <div style={authBackButtonRow}>
           <BackButton onClick={() => navigate('/login')} />
         </div>
         <Bunnies />
@@ -226,7 +226,7 @@ function Register() {
             extra={isTimerRunning && <Timer />}
           />
         </form>
-        <div style={rowCentered}>
+        <div style={authButtonRow}>
           <HomeTextButton text="SIGN UP" onClick={handleRegister} />
         </div>
       </div>
