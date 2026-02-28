@@ -1,44 +1,16 @@
 import { useState } from 'react';
+import { FONT_SIZE } from '../theme.js';
 import { useNavigate } from 'react-router-dom';
 import { getFriendRequests, loginUser } from '../api/userApi.js';
 import Bunnies from '../component/Bunnies.jsx';
+import BackButton from '../component/BackButton.jsx';
 import HomeTextButton from '../component/HomeTextButton.jsx';
 import InputField from '../component/InputField.jsx';
 import { addFriendRequest, initNotification } from '../utils/store.js';
-
-const loginPageStyle = {
-  width: '100%',
-  height: '100%',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-};
-
-const centerBlockStyle = {
-  display: 'flex',
-  width: 'min(700px, 90vw)',
-  padding: 'clamp(36px, 5vw, 60px) clamp(10px, 2vw, 28px) clamp(16px, 2.5vw, 30px)',
-  flexDirection: 'column',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  border: '4px solid #004FC6',
-  background: 'rgba(235, 243, 255, 0.92)',
-  boxShadow: '6px 6px 0px rgba(0, 79, 198, 0.35)',
-  gap: 'clamp(20px, 3vw, 36px)',
-};
-
-const formStyle = {
-  display: 'flex',
-  width: '100%',
-  flexDirection: 'column',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  gap: 'clamp(18px, 2.8vw, 36px)',
-  flexShrink: '0',
-};
+import { pageCentered, authCenterBlock, authFormStyle, rowCentered } from '../sharedStyles.js';
 
 const messageStyle = {
-  fontSize: '13px',
+  fontSize: FONT_SIZE.sm,
   fontFamily: 'Pretendard',
   marginTop: '4px',
 };
@@ -63,7 +35,7 @@ function Login() {
     try {
       const data = await loginUser({ email: state.email, password: state.password });
       await processLoginSuccess(data);
-      setLoginStatus({ message: 'Login successful. Redirecting to home page...', error: false });
+      setLoginStatus({ message: 'Login successful. Redirecting...', error: false });
 
       const friendRequests = await getFriendRequests();
       if (friendRequests.message?.length > 0) {
@@ -72,40 +44,20 @@ function Login() {
       setTimeout(() => navigate('/'), 2000);
     } catch (error) {
       setLoginStatus({
-        message: 'Login failed. Please check your email and password.',
+        message: 'Invalid email or password. Please try again.',
         error: true,
       });
     }
   };
 
   return (
-    <div style={loginPageStyle}>
-      <div style={centerBlockStyle}>
-        <div style={{ width: '100%', display: 'flex', alignItems: 'center' }}>
-          <button
-            onClick={() => navigate('/')}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '4px',
-              opacity: 0.7,
-              transition: 'opacity 0.15s',
-              display: 'flex',
-              alignItems: 'center',
-            }}
-            onMouseEnter={e => e.currentTarget.style.opacity = 1}
-            onMouseLeave={e => e.currentTarget.style.opacity = 0.7}
-          >
-            <img
-              src="/public/images/right_arrow.png"
-              alt="back"
-              style={{ width: 'clamp(22px, 3vw, 45px)', height: 'clamp(24px, 3.5vw, 48px)' }}
-            />
-          </button>
+    <div style={pageCentered}>
+      <div style={authCenterBlock}>
+        <div style={{ ...rowCentered, alignItems: 'center' }}>
+          <BackButton onClick={() => navigate('/')} />
         </div>
         <Bunnies />
-        <form id="login-form" style={formStyle}>
+        <form id="login-form" style={authFormStyle}>
           <InputField
             id="email"
             label="Email"
@@ -113,7 +65,7 @@ function Login() {
             name="email"
             value={state.email}
             onChange={(e) => setState({ ...state, email: e.target.value })}
-            placeholder="example@email.com"
+            placeholder="Email address"
           />
           <InputField
             id="password"
@@ -122,7 +74,7 @@ function Login() {
             name="password"
             value={state.password}
             onChange={(e) => setState({ ...state, password: e.target.value })}
-            placeholder="8자 이상 입력"
+            placeholder="Password"
           />
           <span
             className="message"
@@ -135,7 +87,7 @@ function Login() {
             {loginStatus.message}
           </span>
         </form>
-        <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+        <div style={rowCentered}>
           <HomeTextButton text="LOGIN" onClick={handleLogin} />
         </div>
       </div>

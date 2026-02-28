@@ -1,40 +1,19 @@
 import { useState } from 'react';
+import { FONT_SIZE } from '../theme.js';
 import { useNavigate } from 'react-router-dom';
 import { checkNickname, registerUser, verifyEmail } from '../api/userApi.js';
 import Bunnies from '../component/Bunnies.jsx';
+import BackButton from '../component/BackButton.jsx';
 import HomeTextButton from '../component/HomeTextButton.jsx';
 import InputField from '../component/InputField.jsx';
 import Timer from '../component/Timer.jsx';
+import { pageCentered, authCenterBlock, authFormStyle, rowCentered } from '../sharedStyles.js';
 
-const registerPageStyle = {
-  width: '100%',
-  height: '100%',
-  display: 'flex',
+const registerFormStyle = {
+  ...authFormStyle,
   justifyContent: 'center',
-  alignItems: 'center',
-};
-
-const centerBlockStyle = {
-  display: 'flex',
-  width: 'min(700px, 90vw)',
-  padding: 'clamp(36px, 5vw, 60px) clamp(10px, 2vw, 28px) clamp(16px, 2.5vw, 30px)',
-  flexDirection: 'column',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  border: '4px solid #004FC6',
-  background: 'rgba(235, 243, 255, 0.92)',
-  boxShadow: '6px 6px 0px rgba(0, 79, 198, 0.35)',
-  gap: 'clamp(20px, 3vw, 36px)',
-};
-
-const formStyle = {
-  display: 'flex',
-  width: '100%',
-  flexDirection: 'column',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  gap: 'clamp(18px, 2.8vw, 36px)',
-  flexShrink: '0',
+  gap: 'clamp(16px, 2.5vw, 30px)',
+  minHeight: 0,
 };
 
 const verificationButtonStyle = {
@@ -46,7 +25,7 @@ const verificationButtonStyle = {
   border: 'none',
   cursor: 'pointer',
   fontFamily: 'Pretendard',
-  fontSize: 'clamp(10px, 1vw, 12px)',
+  fontSize: FONT_SIZE.sm,
   fontWeight: '700',
   zIndex: 3,
   padding: '6px 4px',
@@ -88,8 +67,8 @@ function Register() {
     } catch (error) {
       const errmessage =
         error.status === 409
-          ? 'Nickname is already in use.'
-          : 'Failed to check nickname';
+          ? 'This nickname is already in use.'
+          : 'Unable to verify nickname. Please try again.';
       setState((prev) => ({ ...prev, nicknameMessage: errmessage }));
     }
   };
@@ -102,14 +81,14 @@ function Register() {
       ...prev,
       passwordMessage:
         confirmPassword !== state.password
-          ? '비밀번호가 일치하지 않습니다'
+          ? 'Passwords do not match.'
           : '',
     }));
   };
 
   const sendVerificationCode = async () => {
     if (!state.email) {
-      setState((prev) => ({ ...prev, emailMessage: '이메일을 입력해주세요' }));
+      setState((prev) => ({ ...prev, emailMessage: 'Please enter your email address.' }));
       return;
     }
 
@@ -119,20 +98,20 @@ function Register() {
       setTimeout(() => setIsTimerRunning(true), 0);
     } catch (error) {
       if (error.status === 409) {
-        setState((prev) => ({ ...prev, emailMessage: '이미 가입된 이메일입니다' }));
+        setState((prev) => ({ ...prev, emailMessage: 'This email is already registered.' }));
       } else {
-        setState((prev) => ({ ...prev, emailMessage: '인증 코드 전송에 실패했습니다' }));
+        setState((prev) => ({ ...prev, emailMessage: 'Unable to send verification code. Please try again.' }));
       }
     }
   };
 
   const handleRegister = async () => {
     const errors = {};
-    if (!state.nickname) errors.nicknameMessage = '필수 입력 항목입니다';
-    if (!state.password) errors.passwordMessage = '필수 입력 항목입니다';
-    if (!state.confirmPassword) errors.passwordMessage = '필수 입력 항목입니다';
-    if (!state.email) errors.emailMessage = '필수 입력 항목입니다';
-    if (!state.verificationCode) errors.verificationCodeMessage = '필수 입력 항목입니다';
+    if (!state.nickname) errors.nicknameMessage = 'This field is required.';
+    if (!state.password) errors.passwordMessage = 'This field is required.';
+    if (!state.confirmPassword) errors.passwordMessage = 'This field is required.';
+    if (!state.email) errors.emailMessage = 'This field is required.';
+    if (!state.verificationCode) errors.verificationCodeMessage = 'This field is required.';
 
     if (Object.keys(errors).length > 0) {
       setState((prev) => ({ ...prev, ...errors }));
@@ -140,7 +119,7 @@ function Register() {
     }
 
     if (state.password !== state.confirmPassword) {
-      setState((prev) => ({ ...prev, passwordMessage: '비밀번호가 일치하지 않습니다' }));
+      setState((prev) => ({ ...prev, passwordMessage: 'Passwords do not match.' }));
       return;
     }
 
@@ -153,7 +132,7 @@ function Register() {
       });
       setState((prev) => ({
         ...prev,
-        verificationCodeMessage: 'Registration successful. Redirecting to login page...',
+        verificationCodeMessage: 'Registration successful. Redirecting to login...',
       }));
       setTimeout(() => navigate('/login'), 2000);
     } catch (error) {
@@ -177,33 +156,13 @@ function Register() {
   };
 
   return (
-    <div className="register_page" style={registerPageStyle}>
-      <div style={centerBlockStyle}>
-        <div style={{ width: '100%', display: 'flex', alignItems: 'center' }}>
-          <button
-            onClick={() => navigate('/login')}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '4px',
-              opacity: 0.7,
-              transition: 'opacity 0.15s',
-              display: 'flex',
-              alignItems: 'center',
-            }}
-            onMouseEnter={e => e.currentTarget.style.opacity = 1}
-            onMouseLeave={e => e.currentTarget.style.opacity = 0.7}
-          >
-            <img
-              src="/public/images/right_arrow.png"
-              alt="back"
-              style={{ width: 'clamp(22px, 3vw, 45px)', height: 'clamp(24px, 3.5vw, 48px)' }}
-            />
-          </button>
+    <div className="register_page" style={pageCentered}>
+      <div style={{ ...authCenterBlock, justifyContent: 'center' }}>
+        <div style={{ ...rowCentered, alignItems: 'center' }}>
+          <BackButton onClick={() => navigate('/login')} />
         </div>
         <Bunnies />
-        <form id="register-form" style={formStyle}>
+        <form id="register-form" style={registerFormStyle}>
           <InputField
             id="nickname"
             label="nickname"
@@ -212,7 +171,7 @@ function Register() {
             value={state.nickname}
             onChange={handleInputChange}
             onBlur={checkNicknameHandler}
-            placeholder="최대 30자"
+            placeholder="Enter nickname"
             error={state.nicknameMessage}
             maxLength={30}
           />
@@ -223,7 +182,7 @@ function Register() {
             name="password"
             value={state.password}
             onChange={handleInputChange}
-            placeholder="8자 이상 입력"
+            placeholder="Enter password"
           />
           <InputField
             id="confirm-password"
@@ -233,7 +192,7 @@ function Register() {
             value={state.confirmPassword}
             onChange={handleInputChange}
             onBlur={checkPasswordMatch}
-            placeholder="비밀번호 재입력"
+            placeholder="Confirm your password"
             error={state.passwordMessage}
           />
           <InputField
@@ -243,7 +202,7 @@ function Register() {
             name="email"
             value={state.email}
             onChange={handleInputChange}
-            placeholder="example@email.com"
+            placeholder="Email address"
             error={state.emailMessage}
           >
             <button
@@ -251,7 +210,7 @@ function Register() {
               onClick={sendVerificationCode}
               style={verificationButtonStyle}
             >
-              {isTimerRunning ? '인증 재요청' : '인증 요청'}
+              {isTimerRunning ? 'Resend' : 'Verify'}
             </button>
           </InputField>
           <InputField
@@ -261,13 +220,13 @@ function Register() {
             name="verificationCode"
             value={state.verificationCode}
             onChange={handleInputChange}
-            placeholder="6자리 코드"
+            placeholder="Enter verification code"
             error={state.verificationCodeMessage}
             maxLength={6}
             extra={isTimerRunning && <Timer />}
           />
         </form>
-        <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+        <div style={rowCentered}>
           <HomeTextButton text="SIGN UP" onClick={handleRegister} />
         </div>
       </div>
